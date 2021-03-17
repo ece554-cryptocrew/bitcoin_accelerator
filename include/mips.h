@@ -51,76 +51,69 @@ namespace priscas
 	enum REGISTERS
 	{
 		$zero = 0,
-		$at = 1,
-		$v0 = 2,
-		$v1 = 3,
-		$a0 = 4,
-		$a1 = 5,
-		$a2 = 6,
-		$a3 = 7,
-		$t0 = 8,
-		$t1 = 9,
-		$t2 = 10,
-		$t3 = 11,
-		$t4 = 12,
-		$t5 = 13,
-		$t6 = 14,
-		$t7 = 15,
-		$s0 = 16,
-		$s1 = 17,
-		$s2 = 18,
-		$s3 = 19,
-		$s4 = 20,
-		$s5 = 21,
-		$s6 = 22,
-		$s7 = 23,
-		$t8 = 24,
-		$t9 = 25,
-		$k0 = 26,
-		$k1 = 27,
-		$gp = 28,
-		$sp = 29,
-		$fp = 30,
-		$ra = 31,
+		$g1 = 1,
+		$g2 = 2,
+		$g3 = 3,
+		$g4 = 4,
+		$g5 = 5,
+		$g6 = 6,
+		$g7 = 7,
+		$g8 = 8,
+		$g9 = 9,
+		$g10 = 10,
+		$g11 = 11,
+		$flg = 12,
+		$sp = 13,
+		$bp = 14,
+		$pc = 15,
 		INVALID = -1
 	};
 
 	// instruction formats
 	enum format
 	{
-		R, I, J	
+		L, R, I, D	
 	};
 
 	// MIPS Processor Opcodes
 	enum opcode
 	{
-		R_FORMAT = 0,
-		DUMMY = 1,
-		JUMP = 2,
-		JAL = 3,
-		BEQ = 4,
-		BNE = 5,
-		BLEZ = 6,
-		BGTZ = 7,
-		ADDI =  8,
-		ADDIU = 9,
-		SLTI = 10,
-		SLTIU = 11,
-		ANDI = 12,
-		ORI = 13,
-		XORI = 14,
-		LUI = 15,
-		LB = 32,
-		LH = 33,
-		LWL = 34,
-		LW = 35,
-		LBU = 36,
-		LHU = 37,
-		LWR = 38,
-		SB = 40,
-		SH = 41,
-		SWL = 42,
-		SW = 43,
+
+
+
+
+
+		ADD = 16,
+		SUB = 18,
+		MULTL = 20,
+		MULTH = 22,
+		LS = 32,
+		RS = 34,
+		ROR = 36,
+		ADDI = 17,
+		SUBI = 19,
+		MULTLI = 21,
+		MULTHI = 23,
+		LSI =33,
+		RSI = 35,
+		RORI = 37,
+		BEQ = 49,
+		BNEQ = 51,
+		BLTZ = 53,
+		BGTZ = 55,
+
+		LDB = 133,
+		STB = 135,
+		
+
+
+
+
+
+
+
+
+
 		SYS_RES = -1	// system reserved for shell interpreter
 	};
 
@@ -225,10 +218,10 @@ namespace priscas
 		public:
 			virtual std::string get_reg_name(int id);
 			virtual int get_reg_id(std::string& fr) { return friendly_to_numerical(fr.c_str()); }
-			virtual ISA_Attrib::endian get_endian() { return ISA_Attrib::CPU_BIG_ENDIAN; }
+			virtual ISA_Attrib::endian get_endian() { return ISA_Attrib::CPU_LITTLE_ENDIAN; }
 			virtual mBW assemble(const Arg_Vec& args, const BW& baseAddress, syms_table& jump_syms) const;
 		private:
-			static const unsigned REG_COUNT = 32;
+			static const unsigned REG_COUNT = 16;
 			static const unsigned PC_BIT_WIDTH = 32;
 			static const unsigned UNIVERSAL_REG_BW = 32;
 	};
