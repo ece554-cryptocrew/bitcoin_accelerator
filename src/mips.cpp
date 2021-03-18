@@ -191,35 +191,42 @@ namespace priscas
 			true : false;
 	}
 
-	bool reg_write_inst(opcode operation, funct func)
+	bool reg_write_inst(opcode operation)
 	{
 		return
-			(mem_read_inst(operation)) || (operation == R_FORMAT && func != JR) || (operation == ADDI) || (operation == ORI)
-			|| (operation == ANDI) || (operation == XORI) || (operation == SLTI) || (operation == SLTIU) || (operation == ADDIU) || (operation == JAL);
+			(mem_read_inst(operation)) || (l_inst(operation) && operation !=STB) || (r_inst(operation));
 	}
 
-	bool shift_inst(funct f)
+	bool shift_inst(opcode operation)
 	{
 		return
-			f == SLL ? true :
-			f == SRL ? true :
+			operation == RS ? true :
+			operation == LS ? true :
+			operation == ROR ? true:
+			operation == LSI ? true:
+			operation == RSI ? true:
+			operation == RORI ? true:
 			false;
 	}
 
-	bool jorb_inst(opcode operation, funct fcode)
+	bool jorb_inst(opcode operation)
 	{
 		// First check jumps
-		bool is_jump = j_inst(operation);
+		bool is_jump = operation == JMP:
+				operation ==JMPI:
+				false;
 
-		bool is_jr = operation == R_FORMAT && fcode == JR;
 
 		bool is_branch =
 			operation == BEQ ? true :
-			operation == BNE ? true :
-			operation == BLEZ ? true :
-			operation == BGTZ ? true : false;
+			operation == BNEQ ? true :
+			operation == BLTZ ? true :
+			operation == BGTZ ? true :
+			operation == BLEZ ? true:
+		 	operation == BGEZ ? true:
+			false;
 
-		return is_jump || is_branch || is_jr;
+		return is_jump || is_branch;
 	}
 
 	BW_32 generic_mips32_encode(int rs, int rt, int rd, int funct, int imm_shamt_jaddr, opcode op)

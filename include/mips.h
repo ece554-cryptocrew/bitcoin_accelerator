@@ -188,17 +188,17 @@ namespace priscas
 	/* Checks if an instruction performs
 	 * a register write
 	 */
-	bool reg_write_inst(opcode operation, funct func);
+	bool reg_write_inst(opcode operation);
 
 	/* Check if a special R-format
 	 * shift instruction
 	 */
-	bool shift_inst(funct f);
+	bool shift_inst(funct fcode);
 
 	/* Check if a Jump or
 	 * Branch Instruction
 	 */
-	bool jorb_inst(opcode operation, funct fcode);
+	bool jorb_inst(opcode operation);
 
 	/* "Generic" MIPS-32 architecture
 	 * encoding function asm -> binary
