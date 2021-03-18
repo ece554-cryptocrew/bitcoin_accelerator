@@ -101,23 +101,21 @@ namespace priscas
 		BNEQ = 51,
 		BLTZ = 53,
 		BGTZ = 55,
-
+		BLEZ = 57,
+		BGEZ = 59,
+		JMP = 61,
+		JMPI = 63,
+		PUSH = 64,
+		POP = 66,
+		LDI = 129,
+		STI = 131,
 		LDB = 133,
 		STB = 135,
-		
-
-
-
-
-
-
-
-
-
 		SYS_RES = -1	// system reserved for shell interpreter
 	};
 
 	// Function codes for R-Format Instructions
+	/* Not needed since removed functions
 	enum funct
 	{
 		SLL = 0,
@@ -134,7 +132,7 @@ namespace priscas
 		SLTU = 43,
 		NONE = -1	// default, if not R format
 	};
-
+	*/
 	int friendly_to_numerical(const char *);
 
 	// From a register specifier, i.e. %so get an integer representation
@@ -160,7 +158,7 @@ namespace priscas
 	// Format check functions
 	/* Checks if an instruction is I formatted.
 	 */
-	bool i_inst(opcode operation);
+	bool l_inst(opcode operation);
 
 	/* Checks if an instruction is R formatted.
 	 */
@@ -168,8 +166,10 @@ namespace priscas
 
 	/* Checks if an instruction is J formatted.
 	 */
-	bool j_inst(opcode operation);
-
+	bool i_inst(opcode operation);
+	/*checks if instaruction is d formatted
+	 */
+	bool d_inst(opcode operation);
 	/* Checks if an instruction performs
 	 * memory access
 	 */

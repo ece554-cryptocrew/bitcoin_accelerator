@@ -24,6 +24,7 @@ namespace priscas
 {
 	int friendly_to_numerical(const char * fr_name)
 	{
+		//TODO change this for change register names
 		int len = strlen(fr_name);
 		if(len < 2) return INVALID;
 
@@ -118,46 +119,55 @@ namespace priscas
 		return name;
 	}
 
-	bool r_inst(opcode operation)
+	bool l_inst(opcode operation)
 	{
 		return
 		
-			operation == R_FORMAT ? true :
+			operation == ADDI ? true :
+			operation == SUBI ? true:
+			operation == MULTLI ? true:
+			operation == MULTHI ? true:
+			operation == LSI ? true:
+			operation == RSI ? true:
+			operation == RORI ? true:
+			operation == LDB ? true:
+			operation == STB ? true:	
+			false ;
+	}
+
+	bool r_inst(opcode operation)
+	{
+		return
+			operation == ADD ? true : 
+			operation == SUB ? true:
+			operation == MULTL ? true:
+			operation == MULTH ? true:
+			operation == LS ? true:
+			operation == RS ? true:
+			operation == ROR ? true:
 			false ;
 	}
 
 	bool i_inst(opcode operation)
 	{
 		return
-			operation == ADDI ? true :
-			operation == ADDIU ? true:
-			operation == ANDI ? true :
-			operation == ORI ? true :
-			operation == XORI ? true :
-			operation == LB ? true :
-			operation == LBU ? true :
-			operation == LH ? true :
-			operation == LHU ? true :
-			operation == LUI ? true :
-			operation == LW ? true :
-			operation == LWL ? true :
-			operation == SB ? true :
-			operation == SH ? true :
-			operation == SW ? true :
 			operation == BEQ ? true :
-			operation == BNE ? true :
-			operation == BLEZ ? true :
-			operation == BGTZ ? true :
-			operation == SLTI ? true :
-			operation == SLTIU ? true :
-			operation == SWL ? true : false ;
+			operation == BNEQ ? true:
+			operation == BLTZ ? true:
+		 	operation == BGTZ ? true:
+			operation == JMP ? true:
+			operation == JMPI ? true:
+			operation == LDI ? true:
+			operation == STI ? true: //last two encoding alittle different than rest	
+			false;
 	}
 
-	bool j_inst(opcode operation)
+	bool d_inst(opcode operation)
 	{
 		return
-			operation == JUMP ? true :
-			operation == JAL ? true: false;
+			operation == PUSH ? true:
+			operation == POP ? true:
+			false;
 	}
 
 	bool mem_inst(opcode operation)
@@ -170,14 +180,14 @@ namespace priscas
 	bool mem_write_inst(opcode operation)
 	{
 		return
-			(operation == SW || operation == SB || operation == SH )?
+			(operation == STI || operation == STB)? //Only two stores
 			true : false;
 	}
 
 	bool mem_read_inst(opcode operation)
 	{
 		return
-			(operation == LW || operation == LBU || operation == LHU )?
+			(operation == LDI || operation == LDB)?
 			true : false;
 	}
 
