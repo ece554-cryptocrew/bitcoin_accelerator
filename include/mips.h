@@ -193,7 +193,7 @@ namespace priscas
 	/* Check if a special R-format
 	 * shift instruction
 	 */
-	bool shift_inst(funct fcode);
+	bool shift_inst(opcode operation);
 
 	/* Check if a Jump or
 	 * Branch Instruction
