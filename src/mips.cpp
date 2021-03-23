@@ -31,15 +31,8 @@ namespace priscas
 		REGISTERS reg_val
 			=
 			// Can optimize based off of 
-			fr_name[1] == 'b' ?
-				!strcmp("$bp", fr_name) ? $bp : INVALID
-			:
-
-			fr_name[1] == 'f' ?
-				!strcmp("$flg", fr_name) ? $flg : INVALID
-			:
-
 			fr_name[1] == 'g' ?
+				!strcmp("$g0", fr_name) ? $g0 :
 				!strcmp("$g1", fr_name) ? $g1 :
 				!strcmp("$g2", fr_name) ? $g2 :
 				!strcmp("$g3", fr_name) ? $g3 :
@@ -49,19 +42,11 @@ namespace priscas
 				!strcmp("$g7", fr_name) ? $g7 :
 				!strcmp("$g8", fr_name) ? $g8 :
 				!strcmp("$g9", fr_name) ? $g9 :
-				!strcmp("$g10", fr_name) ? $g10 :
-				!strcmp("$g11", fr_name) ? $g11: INVALID
-
-			fr_name[1] == 'k' ?
-				!strcmp("$k0", fr_name) ? $k0 :
-				!strcmp("$k1", fr_name) ? $k1 : INVALID
-			:
-			fr_name[1] == 'p' ?
-				!strcmp("$pc", fr_name) ? $pc : INVALID
-			:
-			fr_name[1] == 's' ?
-				!strcmp("$sp", fr_name) ? $sp : INVALID
-			:
+				!strcmp("$g10", fr_name) ? $g10:
+				!strcmp("$g11", fr_name) ? $g11:
+				!strcmp("$g12", fr_name) ? $g12:
+			        !strcmp("$g13", fr_name) ? $g13:
+				!strcmp("$g14", fr_name) ? $g14: INVALID	
 			fr_name[1] == 'z' ?
 				!strcmp("$zero", fr_name) ? $zero : INVALID
 			: INVALID;
@@ -73,21 +58,21 @@ namespace priscas
 	{
 		std::string name =
 			id == 0 ? "$zero" :
-			id == 1 ? "$g1" :
-			id == 2 ? "$g2" :
-			id == 3 ? "$g3" :
-			id == 4 ? "$g4" :
-			id == 5 ? "$g5" :
-			id == 6 ? "$g6" :
-			id == 7 ? "$g7" :
-			id == 8 ? "$g8" :
-			id == 9 ? "$g9" :
-			id == 10 ? "$g10" :
-			id == 11 ? "$g11" :
-			id == 12 ? "$flg" :
-			id == 13 ? "$sp" :
-			id == 14 ? "$bp" :
-			id == 15 ? "$pc" :
+			id == 1 ? "$g0" :
+			id == 2 ? "$g1" :
+			id == 3 ? "$g2" :
+			id == 4 ? "$g3" :
+			id == 5 ? "$g4" :
+			id == 6 ? "$g5" :
+			id == 7 ? "$g6" :
+			id == 8 ? "$g7" :
+			id == 9 ? "$g8" :
+			id == 10 ? "$g9" :
+			id == 11 ? "$g10" :
+			id == 12 ? "$g11" :
+			id == 13 ? "$g12" :
+			id == 14 ? "$g13" :
+			id == 15 ? "$g14" :
 		if(name == "")
 		{
 			throw reg_oob_exception();
