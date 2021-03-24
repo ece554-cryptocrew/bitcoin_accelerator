@@ -1,10 +1,24 @@
-module cpu_alu(A,B,Op,Flags,Out);
+/////////////////////////////////////////////////////////////////////////////////////
+//
+// Module: cpu_alu
+//
+// Author: Adam Pryor
+//
+// Detail: Does operation on A and B based on opcode.
+//		   Fields for each resulting flag, plus fields for 
+//		   whether each flag should be updated (_en).
+//
+/////////////////////////////////////////////////////////////////////////////////////
+module cpu_alu(A, B, Op, Out, OF, OF_en, CF, CF_en, ZF, ZF_en, NF, NF_en); 
 
-input [31:0] A;
-input [31:0] B;
-input [7:0] Op;
-output [31:0] Flags;
+input  [31:0] A;
+input  [31:0] B;
+input  [7:0]  Op;
 output [31:0] Out;
+output        OF, OF_en;
+output        CF, CF_en;
+output        ZF, ZF_en;
+output        NF, NF_en; //TODO: update flags and flag enables for each function
 
 logic [31:0] top42muxOut;
 logic [31:0] bot42muxOut;
