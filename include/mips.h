@@ -27,9 +27,10 @@
  * and a jump list for functional routines
  *
  * Instruction Formats:
- * R - 6 opcode, 5 rs, 5 rt, 5 rd, 5 shamt, 6 funct
- * I - 6 opcode, 5 rs, 5 rt, 16 imm
- * J - 6 opcode, 26 addr
+ * L - 8 opcode, 4 rd, 4 rs, 16 imm
+ * R - 8 opcode, 4 rd, 4 rs, 4 rt, 12 x
+ * I - 8 opcode, 8 x, 16 imm
+ * D - 8 opcode, 4 rd, 20 x
  *
  *
  * wchen329
@@ -78,25 +79,20 @@ namespace priscas
 	// MIPS Processor Opcodes
 	enum opcode
 	{
-
-
-
-
-
-		ADD = 16,
-		SUB = 18,
-		MULTL = 20,
-		MULTH = 22,
-		LS = 32,
-		RS = 34,
-		ROR = 36,
-		ADDI = 17,
-		SUBI = 19,
-		MULTLI = 21,
-		MULTHI = 23,
-		LSI =33,
-		RSI = 35,
-		RORI = 37,
+	  ADD = 16,
+    ADDI = 17,
+    SUB = 18,
+    SUBI = 19,
+    MULTL = 20,
+    MULTLI = 21,
+    MULTH = 22
+    MULTHI = 23,
+    LS = 32,
+    LSI = 33,
+    RS = 34,
+    RSI = 35,
+    ROR = 36,
+    RORI = 37,
 		BEQ = 49,
 		BNEQ = 51,
 		BLTZ = 53,
@@ -114,25 +110,7 @@ namespace priscas
 		SYS_RES = -1	// system reserved for shell interpreter
 	};
 
-	// Function codes for R-Format Instructions
-	/* Not needed since removed functions
-	enum funct
-	{
-		SLL = 0,
-		SRL = 2,
-		JR = 8,
-		ADD = 32,
-		ADDU = 33,
-		SUB = 34,
-		SUBU = 35,
-		AND = 36,
-		OR = 37,
-		NOR = 39,
-		SLT = 42,
-		SLTU = 43,
-		NONE = -1	// default, if not R format
-	};
-	*/
+	
 	int friendly_to_numerical(const char *);
 
 	// From a register specifier, i.e. %so get an integer representation
@@ -143,7 +121,7 @@ namespace priscas
 
 	namespace ALU
 	{
-		enum ALUOp
+		enum ALUOp // TO-DO
 		{
 					ADD = 0,
 					SUB = 1,
