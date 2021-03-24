@@ -1,0 +1,48 @@
+; CryptoCrewISA 
+isa=CCISA
+endian=little
+
+register general
+	x	0:30 ; Using range based generation
+		31 ; Using singleton generation
+	y	0:30
+		31
+end
+
+; Define that rs and rt are names for general register values.
+define rs = register general
+define rt = register general
+define imm = literal
+
+; Define is used to specify specific field values which the register can use
+define opcode
+	add = 16
+  addi = 17
+  sub = 18
+	subi = 19
+	
+end
+
+format l
+	asm=opcode rd, rs, imm
+	bits=[31:24] opcode, [23:20] rd, [19:16] rs, [15:0] imm
+
+end
+
+format r
+	asm=opcode rd, rs, rt
+	bits=[31:24] opcode, [23:20] rd, [19:16] rs, [15:12] rt 
+
+end
+
+format i
+	asm=opcode imm
+	bits=[31:24] opcode, [23:16] imm
+
+end
+
+format d
+	asm=opcode rs/rd
+	bits=[31:24] opcode, [23:20] rs/rd
+
+end
