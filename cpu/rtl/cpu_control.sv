@@ -28,9 +28,10 @@ module cpu_control (instr, alu_op, alu_imm_src, rf_write_en, datamem_write_en, d
     output        pc_imm_src;
     output        err;
 
-    //Error if invalid opcode;
+    // Error if invalid opcode;
     assign err = 1'b0; //TODO: Do we want this?
 
+    // Assign control signals
     assign alu_op = instr[31:24];
     assign alu_imm_src = instr[24];
     assign rf_write_en = ; //TODO: Finish
