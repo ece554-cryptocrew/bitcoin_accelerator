@@ -22,14 +22,17 @@ module cpu_instrmem (clk, rst_n, addr, rd_data, err);
     output [31:0] instr;
     output        err;
 
-    logic [31:0] instr_mem [0:65535];
+    localparam MEM_SIZE = 65536;
+
+    logic [31:0] instr_mem [0:MEM_SIZE-1];
 
     // Error if instruction addr not at valid location
     // Should be a multiple of 4 (0x0000, 0x0004, etc)
     assign err = (instr_addr % 4 != 0);
 
     // Read logic
-    assign instr = instr_mem[addr+3:addr];
+    // Set instr to 0 if invalid address
+    assign instr = (instr_addr % 4 == 0) ? instr_mem[addr+3:addr] : 32'h0;
 
     // Write logic
     always_ff @(posedge clk or negedge rst_n) begin

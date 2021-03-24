@@ -72,10 +72,11 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en,
     assign accel_rd_data = (accel_rd_en && accel_addr < MEM_SIZE-511) ? data_mem[cpu_addr+511:cpu_addr] : 32'h0; // TODO: Does this work?
 
     // Write logic
+    // Priority goes to CPU write if both asserted, but also throws error
     always_ff @ (posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (integer i = 0; i < MEM_SIZE; i = i + 1) begin
-                data_mem[i] <= 8'h00;
+                data_mem[i] <= 8'h0;
             end
         end
         else if (cpu_wrt_en && cpu_addr < MEM_SIZE-3) begin
