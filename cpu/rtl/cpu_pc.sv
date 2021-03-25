@@ -10,9 +10,9 @@
 //
 /////////////////////////////////////////////////////////////////////////////////////
 module cpu_pc(clk, rst_n, pc_next, pc);
-    input         clk, rst_n;
-    input  [15:0] pc_next;
-    output [15:0] pc;
+    input             clk, rst_n;
+    input      [15:0] pc_next;
+    output reg [15:0] pc;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin

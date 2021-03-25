@@ -15,10 +15,10 @@
 // 0x0000-0xFFFF
 //
 /////////////////////////////////////////////////////////////////////////////////////
-module cpu_instrmem (clk, rst_n, addr, rd_data, err);
+module cpu_instrmem (clk, rst_n, addr, instr, err);
 
     input         clk, rst_n;
-    input  [15:0] instr_addr; 
+    input  [15:0] addr; 
     output [31:0] instr;
     output        err;
 
@@ -28,11 +28,11 @@ module cpu_instrmem (clk, rst_n, addr, rd_data, err);
 
     // Error if instruction addr not at valid location
     // Should be a multiple of 4 (0x0000, 0x0004, etc)
-    assign err = (instr_addr % 4 != 0);
+    assign err = (addr % 4 != 0);
 
     // Read logic
     // Set instr to 0 if invalid address
-    assign instr = (instr_addr % 4 == 0) ? instr_mem[addr+3:addr] : 32'h0;
+    assign instr = (addr % 4 == 0) ? instr_mem[addr+3:addr] : 32'h0; //TODO: does this work? no
 
     // Write logic
     always_ff @(posedge clk or negedge rst_n) begin
