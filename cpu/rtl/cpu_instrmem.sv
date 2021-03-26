@@ -17,10 +17,10 @@
 /////////////////////////////////////////////////////////////////////////////////////
 module cpu_instrmem (clk, rst_n, addr, instr, err);
 
-    input         clk, rst_n;
-    input  [15:0] addr; 
-    output [31:0] instr;
-    output        err;
+    input             clk, rst_n;
+    input      [15:0] addr; 
+    output reg [31:0] instr;
+    output reg        err;
 
     localparam MEM_SIZE = 65536;
 
@@ -32,7 +32,15 @@ module cpu_instrmem (clk, rst_n, addr, instr, err);
 
     // Read logic
     // Set instr to 0 if invalid address
-    assign instr = (addr % 4 == 0) ? instr_mem[addr+3:addr] : 32'h0; //TODO: does this work? no
+    //assign instr = (addr % 4 == 0) ? instr_mem[addr+3:addr] : 32'h0; //TODO: does this work? no
+    always_comb begin
+        if (addr % 4 == 0) begin
+            for (integer i = 0; i < 3; i = i + 1) begin
+                instr[i] = instr_mem[addr+i]; //TODO: Pretty sure this is wrong
+            end
+        end 
+        else instr = 32'h0;
+    end
 
     // Write logic
     always_ff @(posedge clk or negedge rst_n) begin

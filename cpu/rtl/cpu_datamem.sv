@@ -51,9 +51,9 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en,
     input  [31:0]  accel_wrt_data; 
     input          accel_wrt_en;
     input          accel_rd_en;
-    output [31:0]  cpu_rd_data; 
-    output [511:0] accel_rd_data; 
-    output         err;
+    output logic [31:0]  cpu_rd_data; 
+    output logic [511:0] accel_rd_data; 
+    output logic         err;
 
     localparam MEM_SIZE = 65536;
 
@@ -68,8 +68,23 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en,
 
     // Read logic
     // If not reading or invalid read (overflow), output 0
-    assign cpu_rd_data = (cpu_rd_en && cpu_addr < MEM_SIZE-3) ? data_mem[cpu_addr+3:cpu_addr] : 32'h0; 
-    assign accel_rd_data = (accel_rd_en && accel_addr < MEM_SIZE-511) ? data_mem[cpu_addr+511:cpu_addr] : 32'h0; // TODO: Does this work?
+    always_comb begin
+        if (cpu_rd_en && cpu_addr < MEM_SIZE-3) begin
+            for (integer i = 0; i < 3; i = i + 1) begin
+                cpu_rd_data[i] = data_mem[cpu_addr+i]; //TODO: Pretty sure this is wrong
+            end
+        end 
+        else cpu_rd_data = 32'h0;
+    end
+    always_comb begin
+        if (accel_rd_en && accel_addr < MEM_SIZE-63) begin
+            for (integer i = 0; i < 63; i = i + 1) begin
+                accel_rd_data[i] = data_mem[accel_addr+i]; //TODO: Pretty sure this is wrong
+            end
+        end 
+        else accel_rd_data = 512'h0;
+    end
+        
 
     // Write logic
     // Priority goes to CPU write if both asserted, but also throws error
@@ -81,12 +96,12 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en,
         end
         else if (cpu_wrt_en && cpu_addr < MEM_SIZE-3) begin
             for (integer i = 0; i < 4; i = i + 1) begin
-                data_mem[cpu_addr+i] <= cpu_wrt_data[((8*i)+7):(8*i)];
+                data_mem[cpu_addr+i] <= cpu_wrt_data[(8*i)+:8];
             end
         end
         else if (accel_wrt_en && accel_addr < MEM_SIZE-3) begin
             for (integer i = 0; i < 4; i = i + 1) begin
-                data_mem[accel_addr+i] <= accel_wrt_data[((8*i)+7):(8*i)];
+                data_mem[accel_addr+i] <= accel_wrt_data[(8*i)+:8];
             end
         end
     end
