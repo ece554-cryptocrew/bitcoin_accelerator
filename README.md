@@ -1,2 +1,2 @@
-# CryptoCrew
-Bitcoin Accelerator
+# CryptoCrew's Bitcoin Accelerator
+Bitcoin is a peer-to-peer (P2P) digital cash system which allows anyone, anywhere to mine Bitcoins. The mining process consists of being the first one to find the input to the SHA-256 function given a 256-bit output. The SHA-256 function is a mathematical operation run on digital data that outputs a computed hash. Because it is almost impossible to invert the SHA-256, the only feasible approach to find the input that generates the given output is to try each possible input until the intended output is reached. This type of brute force can be slow and energy-inefficient on a CPU, therefore, this project consists of a Bitcoin accelerator that improves the efficiency of running the SHA-256 cryptographic hash function. 
