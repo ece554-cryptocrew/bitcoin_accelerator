@@ -64,7 +64,7 @@ namespace priscas
 		$g9 = 10,
 		$g10 = 11,
 		$g11 = 12,
-		$g12 = 13
+		$g12 = 13,
 		$g13 = 14,
 		$g14 = 15,
 		INVALID = -1
@@ -85,7 +85,7 @@ namespace priscas
     SUBI = 19,
     MULTL = 20,
     MULTLI = 21,
-    MULTH = 22
+    MULTH = 22,
     MULTHI = 23,
     LS = 32,
     LSI = 33,

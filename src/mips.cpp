@@ -42,14 +42,17 @@ namespace priscas
 				!strcmp("$g7", fr_name) ? $g7 :
 				!strcmp("$g8", fr_name) ? $g8 :
 				!strcmp("$g9", fr_name) ? $g9 :
-				!strcmp("$g10", fr_name) ? $g10:
-				!strcmp("$g11", fr_name) ? $g11:
-				!strcmp("$g12", fr_name) ? $g12:
-			        !strcmp("$g13", fr_name) ? $g13:
-				!strcmp("$g14", fr_name) ? $g14: INVALID	
-			fr_name[1] == 'z' ?
+				!strcmp("$g10", fr_name) ? $g10 :
+				!strcmp("$g11", fr_name) ? $g11 :
+				!strcmp("$g12", fr_name) ? $g12 :
+			  !strcmp("$g13", fr_name) ? $g13 :
+				!strcmp("$g14", fr_name) ? $g14 : INVALID	
+      :
+
+      fr_name[1] == 'z' ? 
 				!strcmp("$zero", fr_name) ? $zero : INVALID
-			: INVALID;
+			
+      : INVALID;
 
 		return reg_val;
 	}
@@ -72,7 +75,8 @@ namespace priscas
 			id == 12 ? "$g11" :
 			id == 13 ? "$g12" :
 			id == 14 ? "$g13" :
-			id == 15 ? "$g14" :
+			id == 15 ? "$g14" : "";
+  
 		if(name == "")
 		{
 			throw reg_oob_exception();
@@ -120,7 +124,7 @@ namespace priscas
 			operation == JMP ? true:
 			operation == JMPI ? true:
 			operation == LDI ? true:
-			operation == STI ? true: //last two encoding alittle different than rest	
+			operation == STI ? true: //last two encoding a little different than rest	
 			false;
 	}
 
@@ -142,7 +146,7 @@ namespace priscas
 	bool mem_write_inst(opcode operation)
 	{
 		return
-			(operation == STI || operation == STB || operation == POP)? //POP?
+			(operation == STI || operation == STB)? 
 			true : false;
 	}
 
@@ -156,7 +160,7 @@ namespace priscas
 	bool reg_write_inst(opcode operation)
 	{
 		return
-			(mem_read_inst(operation)) || (l_inst(operation) && operation !=STB) || (r_inst(operation)|| operation == POP);
+			(mem_read_inst(operation)) || (l_inst(operation) && operation != STB) || (r_inst(operation)) || operation == LDI || operation == POP;
 	}
 
 	bool shift_inst(opcode operation)
@@ -173,10 +177,11 @@ namespace priscas
 
 	bool jorb_inst(opcode operation)
 	{
-		// First check jumps
-		bool is_jump = operation == JMP:
-				operation ==JMPI:
-				false;
+		// first check jump
+		bool is_jump = 
+      operation == JMP ? true :
+			operation == JMPI ? true :
+			false;
 
 
 		bool is_branch =
@@ -184,39 +189,44 @@ namespace priscas
 			operation == BNEQ ? true :
 			operation == BLTZ ? true :
 			operation == BGTZ ? true :
-			operation == BLEZ ? true:
-		 	operation == BGEZ ? true:
+			operation == BLEZ ? true :
+		 	operation == BGEZ ? true :
 			false;
 
 		return is_jump || is_branch;
 	}
-	//TODO fix encoding of each type of instruction
-	BW_32 generic_mips32_encode(int rs, int rt, int rd, int funct, int imm_shamt_jaddr, opcode op)
+	
+
+  BW_32 generic_mips32_encode(int rs, int rt, int rd, int imm, opcode op)
 	{
 		BW_32 w = 0;
 
+		if(l_inst(op))
+		{
+			w = (w.AsUInt32() | (imm & ((1 << 16) - 1)));
+			w = (w.AsUInt32() | ((rs & ((1 << 4) - 1) ) << 16 ));
+			w = (w.AsUInt32() | ((rd & ((1 << 4) - 1) ) << 20 ));
+			w = (w.AsUInt32() | ((op & ((1 << 8) - 1) ) << 24 ));
+		}
+
 		if(r_inst(op))
 		{
-			w = (w.AsUInt32() | (funct & ((1 << 6) - 1)  ));
-			w = (w.AsUInt32() | ((imm_shamt_jaddr & ((1 << 5) - 1) ) << 6 ));
-			w = (w.AsUInt32() | ((rd & ((1 << 5) - 1) ) << 11 ));
-			w = (w.AsUInt32() | ((rt & ((1 << 5) - 1) ) << 16 ));
-			w = (w.AsUInt32() | ((rs & ((1 << 5) - 1) ) << 21 ));
-			w = (w.AsUInt32() | ((op & ((1 << 6) - 1) ) << 26 ));
+			w = (w.AsUInt32() | ((rt & ((1 << 4) - 1) ) << 12 ));
+			w = (w.AsUInt32() | ((rs & ((1 << 4) - 1) ) << 16 ));
+			w = (w.AsUInt32() | ((rd & ((1 << 4) - 1) ) << 20 ));
+			w = (w.AsUInt32() | ((op & ((1 << 8) - 1) ) << 24 ));
 		}
 
 		if(i_inst(op))
 		{
-			w = (w.AsUInt32() | (imm_shamt_jaddr & ((1 << 16) - 1)));
-			w = (w.AsUInt32() | ((rt & ((1 << 5) - 1) ) << 16 ));
-			w = (w.AsUInt32() | ((rs & ((1 << 5) - 1) ) << 21 ));
-			w = (w.AsUInt32() | ((op & ((1 << 6) - 1) ) << 26 ));
+			w = (w.AsUInt32() | (imm & ((1 << 16) - 1)));
+			w = (w.AsUInt32() | ((op & ((1 << 8) - 1) ) << 24 ));
 		}
 
-		if(j_inst(op))
+		if(d_inst(op)) // unsure about the rs|rd
 		{
-			w = (w.AsUInt32() | (imm_shamt_jaddr & ((1 << 26) - 1)));
-			w = (w.AsUInt32() | ((op & ((1 << 6) - 1) ) << 26 ));
+			w = (w.AsUInt32() | (((rs|rd) & ((1 << 16) - 1) ) << 20 ));
+			w = (w.AsUInt32() | ((op & ((1 << 8) - 1) ) << 24 ));
 		}
 
 		return w;
@@ -282,8 +292,8 @@ namespace priscas
 		if(args.size() >= 1)
 		{
 			if	(
-					(l_inst(current_op) && args.size() != 4 && f_code != priscas::JR) ||
-					(r_inst(current_op) && args.size() != 4 && f_code == priscas::JR) ||
+					(l_inst(current_op) && args.size() != 4) ||
+					(r_inst(current_op) && args.size() != 4) ||
 					(i_inst(current_op) && args.size() != 2 && !mem_inst(current_op)) ||
 					(i_inst(current_op) && args.size() != 3 && mem_inst(current_op)) ||
 					(d_inst(current_op) && args.size() != 2)				
@@ -319,12 +329,14 @@ namespace priscas
 					imm = priscas::get_imm(args[1].c_str());
 				}
 			}
-			else if(d_inst(current_op))
+			
+      else if(d_inst(current_op))
 			{
-				if((rd = priscas::friendly_to_numerical(args[1].c_str())) <= proscas::INVALID)
+				if((rd = priscas::friendly_to_numerical(args[1].c_str())) <= priscas::INVALID)
 					rd = priscas::get_reg_num(args[1].c_str());	
 			}
-			else
+			
+      else
 			{
 				priscas::mt_bad_mnemonic();
 			} 
@@ -340,9 +352,10 @@ namespace priscas
 					rs = priscas::get_reg_num(args[2].c_str());
 		
 			}
+    
 						
-			else if(r_inst(current_op))
-			{
+			//else if(r_inst(current_op))
+			//{
 				/* UNSURE IF NEEDED?
 				if(mem_inst(current_op))
 				{
@@ -372,19 +385,18 @@ namespace priscas
 					imm = priscas::get_imm(imm_s.c_str());
 								
 				}
-
-				else
-				{
-				*/
-					// later, MUST check for branches
+*/
+        
+      else if(r_inst(current_op))
+      {
+        // later, MUST check for branches
 				if((rs = priscas::friendly_to_numerical(args[2].c_str())) <= priscas::INVALID)
-					rs = priscas::get_reg_num(args[2].c_str());
-				//}
+					rs = priscas::get_reg_num(args[2].c_str());	
 			}
 
 			else if(i_inst(current_op)) //To handle LDI STI will need to code up encoding special
 			{
-				if((rd = priscas::friendlt_to_numerical(args[2].c_str()))<= priscas::INVALID)
+				if((rd = priscas::friendly_to_numerical(args[2].c_str()))<= priscas::INVALID)
 					rd = priscas::get_reg_num(args[2].c_str());
 			}	
 		}
@@ -420,10 +432,11 @@ namespace priscas
 		}
 
 		// Pass the values of rs, rt, rd to the processor's encoding function
-		BW_32 inst = generic_mips32_encode(rs, rt, rd, f_code, imm, current_op);
+		BW_32 inst = generic_mips32_encode(rs, rt, rd, imm, current_op);
 
 		return std::shared_ptr<BW>(new BW_32(inst));
-	}
+	
+  }
 	//TODO figure out if needs to be changed
 	// Returns register number corresponding with argument if any
 	// Returns -1 if invalid or out of range
