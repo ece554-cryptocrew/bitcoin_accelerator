@@ -45,6 +45,6 @@ module cpu_control (instr, alu_op, alu_imm_src, rf_write_en, datamem_write_en, d
     assign rf_write_mem_src = (instr[31:24] == 8'b10000101) || //Only for loads
                               (instr[31:24] == 8'b10000001);
     assign pc_src = (instr[31:28] == 4'b0011);
-    assign pc_jmp_src = instr[25];
+    assign pc_jmp_src = (instr[31:28] == 4'b0011) && (instr[27:24] == 4'b1111); //Only JMPI
     
 endmodule

@@ -35,9 +35,15 @@ module cpu_instrmem (clk, rst_n, addr, instr, err);
     //assign instr = (addr % 4 == 0) ? instr_mem[addr+3:addr] : 32'h0; //TODO: does this work? no
     always_comb begin
         if (addr % 4 == 0) begin
+            instr[7:0] = instr_mem[addr];
+            instr[15:8] = instr_mem[addr+1];
+            instr[23:16] = instr_mem[addr+2];
+            instr[31:24] = instr_mem[addr+3];
+            /*
             for (integer i = 0; i < 3; i = i + 1) begin
                 instr[i] = instr_mem[addr+i]; //TODO: Pretty sure this is wrong
             end
+            */
         end 
         else instr = 32'h0;
     end
