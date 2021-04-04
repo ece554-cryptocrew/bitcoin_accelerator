@@ -1,0 +1,6 @@
+# ModelSim junk
+work/
+*.wlf
+transcript
+*.mpf
+*.mti
