@@ -88,4 +88,9 @@ assign sigma_0 = (circular_buffer[2]  >>  7) ^ (circular_buffer[2]  >> 18) ^ (ci
 assign sigma_1 = (circular_buffer[15] >> 17) ^ (circular_buffer[15] >> 19) ^ (circular_buffer[15] >> 10);
 assign w       = circular_buffer[1] + sigma_0 + circular_buffer[10] + sigma_1;
 
+/// ====================
+/// Output
+/// ====================
+assign ms_r0_out = circular_buffer[0];
+
 endmodule
