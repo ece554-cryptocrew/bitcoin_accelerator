@@ -5,11 +5,18 @@
 
 code_entry:
 <<<<<<< HEAD
-	ADDI g0, R0, 1//Set g0 to one
-	//TODO learn how to properly set to a bitcoin header 
+	ADDI g0, R0, 1//Set g0 to one 
 	ADDI g14, R0, 0x0 // Use g14 to be value to hash and increment
 	ADDI g13, R0, 0xffff // Set g13 to bitcoin hash to acheive
-	
+
+
+  // TODO bitcoin header 
+  // add constants for:
+  // - version number (4 bytes)
+  // - bits (4 bytes)
+  // nonce (4 bytes) starts at 0 and goes to 32 - it will overflow which will
+  // change the merkle root (32 bytes)
+
   // MMIO Acceleration Communication Blocks (40 Bytes + Padding)
   // 0x5000 ACB_0    Stores the accelerator communication blocks. Used  
   // 0x5100 ACB_1    for communication between the on-board CPU and
