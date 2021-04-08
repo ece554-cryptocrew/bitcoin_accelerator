@@ -69,6 +69,11 @@
 //              Client should pull the bit high when they want to access the
 //              shared resource, and block on their corresponding grant.
 //
+// > hold - Assert to hold the current grant unchanged across clock cycles.
+//          Deassert to release the hold, and grant will be re-evaluated on
+//          the next cycle.
+//          Requires to set CAN_HOLD to 1 in parameters.
+//
 // < grants - Each Client should occupy a single bit on the port. When the
 //            Unit pulls a bit high, the Client occupying the bit is granted
 //            exclusive access to the resource.
