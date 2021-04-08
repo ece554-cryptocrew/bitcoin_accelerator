@@ -34,7 +34,7 @@ output    reg                  [NUM_CLIENTS - 1:0]  grants;
           reg                                       is_left_grant_set;
           reg                                       is_right_grant_set;
 
-reg [CLIENTS_SELECT_SIZE - 1:0] selected;
+integer selected;
 always_comb begin
 
     grants                = '0;
@@ -45,19 +45,21 @@ always_comb begin
     // Here we decide who gets a grant
     for (selected = 0; selected < NUM_CLIENTS; selected++) begin
 
-        if (selected <= last_selected && !is_left_grant_set) begin
+        if (selected <= last_selected && !is_right_grant_set) begin
             if (requests[selected]) begin
-                is_left_grant_set = 1;
-                grants[selected]  = '1;
+                is_right_grant_set = 1;
+                grants[selected]   = '1;
+                curr_selected      = selected;
             end
         end
 
-        if (selected > last_selected && !is_right_grant_set) begin
+        if (selected > last_selected && !is_left_grant_set) begin
             if (requests[selected]) begin
-                is_right_grant_set = 1;
+                is_left_grant_set = 1;
 
                 grants             = '0;     // Reset left grants
                 grants[selected]   = '1;
+                curr_selected      = selected;
             end
         end
 
