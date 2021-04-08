@@ -5,8 +5,10 @@
 
 code_entry:
 	ADDI g0, R0, 1//Set g0 to one
-	ADDI g14, R0, 0x0 // Use g14 to be current value to hash
-	
+	//TODO learrn how to properly set to a false bitcoin header 
+	ADDI g14, R0, 0x0 // Use g14 to be value to hash and increment
+	ADDI g13, R0, 0xffff //Set g13 to bitcoin hash to acheive
+	//TODO properly format so full header isloaded at each accelerator	
 	STI g14, 1064 //load value to be hashed into 
 	ADDI g14, g14, 1 //Increament hash number
 	STI g14, 1164
@@ -22,7 +24,7 @@ code_entry:
 	STI g14, 0x4064
 	ADDI g14, g14, 1
 	STI g14, 0x4164
-	
+	//TODO do i need to set the hash_addr of Host Communication Block?
 
 	//Tell all accelerators to begin
 	STI g0, 0x1000
@@ -39,4 +41,15 @@ code_entry:
 loop_begin
 	LDI g0, 0x1001 //Status register for accelerator 1
 	SUBI g1, g0, 1//Check if accelerator done
-	BNEQ 
+	BNEQ accel_2 //Jump if not complete
+	LDI g0, 0x1048 //Get addres of the output hash
+	LDB g1, g0, 64 //Get output hash  of completed hash probably need to check more value
+	//TODO figure out how much each load and store actually takes in
+	SUBI g2, g1, g13 //check if hash matches hash value
+	//TODO most likely need multiple loads and compares,need better understanding of header and hash to do so 
+	BEQ correct_hash_found 
+accel_2
+
+
+
+correct_hash_found
