@@ -4,11 +4,11 @@
 
 
 code_entry:
-	ADDI g0, R0, 1//Set g0 to one
-	ADDI g14, R0, 0x0 // Use g14 to be current value to hash
+	ADDI g0, R0, 1 // Set g0 to one
+	ADDI g14, R0, 0 // Use g14 to be current value to hash
 	
-	STI g14, 1064 //load value to be hashed into 
-	ADDI g14, g14, 1 //Increament hash number
+	STI g14, 1064 // Load value to be hashed into 
+	ADDI g14, g14, 1 // Increament hash number
 	STI g14, 1164
 	ADDI g14, g14, 1
 	STI g14, 2064
@@ -24,7 +24,7 @@ code_entry:
 	STI g14, 0x4164
 	
 
-	//Tell all accelerators to begin
+	// Tell all accelerators to begin
 	STI g0, 0x1000
 	STI g0, 0x1100
 	STI g0, 0x2000
