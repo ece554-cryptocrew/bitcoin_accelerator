@@ -19,11 +19,13 @@ reg                           clk, rst_n;
 
 reg      [NUM_CLIENTS - 1:0]  requests;
 reg      [NUM_CLIENTS - 1:0]  grants;
+reg                           hold;
 
 /// DUT
 arbitration_unit
 #(
-    .NUM_CLIENTS(NUM_CLIENTS)
+    .NUM_CLIENTS(NUM_CLIENTS),
+    .CAN_HOLD(1)
 )
 DUT
 (
@@ -35,6 +37,7 @@ initial begin
 
     clk      = 0;
     rst_n    = 0;
+    hold     = 0;
     requests = '0;
 
     // Reset all
@@ -105,11 +108,25 @@ initial begin
     // #21: All requests, round-robin
     check(8'b1111_1111, 8'b0000_0100);
 
-    // #21: Some requests, pull low on request next in line
+    // #22: Some requests, pull low on request next in line
     check(8'b1111_0111, 8'b0001_0000);
 
-    // #22: No request
-    check(8'b0000_0000, 8'b0000_0000);
+    // #23: Hold. On the cycle of hold nothing changes
+    hold = 1;
+    check(8'b1111_0111, 8'b0010_0000);
+
+    // #24: Check if held
+    check(8'b1111_0111, 8'b0010_0000);
+
+    // #25: Still hold
+    check(8'b1111_0111, 8'b0010_0000);
+
+    // #26: Release. On the cycle of release nothing changes
+    hold = 0;
+    check(8'b1111_0111, 8'b0010_0000);
+
+    // #27: Unhold
+    check(8'b1111_0111, 8'b0100_0000);
 
     success;
 end
@@ -119,11 +136,14 @@ end
 
 // Helper to set the requests line and check the grant.
 // It fails and halts the test if there is a mismatch.
+integer test_number = 0;
 task check;
 input [NUM_CLIENTS - 1:0] rqsts;
 input [NUM_CLIENTS - 1:0] should_grant;
 
 begin
+    test_number += 1;
+
     requests = rqsts;
 
     // Here we wait for one step because the Unit is purely combinational and
@@ -142,8 +162,8 @@ input [NUM_CLIENTS - 1:0] should_grant;
 
 begin
     $display(
-        "Arbitration mismatch: Requested: %b, Granted: %b, Should Be: %b\n",
-        requests, grants, should_grant
+        "Mismatch at Test #%0d: Requested: %b, Granted: %b, Should Be: %b\n",
+        test_number, requests, grants, should_grant
     );
 
     $stop();

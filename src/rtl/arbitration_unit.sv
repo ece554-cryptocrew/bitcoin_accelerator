@@ -93,7 +93,10 @@
 module arbitration_unit
 #(
     // Number of Clients this unit can support
-    parameter NUM_CLIENTS            = 8
+    parameter NUM_CLIENTS            = 8,
+
+    // Set to enable holds
+    parameter CAN_HOLD               = 0
 )
 (
     clk, rst_n,
@@ -101,6 +104,9 @@ module arbitration_unit
     /// Input
     // Bit array where a high indicates access is requested by Clients
     requests,
+
+    // Assert to hold the grant until deassertion
+    hold,
 
     /// Output
     // Bit array where a high indicates access is granted to Clients
@@ -115,6 +121,7 @@ localparam CLIENTS_SELECT_SIZE        = NUM_CLIENTS > 1 ? $clog2(NUM_CLIENTS) : 
 // ===============
  input                                              clk, rst_n;
 
+ input                                              hold;
  input                         [NUM_CLIENTS - 1:0]  requests;
 
 output    reg                  [NUM_CLIENTS - 1:0]  grants;
@@ -173,9 +180,11 @@ end
 
 // Advance the pointer to previous grantee on clock cycle, so
 // each Client is only granted access for one single cycle.
+//
+// Only update the pointer when HOLD is not turned on or is not currently held
 always_ff @(posedge clk, negedge rst_n) begin
-    if (!rst_n) last_selected <= '0;
-    else        last_selected <= curr_selected;
+    if (!rst_n)                   last_selected <= '0;
+    else if (!(CAN_HOLD && hold)) last_selected <= curr_selected;
 end
 
 endmodule
