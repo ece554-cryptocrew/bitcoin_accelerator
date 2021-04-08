@@ -6,9 +6,9 @@
 code_entry:
 <<<<<<< HEAD
 	ADDI g0, R0, 1//Set g0 to one
-	//TODO learrn how to properly set to a false bitcoin header 
+	//TODO learn how to properly set to a bitcoin header 
 	ADDI g14, R0, 0x0 // Use g14 to be value to hash and increment
-	ADDI g13, R0, 0xffff //Set g13 to bitcoin hash to acheive
+	ADDI g13, R0, 0xffff // Set g13 to bitcoin hash to acheive
 	
   // MMIO Acceleration Communication Blocks (40 Bytes + Padding)
   // 0x5000 ACB_0    Stores the accelerator communication blocks. Used  
@@ -22,9 +22,9 @@ code_entry:
 
 
   //TODO properly format so full header isloaded at each accelerator	
-	STI g14, 1064 //load value to be hashed into 
-	ADDI g14, g14, 1 //Increament hash number
-	STI g14, 1164 // should these be 1000 and 1100?
+	STI g14, 1064 // Load value to be hashed into 
+	ADDI g14, g14, 1 // Increament hash number
+	STI g14, 1164 // Should these be 1000 and 1100?
 	ADDI g14, g14, 1
 	STI g14, 2064
 	ADDI g14, g14, 1
@@ -61,14 +61,14 @@ code_entry:
 
 
 loop_begin
-	LDI g0, 0x1001 //Status register for accelerator 1
-	SUBI g1, g0, 1//Check if accelerator done
-	BNEQ accel_2 //Jump if not complete
-	LDI g0, 0x1048 //Get addres of the output hash
-	LDB g1, g0, 64 //Get output hash  of completed hash probably need to check more value
+	LDI g0, 0x1001 // Status register for accelerator 1
+	SUBI g1, g0, 1 // Check if accelerator done
+	BNEQ accel_2   // Jump if not complete
+	LDI g0, 0x1048 // Get addres of the output hash
+	LDB g1, g0, 64 // Get output hash  of completed hash probably need to check more value
 
 //TODO figure out how much each load and store actually takes in
-	SUBI g2, g1, g13 //check if hash matches hash value
+	SUBI g2, g1, g13 // Check if hash matches hash value
 
 //TODO most likely need multiple loads and compares,need better understanding of header and hash to do so 
 	BEQ correct_hash_found 
