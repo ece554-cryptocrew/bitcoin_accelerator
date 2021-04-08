@@ -4,6 +4,7 @@
 
 
 code_entry:
+<<<<<<< HEAD
 	ADDI g0, R0, 1//Set g0 to one
 	//TODO learrn how to properly set to a false bitcoin header 
 	ADDI g14, R0, 0x0 // Use g14 to be value to hash and increment
@@ -11,6 +12,13 @@ code_entry:
 	//TODO properly format so full header isloaded at each accelerator	
 	STI g14, 1064 //load value to be hashed into 
 	ADDI g14, g14, 1 //Increament hash number
+=======
+	ADDI g0, R0, 1 // Set g0 to one
+	ADDI g14, R0, 0 // Use g14 to be current value to hash
+	
+	STI g14, 1064 // Load value to be hashed into 
+	ADDI g14, g14, 1 // Increament hash number
+>>>>>>> f9c79d5dfaabe8a54207f754041f85d735ece8bf
 	STI g14, 1164
 	ADDI g14, g14, 1
 	STI g14, 2064
@@ -26,7 +34,7 @@ code_entry:
 	STI g14, 0x4164
 	//TODO do i need to set the hash_addr of Host Communication Block?
 
-	//Tell all accelerators to begin
+	// Tell all accelerators to begin
 	STI g0, 0x1000
 	STI g0, 0x1100
 	STI g0, 0x2000
