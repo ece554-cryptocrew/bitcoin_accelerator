@@ -35,7 +35,7 @@ module arbiter
     parameter READ_DATA_SIZE         = 512,
 
     // Set to indicate there is another Arbiter in front of us
-    parameter HAVE_UPSTREAM_ARBITER  = 1
+    parameter HAVE_UPSTREAM_ARBITER  = 0
 )
 (
     clk, rst_n,
@@ -54,6 +54,12 @@ module arbiter
     upstream_write_done, upstream_read_valid,
 
     /// Output
+    // Read data sent back to the Client
+    client_read_data,
+
+    // Done signals returned to the granted Client
+    client_read_valid, client_write_done,
+
     // Read address sent to the shared memory
     mem_read_en, mem_read_addr,
 
@@ -67,7 +73,6 @@ module arbiter
  input                                              clk, rst_n;
 
  input                         [NUM_CLIENTS - 1:0]  client_read_en;
- input                      [READ_DATA_SIZE - 1:0]  client_read_data  [NUM_CLIENTS - 1:0];
  input                           [ADDR_SIZE - 1:0]  client_read_addr  [NUM_CLIENTS - 1:0];
 
  input                         [NUM_CLIENTS - 1:0]  client_write_en;
@@ -77,6 +82,11 @@ module arbiter
  input                      [READ_DATA_SIZE - 1:0]  mem_read_data;
 
  input                                              upstream_write_done, upstream_read_valid;
+
+output                      [READ_DATA_SIZE - 1:0]  client_read_data;
+
+output    reg                  [NUM_CLIENTS - 1:0]  client_read_valid;
+output    reg                  [NUM_CLIENTS - 1:0]  client_write_done;
 
 output                                              mem_read_en;
 output    reg                    [ADDR_SIZE - 1:0]  mem_read_addr;
@@ -139,24 +149,44 @@ assign should_hold_write = HAVE_UPSTREAM_ARBITER && !upstream_write_done;
 integer index;
 always_comb begin
 
-    mem_read_addr    = '0;
-    mem_write_addr   = '0;
-    mem_write_data   = '0;
+    mem_read_addr      = '0;
+    mem_write_addr     = '0;
+    mem_write_data     = '0;
+    client_read_valid  = '0;
+    client_write_done  = '0;
 
     // Assign read addr when we have grants
     for (index = 0; index < NUM_CLIENTS; index++)
         if (client_read_grants[index]) begin
-            mem_read_addr = client_read_addr[index];
+
+            // @review/@mightnotwork: depending on the Read timings on the
+            // shared Memory, we might need to assert this during the next
+            // clock cycle.
+            client_read_valid[index] = 1;
+
+            mem_read_addr            = client_read_addr[index];
+
         end
 
     // Assign write addr and data when we have grants
     for (index = 0; index < NUM_CLIENTS; index++)
         if (client_write_grants[index]) begin
-            mem_write_addr = client_write_addr[index];
-            mem_write_data = client_write_data[index];
+
+            // The timings here should work out because this signal is
+            // asserted to tell the Client they can stop holding the write
+            // lines, but the write to the memory should happen on this
+            // clock cycle.
+            client_write_done[index] = 1;
+
+            mem_write_addr           = client_write_addr[index];
+            mem_write_data           = client_write_data[index];
         end
 
 end
+
+// Redirect read data from memory
+// All Clients get the data, read_valid will signal the correct Client
+assign client_read_data = mem_read_data;
 
 // Write/Read enable goes high whenever we have a grant
 assign mem_read_en  = |client_read_grants;
