@@ -37,7 +37,7 @@ module cpu_rf_tb();
             //Dump registers
             for (j = 0; j < 16; j=j+1) begin
                 sel1 = j;
-                @(posedge clk); //TODO: Why do we need >1 clk cycle? Problem? Its a synchronous issue, idk
+                @(posedge clk); //TODO: Why do we need >1 clk cycle? Problem? Its a synchronous issue, idk. Dont think its a problem.
                 #1;
                 $display("Mock: Reg %0h: %0h", j, mock_rf[j]);
                 $display("Real: Reg %0h: %0h", j, reg1);
