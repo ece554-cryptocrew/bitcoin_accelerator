@@ -159,10 +159,11 @@ always_comb begin
     for (index = 0; index < NUM_CLIENTS; index++)
         if (client_read_grants[index]) begin
 
-            // @review/@mightnotwork: depending on the Read timings on the
-            // shared Memory, we might need to assert this during the next
-            // clock cycle.
-            client_read_valid[index] = 1;
+            if (upstream_read_valid)
+                // @review/@mightnotwork: depending on the Read timings on the
+                // shared Memory, we might need to assert this during the next
+                // clock cycle.
+                client_read_valid[index] = 1;
 
             mem_read_addr            = client_read_addr[index];
 
@@ -172,11 +173,12 @@ always_comb begin
     for (index = 0; index < NUM_CLIENTS; index++)
         if (client_write_grants[index]) begin
 
-            // The timings here should work out because this signal is
-            // asserted to tell the Client they can stop holding the write
-            // lines, but the write to the memory should happen on this
-            // clock cycle.
-            client_write_done[index] = 1;
+            if (upstream_write_done)
+                // The timings here should work out because this signal is
+                // asserted to tell the Client they can stop holding the write
+                // lines, but the write to the memory should happen on this
+                // clock cycle.
+                client_write_done[index] = 1;
 
             mem_write_addr           = client_write_addr[index];
             mem_write_data           = client_write_data[index];
