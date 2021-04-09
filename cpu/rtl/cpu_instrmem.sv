@@ -66,7 +66,6 @@ module cpu_instrmem (clk, rst_n, instr_addr, wrt_en, wrt_addr, wrt_data, instr_o
             instr_mem[wrt_addr+2] <= wrt_data[23:16];
             instr_mem[wrt_addr+3] <= wrt_data[31:24];
         end
-        end
     end
 
 endmodule
