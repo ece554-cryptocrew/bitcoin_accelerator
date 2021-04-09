@@ -111,7 +111,8 @@ initial begin
     // #22: Some requests, pull low on request next in line
     check(8'b1111_0111, 8'b0001_0000);
 
-    // #23: Hold. On the cycle of hold nothing changes
+    // #23: Hold. On the cycle of hold nothing changes - grant already moved
+    // to next in line because of next clock cycle.
     hold = 1;
     check(8'b1111_0111, 8'b0010_0000);
 
@@ -128,9 +129,34 @@ initial begin
     // #27: Unhold
     check(8'b1111_0111, 8'b0100_0000);
 
+    // #28: Hold, add new clients
+    hold = 1;
+    check(8'b0000_0001, 8'b0000_0001);
+
+    // #29: Hold, add new clients
+    check(8'b0000_0011, 8'b0000_0001);
+
+    // #30: Hold, add new clients
+    check(8'b0000_0111, 8'b0000_0001);
+
+    // #31: Corner case, hold on startup, request at index 0
+    rst_n = 0; @(posedge clk);
+    rst_n = 1; @(posedge clk);
+    check(8'b0000_0001, 8'b0000_0001);
+
+    // #32: Hold on startup, add second request
+    check(8'b0000_0011, 8'b0000_0001);
+
+    // #33: Corner case setup, move last_selected to current request
+    hold = 0; @(posedge clk);
+    hold = 1;
+    check(8'b0000_0010, 8'b0000_0010);
+
+    // #34: Corner case, hold, add second request in direction of Round-Robin
+    check(8'b0010_0010, 8'b0000_0010);
+
     success;
 end
-
 
 /// Helpers
 
