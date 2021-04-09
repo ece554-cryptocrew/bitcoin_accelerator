@@ -368,7 +368,7 @@ module cpu_alu_tb();
         end
 
         if (en_errs == 0 && ex_errs == 0 && flg_errs == 0) $display("TEST PASSED");
-        else $display("FAILED: en_errs: %0d, ex_errs: %0d, flg_errs: %0d", en_errs, ex_errs, flg_errs);
+        else $display("FAILED: ex_errs: %0d, en_errs: %0d, flg_errs: %0d", ex_errs, en_errs, flg_errs);
         $stop;
     end
 
