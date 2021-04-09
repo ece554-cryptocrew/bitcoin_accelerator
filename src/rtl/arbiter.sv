@@ -42,7 +42,7 @@ module arbiter
 
     /// Input
     // Downstream read ports
-    client_read_en, client_read_data, client_read_addr,
+    client_read_en, client_read_addr,
 
     // Downstream write ports
     client_write_en, client_write_data, client_write_addr,
