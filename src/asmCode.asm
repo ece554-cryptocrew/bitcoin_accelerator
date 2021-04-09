@@ -1,13 +1,16 @@
 //R0 zero register
 //R1-R15 general purpose registers g0-g14
-
-
-
 code_entry:
-<<<<<<< HEAD
-	ADDI g0, R0, 1//Set g0 to one 
-	ADDI g14, R0, 0x0 // Use g14 to be value to hash and increment
-	ADDI g13, R0, 0xffff // Set g13 to bitcoin hash to acheive
+	ADDI g14, R0, 0x00000000 // Use g14 to be current nonce value
+	//use g6 - g13 to hold proper output hash
+	ADDI g6, R0, 0x00000000
+	ADDI g7, R0, 0x00000000
+	ADDI g8, R0, 0x00000000
+	ADDI g9, R0, 0x00000000
+	ADDI g10, R0, 0x00000000
+	ADDI g11, R0, 0x00000000
+	ADDI g12, R0, 0x00000000
+	ADDI g13, R0, 0x00000000
 
 
   // TODO bitcoin header 
@@ -28,56 +31,74 @@ code_entry:
   // 0x8100 ACB_7
 
 
-  //TODO properly format so full header isloaded at each accelerator	
-	STI g14, 1064 // Load value to be hashed into 
+  //Update each nonce value loader should set rest of header
+	STI g14, 0x1054 // Load value to be hashed into
 	ADDI g14, g14, 1 // Increament hash number
-	STI g14, 1164 // Should these be 1000 and 1100?
+	STI g14, 0x1154 // Should these be 1000 and 1100?
 	ADDI g14, g14, 1
-	STI g14, 2064
+	STI g14, 0x2054
 	ADDI g14, g14, 1
-	STI g14, 2164
+	STI g14, 0x2154
 	ADDI g14, g14, 1
-	STI g14, 3064
+	STI g14, 0x3054
 	ADDI g14, g14, 1
-	STI g14, 3164
+	STI g14, 0x3154
 	ADDI g14, g14, 1
-	STI g14, 0x4064
+	STI g14, 0x4054
 	ADDI g14, g14, 1
-	STI g14, 0x4164
+	STI g14, 0x4154
 
 //TODO do i need to set the hash_addr of Host Communication Block?
+//We will handle on loader
 
 
 
 	// Tell all accelerators to begin
+	//Do this by properly setting msg_ready signal to true
   // MMIO Host Communication Blocks (136 Bytes + Padding)
   // Stores the host communication blocks. Used for 
   // communication between the host and the accelerator
   // which consists of the status of the hashing, 
   // memory address of the result, input message, and
   // some reserved space for algorithmic purposes
-	STI g0, 0x1000 // HCB_0
-	STI g0, 0x1100 // HCB_1
-	STI g0, 0x2000 // HCB_2
-	STI g0, 0x2100 // HCB_3
-	STI g0, 0x3000 // HCB_4
-	STI g0, 0x3100 // HCB_5
-	STI g0, 0x4000 // HCB_6
-	STI g0, 0x4100 // HCB_7
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x1000 // HCB_0
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x1100 // HCB_1
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x2000 // HCB_2
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x2100 // HCB_3
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x3000 // HCB_4
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x3100 // HCB_5
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x4000 // HCB_6
+	ADDI g0, R0, 0x80000000
+	STI g0, 0x4100 // HCB_7
 
-
-
+//Have loop that polls for
 loop_begin
-	LDI g0, 0x1001 // Status register for accelerator 1
-	SUBI g1, g0, 1 // Check if accelerator done
+	LDI g0, 0x1000 // Status register for accelerator 1
+	ANDI g1, 0x40000000 // Check if accelerator done TODO check without and
 	BNEQ accel_2   // Jump if not complete
-	LDI g0, 0x1048 // Get addres of the output hash
-	LDB g1, g0, 64 // Get output hash  of completed hash probably need to check more value
+	LDI g0, 0x1040 // Get addres of the output hash
+	SUB g1, g0, g6 //See if first part of hash is correct
+	BNEQ accel_2
+	LDI g0, 0x1044 //Second
+	SUB g1, g0, g7
+	BNEQ accel_2
+	LDI g0, 0x1048
+	SUB g1, g0, g8
+	BNEQ accel_2
+	LDI g0, 0x104C
+	SUB g1, g0, g9
+	BNEQ accel_2
+ 
 
-//TODO figure out how much each load and store actually takes in
 	SUBI g2, g1, g13 // Check if hash matches hash value
 
-//TODO most likely need multiple loads and compares,need better understanding of header and hash to do so 
 	BEQ correct_hash_found 
 accel_2
 
