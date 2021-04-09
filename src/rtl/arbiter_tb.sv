@@ -102,11 +102,9 @@ module mock_memory(read_en, read_addr, read_data, write_en, write_addr, write_da
     always_comb begin
         read_data = '0;
 
-        if (READ_DATA_SIZE <= MOCK_MEMORY_REG_SIZE && read_en)
-            read_data = registers[read_addr];
-        else if (read_en)
-            for (integer i = 0; i < READ_DATA_SIZE / MOCK_MEMORY_REG_SIZE; i++)
-                read_data[i * MOCK_MEMORY_REG_SIZE +: MOCK_MEMORY_REG_SIZE] = registers[read_addr + i];
+        if (read_en)
+            read_data = memory_read(read_addr);
+
     end
 
     // Fill memory with random initial values
@@ -128,7 +126,6 @@ mock_memory memory
 );
 
 /// Tests
-reg [WRITE_DATA_SIZE - 1:0] saved_read_addr;
 initial begin
 
     clk                 = 0;
@@ -150,81 +147,140 @@ initial begin
     @(posedge clk);
 
     // #1: Single read
-    saved_read_addr = $random;
-    client_read(0, saved_read_addr);
-    check_read(0, saved_read_addr);
+    client_read(0, 16'h7A34);
+    check_read_data(0);
+    check_read_valid(0, 0);
+
+    // #2: Add competing read, no upstream read valid
+    client_read(1, 16'h83DB);
+    check_read_data(0);
 
     success;
 end
 
 
 /// Helpers
+integer test_number = 0;
 
-task check_read;
-input                integer client_index;
-input      [ADDR_SIZE - 1:0] read_addr;
-begin
-    if (client_read_data != memory_read(read_addr))
-        fail_read(client_index, read_addr, client_read_data, memory_read(read_addr));
-end
+// Check if a Client's read request is properly satisfied, i.e.
+// the read data matches data in memory.
+task check_read_data;
+
+    input                       integer client_index;
+
+           reg        [ADDR_SIZE - 1:0] read_addr;
+           reg   [READ_DATA_SIZE - 1:0] read_data;
+
+    begin
+        test_number += 1;
+
+        read_addr = client_read_addr[client_index];
+        read_data = memory_read(read_addr);
+
+        if (client_read_data != read_data)
+            fail_read_data(client_index, read_addr);
+
+        @(posedge clk);
+    end
+
 endtask
+
+
+// Check if a Client's read request is properly satisfied, i.e.
+// the valid bit is set
+task check_read_valid;
+
+    input                       integer client_index;
+    input                           bit valid;
+
+    begin
+        test_number += 1;
+
+        if (client_read_valid[client_index] != valid)
+            fail_read_valid(client_index, valid);
+
+        @(posedge clk);
+    end
+
+endtask
+
 
 // Directly read from the mock memory and return the value
 function [READ_DATA_SIZE - 1:0] memory_read;
-input [ADDR_SIZE - 1:0] read_addr;
 
-begin
-    if (READ_DATA_SIZE <= MOCK_MEMORY_REG_SIZE)
-        memory_read = memory.registers[read_addr];
-    else
-        for (integer i = 0; i < READ_DATA_SIZE / MOCK_MEMORY_REG_SIZE; i++)
-            memory_read[i * MOCK_MEMORY_REG_SIZE +: MOCK_MEMORY_REG_SIZE] = memory.registers[read_addr + i];
-end
+    input [ADDR_SIZE - 1:0] read_addr;
+
+    begin
+
+        // Might need to fill more than one register size of the data to the
+        // read line
+        if (READ_DATA_SIZE <= MOCK_MEMORY_REG_SIZE)
+            memory_read = memory.registers[read_addr];
+        else
+            for (integer i = 0; i < READ_DATA_SIZE / MOCK_MEMORY_REG_SIZE; i++)
+                memory_read[i * MOCK_MEMORY_REG_SIZE +: MOCK_MEMORY_REG_SIZE] = memory.registers[read_addr + i];
+    end
 
 endfunction
 
+
 // Send read request from a client at a certain index
 task client_read;
-input                integer client_index;
-input      [ADDR_SIZE - 1:0] read_addr;
 
-begin
-    client_read_en[client_index]   = 1;
-    client_read_addr[client_index] = read_addr;
+    input                integer client_index;
+    input      [ADDR_SIZE - 1:0] read_addr;
 
-    // Wait one step so the result is available on the same clock cycle
-    #1;
-end
+    begin
+        client_read_en[client_index]   = 1;
+        client_read_addr[client_index] = read_addr;
+
+        // Wait one step so the result is available on the same clock cycle
+        #1;
+    end
 
 endtask
+
 
 // Fail and halt the test, used then a read is wrong
-task fail_read;
-input               integer  client_index;
-input      [ADDR_SIZE - 1:0] read_addr;
-input [READ_DATA_SIZE - 1:0] client_read;
-input [READ_DATA_SIZE - 1:0] memory_read;
+task fail_read_data;
 
-begin
-    $display(
-        "Read data mismatch for Client %d at address 0x%h: should be 0x%h, got 0x%h",
-        client_index, read_addr, memory_read, client_read
-    );
+    input               integer  client_index;
+    input      [ADDR_SIZE - 1:0] read_addr;
 
-    $stop();
-end
+    begin
+        $display(
+            "Test #%0d: Read Data mismatch for Client %0d at address 0x%h. [requested=%b, granted=%b]",
+            test_number, client_index, read_addr, client_read_en, DUT.client_read_grants
+        );
+
+        $stop();
+    end
+
 endtask
 
-// Fail and halt the test
-task fail;
-begin
-    $display(
-        "Failed"
-    );
 
-    $stop();
-end
+// Fail and halt the test, used then a read is wrong
+task fail_read_valid;
+
+    input               integer  client_index;
+    input                   bit  valid;
+
+    begin
+        $display(
+            "Test #%0d: read_valid is %0s for Client %0d when upstream_read_valid is %0s. [requested=%b, granted=%b]",
+            test_number,
+            valid ? "not set" : "set",
+            client_index,
+            upstream_read_valid ? "set" : "not set",
+            client_read_en,
+            DUT.client_read_grants
+        );
+
+        $stop();
+    end
+
 endtask
+
 
 // Success and exit
 task success;
