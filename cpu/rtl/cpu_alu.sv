@@ -26,10 +26,11 @@ logic [31:0] bPassthrough;
 logic [31:0] rotateOut; 
 logic [31:0] topFinalMuxOut;
 logic [31:0] bottomFinalMuxOut;
+logic [63:0] multiply;
 
-
+assign multiply = A*B;
 assign bPassthrough = Op[2] ? (A + B) : B; // Mux on diagram with Op[2]
-assign top42muxOut = Op[2] ? (A * B) : Op[1] ? (A - B) : (A + B); // Top 4:2 mux.  If Op[2:1] is 3 or 2, then Mult, if 1, Sub, if 0 add
+assign top42muxOut = Op[2] ? (Op[1] ? (multiply >> 32) : (A * B)) : (Op[1] ? (A - B) : (A + B)); // Top 4:2 mux.  If Op[2:1] is 3 or 2, then Mult, if 1, Sub, if 0 add //TODO: Fix for MULTH
 assign bot42muxOut = Op[2] ? rotateOut : Op[1] ? (A >> B) : (A << B); // Bot 4:2 mux.  If Op[2:1] is 3 or 2 then rotate by B etc..
 assign topFinalMuxOut = Op[4] ? top42muxOut : bot42muxOut;
 assign bottomFinalMuxOut = Op[7] ? (Op[2] ? (A+B) : B) : A;
