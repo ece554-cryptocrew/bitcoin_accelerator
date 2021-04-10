@@ -62,6 +62,10 @@ wire                                  mem_write_en;
 wire               [ADDR_SIZE - 1:0]  mem_write_addr;
 wire         [WRITE_DATA_SIZE - 1:0]  mem_write_data;
 
+                              integer test_number = 0;
+
+
+
 /// DUT
 arbiter
 #(
@@ -95,8 +99,17 @@ module mock_memory(read_en, read_addr, read_data, write_en, write_addr, write_da
            reg [MOCK_MEMORY_REG_SIZE - 1:0]  registers [MOCK_MEMORY_REG_COUNT - 1:0];
 
     // Write on rising edge
-    always @(posedge clk)
-        if (write_en) registers[write_addr] <= write_data;
+    always_ff @(posedge clk, negedge clk) begin
+
+        if (!rst_n)
+            // Fill memory with random initial values
+            for (integer i = 0; i < MOCK_MEMORY_REG_COUNT; i++)
+                registers[i] = $random;
+
+        else if (write_en)
+            registers[write_addr] <= write_data;
+
+    end
 
     // Read data is available on the same cycle
     always_comb begin
@@ -104,13 +117,7 @@ module mock_memory(read_en, read_addr, read_data, write_en, write_addr, write_da
 
         if (read_en)
             read_data = memory_read(read_addr);
-
     end
-
-    // Fill memory with random initial values
-    initial
-        for (integer i = 0; i < MOCK_MEMORY_REG_COUNT; i++)
-            registers[i] = $random;
 
 endmodule
 
@@ -126,7 +133,7 @@ mock_memory memory
 );
 
 /// Tests
-reg [WRITE_DATA_SIZE - 1:0] saved_write_data;
+reg [WRITE_DATA_SIZE - 1:0] saved_write_data [NUM_CLIENTS - 1:0];
 initial begin
 
     clk                 = 0;
@@ -219,19 +226,59 @@ initial begin
         $stop;
     end
     next_cycle;
+    test_number += 2;
 
-    // #21, 22: one write request, no write done
-    saved_write_data = memory_read(16'h03AF);
-    client_write(0, 16'h03AF, 32'h6AFF);
+    // #21: one write request, no write done
+    client_write(0, 16'h03AF, 32'h6AFF0AB9);
+    next_cycle;
+    check_write_data(0, 32'h6AFF0AB9);
+
+    // #22, 23, 24, 25: three other write request, no write done
+    saved_write_data[1] = memory_read(16'h8379);
+    client_write(1, 16'h8379, 32'h03A11B8B);
+
+    saved_write_data[2] = memory_read(16'h0001);
+    client_write(2, 16'h0001, 32'h8A9B0C1D);
+
+    saved_write_data[7] = memory_read(16'h1A01);
+    client_write(7, 16'h1A01, 32'h01234567);
+
+    next_cycle;
+
+    // Nothing should change, Client 0's data is already written
+    check_write_data(0, 32'h6AFF0AB9);
+    check_write_data(1, saved_write_data[1]);
+    check_write_data(2, saved_write_data[2]);
+    check_write_data(7, saved_write_data[7]);
+
+    // #26, 27, 28: upstream_write_done high for one cycle
+    set_upstream_write_done;   next_cycle;
+    unset_upstream_write_done; next_cycle;      // Write happens on this cycle
+    check_write_data(1, 32'h03A11B8B);
+    check_write_data(2, saved_write_data[2]);
+    check_write_data(7, saved_write_data[7]);
+    next_cycle;
+
+    // #29, 30: Unassert upstream_write_done
+    check_write_data(2, saved_write_data[2]);
+    check_write_data(7, saved_write_data[7]);
+    next_cycle;
+
+    // #31, 32: Reassert upstream_write_done
+    set_upstream_write_done; next_cycle;
+    next_cycle;                                // Write happens on this cycle
+    check_write_data(2, 32'h8A9B0C1D);
+    check_write_data(7, saved_write_data[7]);
+    next_cycle;
+
+    // #33, 34: Continuing asserting upstream_write_done
+    check_write_data(7, 32'h01234567);
 
     success;
 end
 
 
 /// Helpers
-integer test_number = 0;
-
-
 // Check if a Client's read request is properly satisfied, i.e.
 // the read data matches data in memory.
 task check_read_data;
@@ -266,6 +313,29 @@ task check_read_valid;
 
         if (client_read_valid[client_index] != valid)
             fail_read_valid(client_index, valid);
+    end
+
+endtask
+
+
+// Check if a Client's write request is properly satisfied, i.e.
+// the written data matches data in memory.
+task check_write_data;
+
+    input                       integer client_index;
+    input       [WRITE_DATA_SIZE - 1:0] write_data;
+
+           reg        [ADDR_SIZE - 1:0] write_addr;
+           reg  [WRITE_DATA_SIZE - 1:0] memory_data;
+
+    begin
+        test_number += 1;
+
+        write_addr  = client_write_addr[client_index];
+        memory_data = memory_read(write_addr);
+
+        if (write_data != memory_data)
+            fail_write_data(client_index, write_addr);
     end
 
 endtask
@@ -333,6 +403,8 @@ task client_write;
         client_write_en[client_index]   = 1;
         client_write_addr[client_index] = write_addr;
         client_write_data[client_index] = write_data;
+
+        next_step;
     end
 
 endtask
@@ -360,6 +432,20 @@ endtask
 // Unassert upstream_read_valid bit and advance one step
 task unset_upstream_read_valid;
     upstream_read_valid = 0;
+    next_step;
+endtask
+
+
+// Assert upstream_write_done bit and advance one step
+task set_upstream_write_done;
+    upstream_write_done = 1;
+    next_step;
+endtask
+
+
+// Unassert upstream_write_done bit and advance one step
+task unset_upstream_write_done;
+    upstream_write_done = 0;
     next_step;
 endtask
 
@@ -409,6 +495,24 @@ task fail_read_valid;
             upstream_read_valid ? "set" : "not set",
             client_read_en,
             DUT.client_read_grants
+        );
+
+        $stop();
+    end
+
+endtask
+
+
+// Fail and halt the test, used then a write is wrong
+task fail_write_data;
+
+    input               integer  client_index;
+    input      [ADDR_SIZE - 1:0] write_addr;
+
+    begin
+        $display(
+            "Test #%0d: Write Data mismatch for Client %0d at address 0x%h. [requested=%b, granted=%b, mem_write_addr=0x%h]",
+            test_number, client_index, write_addr, client_write_en, DUT.client_write_grants, mem_write_addr
         );
 
         $stop();
