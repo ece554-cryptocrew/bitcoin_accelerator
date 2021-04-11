@@ -95,11 +95,20 @@ loop_begin
 	LDI g0, 0x104C
 	SUB g1, g0, g9
 	BNEQ accel_2
- 
+	LDI g0, 0x1050
+	SUB g1, g0, g10
+	BNEQ  accel_2
+ 	LDI g0, 0x1054
+	SUB g1, g0, g11
+	BNEQ  accel_2
+	LDI g0, 0x1058
+	SUB g1, g0, g12
+	BNEQ  accel_2
+	LDI g0, 0x105C
+	SUB g1, g0, g13
+	BNEQ  accel_2
+	JMP correct_hash_found //If passes all tests then hash matches and can finish 
 
-	SUBI g2, g1, g13 // Check if hash matches hash value
-
-	BEQ correct_hash_found 
 accel_2
 
 
