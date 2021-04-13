@@ -141,6 +141,6 @@ loop_begin
 
 accel_2
 
-
+	JMP loop_begin
 
 correct_hash_found
