@@ -61,28 +61,51 @@ code_entry:
   // which consists of the status of the hashing, 
   // memory address of the result, input message, and
   // some reserved space for algorithmic purposes
-	ADDI g0, R0, 0x80000000
+	LDI g1, 0x1000 //Need to change specific bit should keep old info since already set to 0
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x1000 // HCB_0
-	ADDI g0, R0, 0x80000000
+
+	LDI g1, 0x1100
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x1100 // HCB_1
-	ADDI g0, R0, 0x80000000
+	
+	LDI g1, 0x2000
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x2000 // HCB_2
-	ADDI g0, R0, 0x80000000
+	
+	LDI g1, 0X2100
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x2100 // HCB_3
-	ADDI g0, R0, 0x80000000
+	
+	LDI g1, 0x3000
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x3000 // HCB_4
-	ADDI g0, R0, 0x80000000
+	
+	LDI g1, 0x3100
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x3100 // HCB_5
-	ADDI g0, R0, 0x80000000
+
+	LDI g1, 0x4000
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x4000 // HCB_6
-	ADDI g0, R0, 0x80000000
+	
+	LDI g1, 0x4100
+	ADDI g0, g1, 0x80000000
 	STI g0, 0x4100 // HCB_7
 
 //Have loop that polls for
 loop_begin
 	LDI g0, 0x1000 // Status register for accelerator 1
-	ANDI g1, 0x40000000 // Check if accelerator done TODO check without and
-	BNEQ accel_2   // Jump if not complete
+
+	SUBI g1, g0, 0x40000001// Check if accelerator done By checking specific bit
+	BGEZ accel_2
+	SUBI g1, g0, 0x3FFFFFFF
+	BLEZ accel_2 
+
+	//TODO can i set msg_ready right away also do i need to unset hash_valid? what values does accel change and whe
+	SUBI g0, g0, 0x40000000
+	STI g0, 0x1000
+
 	LDI g0, 0x1040 // Get addres of the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_2
