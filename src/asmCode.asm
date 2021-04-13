@@ -1,7 +1,10 @@
 //R0 zero register
 //R1-R15 general purpose registers g0-g14
+
 code_entry:
-	ADDI g14, R0, 0x00000000 // Use g14 to be current nonce value
+	// use g14 to be the current nonce value
+	ADDI g14, R0, 0x00000000 
+	
 	//use g6 - g13 to hold proper output hash
 	ADDI g6, R0, 0x00000000
 	ADDI g7, R0, 0x00000000
@@ -15,8 +18,8 @@ code_entry:
 
   // TODO bitcoin header 
   // add constants for:
-  // - version number (4 bytes)
-  // - bits (4 bytes)
+  // version number (4 bytes)
+  // bits (4 bytes)
   // nonce (4 bytes) starts at 0 and goes to 32 - it will overflow which will
   // change the merkle root (32 bytes)
 
@@ -32,9 +35,9 @@ code_entry:
 
 
   //Update each nonce value loader should set rest of header
-	STI g14, 0x1054 // Load value to be hashed into
+	STI g14, 0x1054  // Load the value to be hashed into
 	ADDI g14, g14, 1 // Increament hash number
-	STI g14, 0x1154 // Should these be 1000 and 1100?
+	STI g14, 0x1154 // TODO Should these be 1000 and 1100? Why is the offset 54?
 	ADDI g14, g14, 1
 	STI g14, 0x2054
 	ADDI g14, g14, 1
@@ -49,98 +52,106 @@ code_entry:
 	STI g14, 0x4154
 	ADDI g14, g14, 1
 
-//TODO do i need to set the hash_addr of Host Communication Block?
-//We will handle on loader
+// TODO do i need to set the hash_addr of Host Communication Block?
+// We will handle on loader
 
 
-
-	// Tell all accelerators to begin
-	//Do this by properly setting msg_ready signal to true
+  // Tell all accelerators to begin - by properly setting msg_ready to true
+  
   // MMIO Host Communication Blocks (136 Bytes + Padding)
   // Stores the host communication blocks. Used for 
   // communication between the host and the accelerator
   // which consists of the status of the hashing, 
   // memory address of the result, input message, and
   // some reserved space for algorithmic purposes
-	LDI g1, 0x1000 //Need to change specific bit should keep old info since already set to 0
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x1000 // HCB_0
 
-	LDI g1, 0x1100
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x1100 // HCB_1
-	
-	LDI g1, 0x2000
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x2000 // HCB_2
-	
-	LDI g1, 0X2100
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x2100 // HCB_3
-	
-	LDI g1, 0x3000
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x3000 // HCB_4
-	
-	LDI g1, 0x3100
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x3100 // HCB_5
+  LDI g1, 0x1000 // Need to change specific bit should keep old info since already set to 0
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x1000 // HCB_0
 
-	LDI g1, 0x4000
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x4000 // HCB_6
+  LDI g1, 0x1100
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x1100 // HCB_1
 	
-	LDI g1, 0x4100
-	ADDI g0, g1, 0x80000000
-	STI g0, 0x4100 // HCB_7
+  LDI g1, 0x2000
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x2000 // HCB_2
+	
+  LDI g1, 0X2100
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x2100 // HCB_3
+	
+  LDI g1, 0x3000
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x3000 // HCB_4
+	
+  LDI g1, 0x3100
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x3100 // HCB_5
 
-//Have loop that polls for
-loop_begin
+  LDI g1, 0x4000
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x4000 // HCB_6
+	
+  LDI g1, 0x4100
+  ADDI g0, g1, 0x80000000
+  STI g0, 0x4100 // HCB_7
+
+
+  // Have loop that polls 
+  loop_begin
 	LDI g0, 0x1000 // Status register for accelerator 1
 
-	SUBI g1, g0, 0x40000001// Check if accelerator done By checking specific bit
+	SUBI g1, g0, 0x40000001 // Check if the accelerator is done through specific bit
 	BGEZ accel_2
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_2 
 
 	//TODO can i set msg_ready right away also do i need to unset hash_valid? what values does accel change and whe
-	//Set msg_ready here check if it gets unset
+	// Set msg_ready here check if it gets unset
 	STI g14, 0x1054 // Update to new nonce
 	ADDI g14, g14, 1 // Increament hash number	
-	SUBI g0, g0, 0x40000000//Set hash_valid to false to ready
-	ADDI g0, g0, 0x80000000 //Set msg_ready to ready
+	SUBI g0, g0, 0x40000000 // Set hash_valid to false to ready
+	ADDI g0, g0, 0x80000000 // Set msg_ready to ready
 	STI g0, 0x1000 //Store new status values
 
+	// check all eight bytes of the hash
+	LDI g0, 0x1040 // Get address of the output hash
+	SUB g1, g0, g6 // See if first byte of hash is correct
+	BNEQ accel_2
 	
-
-	LDI g0, 0x1040 // Get addres of the output hash
-	SUB g1, g0, g6 //See if first part of hash is correct
+	LDI g0, 0x1044 // Second
+	SUB g1, g0, g7 // See if second byte of hash is correct
 	BNEQ accel_2
-	LDI g0, 0x1044 //Second
-	SUB g1, g0, g7
-	BNEQ accel_2
+	
 	LDI g0, 0x1048
-	SUB g1, g0, g8
+	SUB g1, g0, g8 // See if third byte of hash is correct
 	BNEQ accel_2
+	
 	LDI g0, 0x104C
-	SUB g1, g0, g9
+	SUB g1, g0, g9 // See if fourth byte of hash is correct
 	BNEQ accel_2
+	
 	LDI g0, 0x1050
-	SUB g1, g0, g10
+	SUB g1, g0, g10 // See if fifth byte of hash is correct
 	BNEQ  accel_2
- 	LDI g0, 0x1054
-	SUB g1, g0, g11
+ 	
+	LDI g0, 0x1054
+	SUB g1, g0, g11 // See if sixth byte of hash is correct
 	BNEQ  accel_2
+	
 	LDI g0, 0x1058
-	SUB g1, g0, g12
+	SUB g1, g0, g12 // See if seventh byte of hash is correct
 	BNEQ  accel_2
+	
 	LDI g0, 0x105C
-	SUB g1, g0, g13
+	SUB g1, g0, g13 // See if last byte of hash is correct
 	BNEQ  accel_2
-	JMP correct_hash_found //If passes all tests then hash matches and can finish 
+	JMP correct_hash_found // If passes all tests then hash matches and can finish 
 
-accel_2
+  accel_2
 
 	JMP loop_begin
 
-correct_hash_found
+  correct_hash_found
+  	// halt and send
