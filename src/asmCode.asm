@@ -156,3 +156,5 @@ code_entry:
 
   	correct_hash_found
   		// halt and send
+		// are we going to package the header for transmission to the bitcoin network? 
+		// are we going to send it to a GUI to show in our demo and compare speeds?
