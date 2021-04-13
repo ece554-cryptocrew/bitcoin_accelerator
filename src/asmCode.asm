@@ -47,6 +47,7 @@ code_entry:
 	STI g14, 0x4054
 	ADDI g14, g14, 1
 	STI g14, 0x4154
+	ADDI g14, g14, 1
 
 //TODO do i need to set the hash_addr of Host Communication Block?
 //We will handle on loader
@@ -103,8 +104,14 @@ loop_begin
 	BLEZ accel_2 
 
 	//TODO can i set msg_ready right away also do i need to unset hash_valid? what values does accel change and whe
-	SUBI g0, g0, 0x40000000
-	STI g0, 0x1000
+	//Set msg_ready here check if it gets unset
+	STI g14, 0x1054 // Update to new nonce
+	ADDI g14, g14, 1 // Increament hash number	
+	SUBI g0, g0, 0x40000000//Set hash_valid to false to ready
+	ADDI g0, g0, 0x80000000 //Set msg_ready to ready
+	STI g0, 0x1000 //Store new status values
+
+	
 
 	LDI g0, 0x1040 // Get addres of the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
