@@ -12,7 +12,7 @@
 
 // TODO: Mem arbitration should be BEFORE pipe
 
-module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, ex_wrt_en, ex_wrt_addr, ex_wrt_data, 
+module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, ex_wrt_en, ex_addr, ex_wrt_data, 
                     accel_addr, accel_wrt_data, accel_wrt_en, cpu_rd_data, accel_rd_data);
 
     input                clk, rst_n;
@@ -33,9 +33,9 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, e
     logic [31:0]  wrt_data_arb;
     logic         wrt_en_arb;
     logic [511:0] rd_data_raw;
-    logic         arb; // 1 if choosing CPU, 0 if choosing Accel
+    logic         ex_priority, cpu_priority;
 
-    datamem_mem datamem(.clk(clk), .rst_n(rst_n), .addr(addr_arb), .wrt_data(wrt_data_arb), .wrt_en(wrt_en_arb), .rd_data(rd_data_raw));
+    cpu_datamem_mem datamem(.clk(clk), .rst_n(rst_n), .addr(addr_arb), .wrt_data(wrt_data_arb), .wrt_en(wrt_en_arb), .rd_data(rd_data_raw));
 
     assign accel_rd_data = rd_data_raw;
     assign cpu_rd_data = rd_data_raw[31:0];
