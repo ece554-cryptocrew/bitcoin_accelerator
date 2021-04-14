@@ -12,13 +12,14 @@
 
 // TODO: Mem arbitration should be BEFORE pipe
 
-module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, ex_wrt_en, ex_wrt_addr, ex_wrt_data, 
+module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, ex_wrt_en, ex_wrt_addr, ex_wrt_data, 
                     accel_addr, accel_wrt_data, accel_wrt_en, cpu_rd_data, accel_rd_data);
 
     input                clk, rst_n;
     input        [15:0]  cpu_addr; 
     input        [31:0]  cpu_wrt_data; 
     input                cpu_wrt_en;
+    input                cpu_rd_en;
     input        [15:0]  ex_addr; 
     input        [31:0]  ex_wrt_data; 
     input                ex_wrt_en;
@@ -39,12 +40,14 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, ex_wrt_en, e
     assign accel_rd_data = rd_data_raw;
     assign cpu_rd_data = rd_data_raw[31:0];
 
-    assign addr_arb = (arb) ? cpu_addr : accel_addr;
-    assign wrt_data_arb = (arb) ? cpu_wrt_data : accel_wrt_data;
-    assign wrt_en_arb = (arb) ? cpu_wrt_en : accel_wrt_en;
+    assign addr_arb = (ex_priority) ? ex_addr : ((cpu_priority) ? cpu_addr : accel_addr);
+    assign wrt_data_arb = (ex_priority) ? ex_wrt_data : ((cpu_priority) ? cpu_wrt_data : accel_wrt_data);
+    assign wrt_en_arb = (ex_priority) ? ex_wrt_en : ((cpu_priority) ? cpu_wrt_en : accel_wrt_en);
 
-    // TODO: is this the arbritration we want? Currently gives priority to CPU if it needs to write or read
+    // TODO: is this the arbritration we want? Currently gives priority to host if writing (host cant read), 
+    //       then to cpu if writing or reading, then to accel
     // TODO: add fifo for storing accel reads and writes
-    assign arb = (cpu_wrt_en);
+    assign ex_priority = ex_wrt_en; // host cant read from mem, so we dont check for it
+    assign cpu_priority = (cpu_wrt_en | cpu_rd_en);
 
 endmodule
