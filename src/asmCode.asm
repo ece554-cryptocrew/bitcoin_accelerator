@@ -1,7 +1,10 @@
 //R0 zero register
 //R1-R15 general purpose registers g0-g14
+
 code_entry:
-	ADDI g14, R0, 0x00000000 // Use g14 to be current nonce value
+	// use g14 to be the current nonce value
+	ADDI g14, R0, 0x00000000 
+	
 	//use g6 - g13 to hold proper output hash
 	ADDI g6, R0, 0x00000000
 	ADDI g7, R0, 0x00000000
@@ -16,23 +19,20 @@ code_entry:
   // - version number (4 bytes)
   // - bits (4 bytes)
   // nonce (4 bytes) starts at 0 and goes to 32 - it will overflow which will
-  // change the merkle root (32 bytes)
-
-  // MMIO Acceleration Communication Blocks (40 Bytes + Padding)
-  // 0x5000 ACB_0    Stores the accelerator communication blocks. Used  
-  // 0x5100 ACB_1    for communication between the on-board CPU and
-  // 0x6000 ACB_2    the accelerator blocks which consists of the status 
-  // 0x6100 ACB_3    of the hashing, starting memory address of input
-  // 0x7000 ACB_4    message and the output hash.
-  // 0x7100 ACB_5
-  // 0x8000 ACB_6
-  // 0x8100 ACB_7
+  	// 0x5000 ACB_0    Stores the accelerator communication blocks. Used  
+  	// 0x5100 ACB_1    for communication between the on-board CPU and
+  	// 0x6000 ACB_2    the accelerator blocks which consists of the status 
+  	// 0x6100 ACB_3    of the hashing, starting memory address of input
+  	// 0x7000 ACB_4    message and the output hash.
+  	// 0x7100 ACB_5
+  	// 0x8000 ACB_6
+  	// 0x8100 ACB_7
 
 
-  //Update each nonce value loader should set rest of header
-	STI g14, 0x1054 // Load value to be hashed into
+  	//Update each nonce value loader should set rest of header
+	STI g14, 0x1054  // Load the value to be hashed into
 	ADDI g14, g14, 1 // Increament hash number
-	STI g14, 0x1154 // Should these be 1000 and 1100?
+	STI g14, 0x1154 // TODO Should these be 1000 and 1100? Why is the offset 54?
 	ADDI g14, g14, 1
 	STI g14, 0x2054
 	ADDI g14, g14, 1
@@ -47,10 +47,19 @@ code_entry:
 	STI g14, 0x4154
 	ADDI g14, g14, 1
 
-// do i need to set the hash_addr of Host Communication Block?
-//We will handle on loader
+	
+	// TODO do i need to set the hash_addr of Host Communication Block?
+	// We will handle on loader
 
 
+  	// Tell all accelerators to begin - by properly setting msg_ready to true
+  
+  	// MMIO Host Communication Blocks (136 Bytes + Padding)
+  	// Stores the host communication blocks. Used for 
+  	// communication between the host and the accelerator
+  	// which consists of the status of the hashing, 
+  	// memory address of the result, input message, and
+  	// some reserved space for algorithmic purposes
 
 	// Tell all accelerators to begin
 	//Do this by properly setting msg_ready signal to true
@@ -95,12 +104,6 @@ code_entry:
 //Have loop that polls for
 loop_begin
 	LDI g0, 0x5000 // Status register for accelerator 1
-
-	SUBI g1, g0, 0x40000001// Check if accelerator done By checking specific bit
-	BGEZ accel_2
-	SUBI g1, g0, 0x3FFFFFFF
-	BLEZ accel_2 
-
 	LDI g0, 0x5040 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_1_end
@@ -440,3 +443,6 @@ accel_8_end
 correct_hash_found
 	LDB g0, g4, 0x0//get final nonce value
 	STI g0, 0x9000 //send it to the host
+  		// halt and send
+		// are we going to package the header for transmission to the bitcoin network? 
+		// are we going to send it to a GUI to show in our demo and compare speeds?
