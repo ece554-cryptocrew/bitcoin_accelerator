@@ -102,30 +102,37 @@ code_entry:
 	STI g0, 0x8100 // ACB_7
 
 //Have loop that polls for
-loop_begin
+loop_begin 
+
 	LDI g0, 0x5000 // Status register for accelerator 1
-	LDI g0, 0x5040 // Get first part the output hash
+	
+	SUBI g1, g0, 0x40000001
+	BGEZ accel_2
+	SUBI g1, g0, 0x3FFFFFFF
+	BLEZ accel_2
+
+	LDI g1, 0x5008 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_1_end
-	LDI g0, 0x5044 //Second
+	LDI g0, 0x500C //Second
 	SUB g1, g0, g7
 	BNEQ accel_1_end
-	LDI g0, 0x5048
+	LDI g0, 0x5010
 	SUB g1, g0, g8
 	BNEQ accel_1_end
-	LDI g0, 0x504C
+	LDI g0, 0x5014
 	SUB g1, g0, g9
 	BNEQ accel_1_end
-	LDI g0, 0x5050
+	LDI g0, 0x5018
 	SUB g1, g0, g10
 	BNEQ  accel_1_end
- 	LDI g0, 0x5054
+ 	LDI g0, 0x501C
 	SUB g1, g0, g11
 	BNEQ  accel_1_end
-	LDI g0, 0x5058
+	LDI g0, 0x5020
 	SUB g1, g0, g12
 	BNEQ  accel_1_end
-	LDI g0, 0x505C
+	LDI g0, 0x5024
 	SUB g1, g0, g13
 	BNEQ  accel_1_end
 	ADDI g4, R0, 0x1054 //Store address to then save final hash
@@ -146,28 +153,28 @@ accel_2
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_3 
 
-	LDI g0, 0x5140 // Get first part the output hash
+	LDI g0, 0x5108 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_2_end
-	LDI g0, 0x5144 //Second
+	LDI g0, 0x510C //Second
 	SUB g1, g0, g7
 	BNEQ accel_2_end
-	LDI g0, 0x5148
+	LDI g0, 0x5110
 	SUB g1, g0, g8
 	BNEQ accel_2_end
-	LDI g0, 0x514C
+	LDI g0, 0x5114
 	SUB g1, g0, g9
 	BNEQ accel_2_end
-	LDI g0, 0x5150
+	LDI g0, 0x5118
 	SUB g1, g0, g10
 	BNEQ  accel_2_end
- 	LDI g0, 0x5154
+ 	LDI g0, 0x511C
 	SUB g1, g0, g11
 	BNEQ  accel_2_end
-	LDI g0, 0x5158
+	LDI g0, 0x5120
 	SUB g1, g0, g12
 	BNEQ  accel_2_end
-	LDI g0, 0x515C
+	LDI g0, 0x5124
 	SUB g1, g0, g13
 	BNEQ  accel_2_end
 	ADDI g4, R0, 0x1154 //Store address to then save final hash
@@ -188,28 +195,28 @@ accel_3
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_4 
 
-	LDI g0, 0x6040 // Get first part the output hash
+	LDI g0, 0x6008// Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_3_end
-	LDI g0, 0x6044 //Second
+	LDI g0, 0x600C //Second
 	SUB g1, g0, g7
 	BNEQ accel_3_end
-	LDI g0, 0x6048
+	LDI g0, 0x6010
 	SUB g1, g0, g8
 	BNEQ accel_3_end
-	LDI g0, 0x604C
+	LDI g0, 0x6014
 	SUB g1, g0, g9
 	BNEQ accel_3_end
-	LDI g0, 0x6050
+	LDI g0, 0x6018
 	SUB g1, g0, g10
 	BNEQ  accel_3_end
- 	LDI g0, 0x6054
+ 	LDI g0, 0x601C
 	SUB g1, g0, g11
 	BNEQ  accel_3_end
-	LDI g0, 0x6058
+	LDI g0, 0x6020
 	SUB g1, g0, g12
 	BNEQ  accel_3_end
-	LDI g0, 0x605C
+	LDI g0, 0x6024
 	SUB g1, g0, g13
 	BNEQ  accel_3_end
 	ADDI g4, R0, 0x2054 //Store address to then save final hash
@@ -231,28 +238,28 @@ accel_4
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_5 
 
-	LDI g0, 0x6140 // Get first part the output hash
+	LDI g0, 0x6108 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_4_end
-	LDI g0, 0x6144 //Second
+	LDI g0, 0x610C //Second
 	SUB g1, g0, g7
 	BNEQ accel_4_end
-	LDI g0, 0x6148
+	LDI g0, 0x6110
 	SUB g1, g0, g8
 	BNEQ accel_4_end
-	LDI g0, 0x614C
+	LDI g0, 0x6114
 	SUB g1, g0, g9
 	BNEQ accel_4_end
-	LDI g0, 0x6150
+	LDI g0, 0x6118
 	SUB g1, g0, g10
 	BNEQ  accel_4_end
- 	LDI g0, 0x6154
+ 	LDI g0, 0x611C
 	SUB g1, g0, g11
 	BNEQ  accel_4_end
-	LDI g0, 0x6158
+	LDI g0, 0x6120
 	SUB g1, g0, g12
 	BNEQ  accel_4_end
-	LDI g0, 0x615C
+	LDI g0, 0x6124
 	SUB g1, g0, g13
 	BNEQ  accel_4_end
 	ADDI g4, R0, 0x2154 //Store address to then save final hash
@@ -274,28 +281,28 @@ accel_5
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_6 
 
-	LDI g0, 0x7040 // Get first part the output hash
+	LDI g0, 0x7008 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_5_end
-	LDI g0, 0x7044 //Second
+	LDI g0, 0x700C //Second
 	SUB g1, g0, g7
 	BNEQ accel_5_end
-	LDI g0, 0x7048
+	LDI g0, 0x7010
 	SUB g1, g0, g8
 	BNEQ accel_5_end
-	LDI g0, 0x704C
+	LDI g0, 0x7014
 	SUB g1, g0, g9
 	BNEQ accel_5_end
-	LDI g0, 0x7050
+	LDI g0, 0x7018
 	SUB g1, g0, g10
 	BNEQ  accel_5_end
- 	LDI g0, 0x7054
+ 	LDI g0, 0x701C
 	SUB g1, g0, g11
 	BNEQ  accel_5_end
-	LDI g0, 0x7058
+	LDI g0, 0x7020
 	SUB g1, g0, g12
 	BNEQ  accel_5_end
-	LDI g0, 0x705C
+	LDI g0, 0x7024
 	SUB g1, g0, g13
 	BNEQ  accel_5_end
 	ADDI g4, R0, 0x3054 //Store address to then save final hash
@@ -317,28 +324,28 @@ accel_6
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_6 
 
-	LDI g0, 0x7140 // Get first part the output hash
+	LDI g0, 0x7108 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_3_end
-	LDI g0, 0x7144 //Second
+	LDI g0, 0x710C //Second
 	SUB g1, g0, g7
 	BNEQ accel_6_end
-	LDI g0, 0x7148
+	LDI g0, 0x7110
 	SUB g1, g0, g8
 	BNEQ accel_6_end
-	LDI g0, 0x714C
+	LDI g0, 0x7114
 	SUB g1, g0, g9
 	BNEQ accel_6_end
-	LDI g0, 0x7150
+	LDI g0, 0x7118
 	SUB g1, g0, g10
 	BNEQ  accel_6_end
- 	LDI g0, 0x7154
+ 	LDI g0, 0x711C
 	SUB g1, g0, g11
 	BNEQ  accel_6_end
-	LDI g0, 0x7158
+	LDI g0, 0x7120
 	SUB g1, g0, g12
 	BNEQ  accel_6_end
-	LDI g0, 0x715C
+	LDI g0, 0x7124
 	SUB g1, g0, g13
 	BNEQ  accel_6_end
 	ADDI g4, R0, 0x3154 //Store address to then save final hash
@@ -360,28 +367,28 @@ accel_7
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_7 
 
-	LDI g0, 0x8040 // Get first part the output hash
+	LDI g0, 0x8008 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_7_end
-	LDI g0, 0x8044 //Second
+	LDI g0, 0x800C //Second
 	SUB g1, g0, g7
 	BNEQ accel_7_end
-	LDI g0, 0x8048
+	LDI g0, 0x8010
 	SUB g1, g0, g8
 	BNEQ accel_7_end
-	LDI g0, 0x804C
+	LDI g0, 0x8014
 	SUB g1, g0, g9
 	BNEQ accel_7_end
-	LDI g0, 0x8050
+	LDI g0, 0x8018
 	SUB g1, g0, g10
 	BNEQ  accel_7_end
- 	LDI g0, 0x8054
+ 	LDI g0, 0x801C
 	SUB g1, g0, g11
 	BNEQ  accel_7_end
-	LDI g0, 0x8058
+	LDI g0, 0x8020
 	SUB g1, g0, g12
 	BNEQ  accel_7_end
-	LDI g0, 0x805C
+	LDI g0, 0x8024
 	SUB g1, g0, g13
 	BNEQ  accel_7_end
 	ADDI g4, R0, 0x4054 //Store address to then save final hash
@@ -403,28 +410,28 @@ accel_8
 	SUBI g1, g0, 0x3FFFFFFF
 	BLEZ accel_8 
 
-	LDI g0, 0x8140 // Get first part the output hash
+	LDI g0, 0x8108 // Get first part the output hash
 	SUB g1, g0, g6 //See if first part of hash is correct
 	BNEQ accel_8_end
-	LDI g0, 0x8144 //Second
+	LDI g0, 0x810C //Second
 	SUB g1, g0, g7
 	BNEQ accel_8_end
-	LDI g0, 0x8148
+	LDI g0, 0x8110
 	SUB g1, g0, g8
 	BNEQ accel_8_end
-	LDI g0, 0x814C
+	LDI g0, 0x8114
 	SUB g1, g0, g9
 	BNEQ accel_8_end
-	LDI g0, 0x8150
+	LDI g0, 0x8118
 	SUB g1, g0, g10
 	BNEQ  accel_8_end
- 	LDI g0, 0x8154
+ 	LDI g0, 0x811C
 	SUB g1, g0, g11
 	BNEQ  accel_8_end
-	LDI g0, 0x8158
+	LDI g0, 0x8120
 	SUB g1, g0, g12
 	BNEQ  accel_8_end
-	LDI g0, 0x815C
+	LDI g0, 0x8124
 	SUB g1, g0, g13
 	BNEQ  accel_8_end
 	ADDI g4, R0, 0x4154 //Store address to then save final hash
