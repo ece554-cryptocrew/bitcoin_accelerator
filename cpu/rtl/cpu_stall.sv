@@ -57,7 +57,7 @@ module cpu_stall(
 
 																	1'b0;
 				
-		
+	assign jb_stall = exec_jb_stall | dec_jb_stall;
 
 
 endmodule
