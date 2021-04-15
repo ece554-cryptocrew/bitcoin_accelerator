@@ -75,4 +75,14 @@ endcase
 
 end
 
+assign ZF = (Out == 32'h0);
+assign NF = (Out < 32'h0);
+assign OF = 1'b0; // not used for now
+assign CF = 1'b0;
+
+assign ZF_en = (Op[7:4] == 4'b0001);
+assign NF_en = (Op[7:4] == 4'b0001);
+assign OF_en = (Op[7:4] == 4'b0001);
+assign CF_en = (Op[7:4] == 4'b0001);
+
 endmodule
