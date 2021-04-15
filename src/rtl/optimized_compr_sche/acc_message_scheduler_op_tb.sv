@@ -15,7 +15,7 @@ endclass
 msg_t new_msg = new();
 
 // DUT
-acc_message_schduler_op DUT(.clk(clk), .rst_n(rst_n),
+acc_message_scheduler_op DUT(.clk(clk), .rst_n(rst_n),
                             .ms_init(ms_init), .ms_enable(ms_enable), .message(message),
                             .ms_r0_out(ms_r0_out));
 
