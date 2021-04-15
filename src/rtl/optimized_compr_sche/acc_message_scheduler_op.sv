@@ -12,7 +12,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-module acc_message_schduler_op (clk, rst_n, ms_init, ms_enable, message, ms_r0_out);
+module acc_message_scheduler_op (clk, rst_n, ms_init, ms_enable, message, ms_r0_out);
 
 // Size of the input message port
 localparam MESSAGE_SIZE = 512;
