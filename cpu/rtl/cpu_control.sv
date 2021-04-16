@@ -15,19 +15,17 @@
 //   pc_jmp_src - Chooses between PC+immediate (0) or just the immediate (1) to go to the PC for jumps (JMP vs JMPI)         
 //
 /////////////////////////////////////////////////////////////////////////////////////
-module cpu_control (instr, alu_op, alu_imm_src, rf_write_en, rw_stall, datamem_write_en, datamem_read_en, rf_write_mem_src, pc_src, pc_jmp_src, jb_stall, err);
+module cpu_control (instr, alu_op, alu_imm_src, rf_write_en, datamem_write_en, datamem_read_en, rf_write_mem_src, pc_src, pc_jmp_src, err);
 
     input  [31:0] instr;
     output [7:0]  alu_op;
     output        alu_imm_src;
     output        rf_write_en;
-    output        rw_stall;
     output        datamem_write_en;
     output        datamem_read_en;
     output        rf_write_mem_src;
     output        pc_src;
     output        pc_jmp_src;
-    output        jb_stall;
     output        err;
 
     // Error if invalid opcode;

@@ -24,11 +24,11 @@ module cpu_stall(
 	input logic [3:0] wb_wrt_reg,
 	input logic wb_wrt_en,
 	input logic wb_jb_stall,
-	output logic rd_wrt_stall,
+	output logic rw_stall,
 	output logic jb_stall);
 
 
-	assign rd_wrt_stall = (((if_instr[31:24] == 8'b00010001) || // Type L Instructions
+	assign rw_stall = (((if_instr[31:24] == 8'b00010001) || // Type L Instructions
 			       (if_instr[31:24] == 8'b00010011) ||
 			       (if_instr[31:24] == 8'b00010101) ||
 			       (if_instr[31:24] == 8'b00100111) ||
