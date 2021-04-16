@@ -76,20 +76,20 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
 
     logic [31:0]  rf_instr;
 
-	logic [31:0]  stl_if_instr,
-	logic [3:0]   stl_dec_wrt_reg,
-	logic         stl_dec_wrt_en,
-	logic         stl_dec_jb_stall,
-	logic [3:0]   stl_exec_wrt_reg,
-	logic         stl_exec_wrt_en,
-	logic         stl_exec_jb_stall,
-	logic [3:0]   stl_mem_wrt_reg,
-	logic         stl_mem_wrt_en,
-	logic         stl_mem_jb_stall,
-	logic [3:0]   stl_wb_wrt_reg,
-	logic         stl_wb_wrt_en,
-	logic         stl_wb_jb_stall,
-	logic         stl_rw_stall,
+	logic [31:0]  stl_if_instr;
+	logic [3:0]   stl_dec_wrt_reg;
+	logic         stl_dec_wrt_en;
+	logic         stl_dec_jb_stall;
+	logic [3:0]   stl_exec_wrt_reg;
+	logic         stl_exec_wrt_en;
+	logic         stl_exec_jb_stall;
+	logic [3:0]   stl_mem_wrt_reg;
+	logic         stl_mem_wrt_en;
+	logic         stl_mem_jb_stall;
+	logic [3:0]   stl_wb_wrt_reg;
+	logic         stl_wb_wrt_en;
+	logic         stl_wb_jb_stall;
+	logic         stl_rw_stall;
 	logic         stl_jb_stall;
 
     localparam IFID_WIDTH = 64; // TODO: change to make pipe stages wider as needed
@@ -168,7 +168,7 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
                             ctrl_rf_write_mem_src, ctrl_pc_src, ctrl_pc_jmp_src, stl_rw_stall, stl_jb_stall}; 
     assign IDEX_in[63:32] = rf_reg1;
     assign IDEX_in[95:64] = rf_reg2;
-    assign IDEX_in[127:96] = {16{rf_instr[15]}, rf_instr[15:0]}; // imm TODO: for sure sign extended?
+    assign IDEX_in[127:96] = {{16{rf_instr[15]}}, rf_instr[15:0]}; // imm TODO: for sure sign extended?
     assign IDEX_in[159:128] = rf_instr[23:20]; //wb reg
     assign IDEX_en = 1'b1; //TODO: fix for stalls
     assign rf_instr = IFID_out[63:32];

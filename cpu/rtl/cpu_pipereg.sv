@@ -11,7 +11,8 @@ module cpu_pipereg(clk, rst_n, pipe_in, pipe_out, pipe_en);
     
     parameter PIPE_WIDTH = 32;
 
-    input             clk, rst_n;
+    input                       clk, rst_n;
+    input                       pipe_en;
     input      [PIPE_WIDTH-1:0] pipe_in;
     output reg [PIPE_WIDTH-1:0] pipe_out;
 
