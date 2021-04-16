@@ -219,6 +219,7 @@ namespace priscas
 
 		if(i_inst(op))
 		{
+
 			w = (w.AsUInt32() | (imm & ((1 << 16) - 1)));
 			w = (w.AsUInt32() | ((op & ((1 << 8) - 1) ) << 24 ));
 		}
@@ -255,34 +256,34 @@ namespace priscas
 
 		// Mnemonic resolution
 		
-		if("addi" == args[0]) { current_op = priscas::ADDI;}
-		else if("subi" == args[0]) { current_op = priscas::SUBI;}
-		else if("multli" == args[0]) { current_op = priscas::MULTLI;}
-		else if("multhi" == args[0]) { current_op = priscas::MULTHI; }
-		else if("lsi" == args[0]) { current_op = priscas::LSI; }
-		else if("rsi" == args[0]) { current_op = priscas::RSI; }
-		else if("rori" == args[0]) { current_op = priscas::RORI; }
-		else if("ldb" == args[0]) { current_op = priscas::LDB; }
-		else if("stb" == args[0]) { current_op = priscas::STB; }
-		else if("add" == args[0]) { current_op = priscas::ADD; }	
-		else if("sub" == args[0]) { current_op = priscas::SUB; }	
-		else if("multl" == args[0]) { current_op = priscas::MULTL; }	
-		else if("multh" ==  args[0]) { current_op = priscas::MULTH; }
-		else if("ls" == args[0]) { current_op = priscas::LS; }
-		else if("rs" == args[0]) { current_op = priscas::RS; }
-		else if("ror" == args[0]) { current_op = priscas::ROR; }
-		else if("beq" == args[0]) { current_op = priscas::BEQ; }
-		else if("bneq" == args[0]) { current_op = priscas::BNEQ; }
-		else if("bltz" == args[0]) { current_op = priscas::BLTZ; }
-		else if("bgtz" == args[0]) { current_op = priscas::BGTZ; }
-		else if("blez" == args[0]) { current_op = priscas::BLEZ; }
-		else if("bgez" == args[0]) { current_op = priscas::BGEZ; }	
-		else if("jmp" == args[0]) { current_op = priscas::JMP;}
-		else if("jmpi" == args[0]) { current_op = priscas::JMPI; }	
-		else if("ldi" == args[0]) { current_op = priscas::LDI; }
-		else if("sti" == args[0]) { current_op = priscas::STI; }
-		else if("push" == args[0]) { current_op = priscas::PUSH;}
-		else if("pop" == args[0]) { current_op = priscas::POP;}	
+		if("ADDI" == args[0]) { current_op = priscas::ADDI;}
+		else if("SUBI" == args[0]) { current_op = priscas::SUBI;}
+		else if("MULTLI" == args[0]) { current_op = priscas::MULTLI;}
+		else if("MULTHI" == args[0]) { current_op = priscas::MULTHI; }
+		else if("LSI" == args[0]) { current_op = priscas::LSI; }
+		else if("RSI" == args[0]) { current_op = priscas::RSI; }
+		else if("RORI" == args[0]) { current_op = priscas::RORI; }
+		else if("LDB" == args[0]) { current_op = priscas::LDB; }
+		else if("STB" == args[0]) { current_op = priscas::STB; }
+		else if("ADD" == args[0]) { current_op = priscas::ADD; }	
+		else if("SUB" == args[0]) { current_op = priscas::SUB; }	
+		else if("MULTL" == args[0]) { current_op = priscas::MULTL; }	
+		else if("MULTH" ==  args[0]) { current_op = priscas::MULTH; }
+		else if("LS" == args[0]) { current_op = priscas::LS; }
+		else if("RS" == args[0]) { current_op = priscas::RS; }
+		else if("ROR" == args[0]) { current_op = priscas::ROR; }
+		else if("BEQ" == args[0]) { current_op = priscas::BEQ; }
+		else if("BNEQ" == args[0]) { current_op = priscas::BNEQ; }
+		else if("BLTZ" == args[0]) { current_op = priscas::BLTZ; }
+		else if("BGTZ" == args[0]) { current_op = priscas::BGTZ; }
+		else if("BLEZ" == args[0]) { current_op = priscas::BLEZ; }
+		else if("BGEZ" == args[0]) { current_op = priscas::BGEZ; }	
+		else if("JMP" == args[0]) { current_op = priscas::JMP;}
+		else if("JMPI" == args[0]) { current_op = priscas::JMPI; }	
+		else if("LDI" == args[0]) { current_op = priscas::LDI; }
+		else if("STI" == args[0]) { current_op = priscas::STI; }
+		else if("PUSH" == args[0]) { current_op = priscas::PUSH;}
+		else if("POP" == args[0]) { current_op = priscas::POP;}	
 		else
 		{
 			throw mt_bad_mnemonic();
@@ -326,7 +327,13 @@ namespace priscas
 
 				else
 				{
-					imm = priscas::get_imm(args[1].c_str());
+				//	if(mem_inst(current_op)){
+				//		rs = priscas::get_reg_num(args[1].c_str());
+				//		imm = priscas::get_imm(args[2].cstr());
+				//	}
+				//	else{
+						imm = priscas::get_imm(args[1].c_str());
+				//	}
 				}
 			}
 			
