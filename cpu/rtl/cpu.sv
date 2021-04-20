@@ -84,22 +84,21 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     logic         rf_err;
 
     logic [31:0]  rf_instr;
-
-	logic [31:0]  stl_if_instr;
-	logic [3:0]   stl_dec_wrt_reg;
-	logic         stl_dec_wrt_en;
-	logic         stl_dec_jb_stall;
-	logic [3:0]   stl_exec_wrt_reg;
-	logic         stl_exec_wrt_en;
-	logic         stl_exec_jb_stall;
-	logic [3:0]   stl_mem_wrt_reg;
-	logic         stl_mem_wrt_en;
-	logic         stl_mem_jb_stall;
-	logic [3:0]   stl_wb_wrt_reg;
-	logic         stl_wb_wrt_en;
-	logic         stl_wb_jb_stall;
-	logic         stl_rw_stall;
-	logic         stl_jb_stall;
+    logic [31:0]  stl_if_instr;
+    logic [3:0]   stl_dec_wrt_reg;
+    logic         stl_dec_wrt_en;
+    logic         stl_dec_jb_stall;
+    logic [3:0]   stl_exec_wrt_reg;
+    logic         stl_exec_wrt_en;
+    logic         stl_exec_jb_stall;
+    logic [3:0]   stl_mem_wrt_reg;
+    logic         stl_mem_wrt_en;
+    logic         stl_mem_jb_stall;
+    logic [3:0]   stl_wb_wrt_reg;
+    logic         stl_wb_wrt_en;
+    logic         stl_wb_jb_stall;
+    logic         stl_rw_stall;
+    logic         stl_jb_stall;
 
     localparam IFID_WIDTH = 64; // TODO: change to make pipe stages wider as needed
     localparam IDEX_WIDTH = 160;
@@ -229,17 +228,17 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     //Stall detection //TODO: done?
     //out signals above
     assign stl_if_instr = im_rd_out; // next instruction
-	assign stl_dec_wrt_reg = rf_instr[23:20]; //wb reg
-	assign stl_dec_wrt_en = ctrl_rf_write_en; //wb en
-	assign stl_dec_jb_stall = (rf_instr[31:28] == 4'b0011); //if j or b instruction
-	assign stl_exec_wrt_reg = IDEX_out[159:128]; //wb reg
-	assign stl_exec_wrt_en = IDEX_out[7]; //wb en
-	assign stl_exec_jb_stall = IDEX_out[0]; //active jb stall
-	assign stl_mem_wrt_reg = EXMEM_out[127:96]; //wb reg
-	assign stl_mem_wrt_en = EXMEM_out[7]; //wb en
-	assign stl_mem_jb_stall = EXMEM_out[0]; //active jb stall
-	assign stl_wb_wrt_reg = MEMWB_out[127:96]; //wb reg
-	assign stl_wb_wrt_en = MEMWB_out[7]; //wb en
-	assign stl_wb_jb_stall = MEMWB_out[0]; //active jb stall
+    assign stl_dec_wrt_reg = rf_instr[23:20]; //wb reg
+    assign stl_dec_wrt_en = ctrl_rf_write_en; //wb en
+    assign stl_dec_jb_stall = (rf_instr[31:28] == 4'b0011); //if j or b instruction
+    assign stl_exec_wrt_reg = IDEX_out[159:128]; //wb reg
+    assign stl_exec_wrt_en = IDEX_out[7]; //wb en
+    assign stl_exec_jb_stall = IDEX_out[0]; //active jb stall
+    assign stl_mem_wrt_reg = EXMEM_out[127:96]; //wb reg
+    assign stl_mem_wrt_en = EXMEM_out[7]; //wb en
+    assign stl_mem_jb_stall = EXMEM_out[0]; //active jb stall
+    assign stl_wb_wrt_reg = MEMWB_out[127:96]; //wb reg
+    assign stl_wb_wrt_en = MEMWB_out[7]; //wb en
+    assign stl_wb_jb_stall = MEMWB_out[0]; //active jb stall
 
 endmodule
