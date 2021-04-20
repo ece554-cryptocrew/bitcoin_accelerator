@@ -116,8 +116,7 @@ output      reg                                     ms_init, ms_enable;
 output      reg                                     cm_init, cm_enable;
 
 // Internal
-            reg  [$clog2(dummy_state.num()) - 1:0]  curr_state, next_state;
-            reg   [$clog2(HASH_CYCLE_COUNT) - 1:0]  hash_cycle_counter;
+            reg       [$clog2(HASH_CYCLE_COUNT):0]  hash_cycle_counter;
 
            // Assert to start the hash_cycle counter
             reg                                     hash_cycle_counter_en;
@@ -127,7 +126,7 @@ output      reg                                     cm_init, cm_enable;
 // ===============
 /// States
 // ===============
-typedef enum {
+typedef enum reg [3:0] {
     IDLE,             // Reset/Idle
 
     READ_MESSAGE,     // Read message from Data Memory
@@ -152,7 +151,7 @@ typedef enum {
     WRITE_DONE_BIT    // Write the done bit to Data Memory
 
 } state_t;
-state_t dummy_state;  // Dummy state so we can use .num() to get the cardinality.
+state_t curr_state, next_state;
 
 // ===============
 // FSM
@@ -183,7 +182,7 @@ always_comb begin
 
             // Signal the Arbiter we need to read something
             mem_acc_read_en   = 1'b1;
-            mem_acc_read_addr = ACB_START_ADDR;
+            mem_acc_read_addr = HCB_START_ADDR;
 
             // If we interface with an Arbiter, we wait here until Arbiter gives us the data
             if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
