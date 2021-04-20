@@ -21,6 +21,7 @@
 #ifndef __ENV_H__
 #define __ENV_H__
 #include <algorithm>
+#include "mtsstream.h"
 #include "priscas_global.h"
 
 namespace priscas
@@ -78,6 +79,31 @@ namespace priscas
 			 */
 			bool get_Option_AsmMode() { return this->has_Option_AsmMode; }
 
+			/* bool get_Option_AsmStrMode
+			 * Specifies if the AsmStrMode -s was specified on the command line
+			 */
+			bool get_Option_AsmStrMode() { return this->has_Option_AsmStrMode; }
+
+			/* bool has_AsmStrMode_Value
+			 * Specifies if -s had a value specified for it
+			 */
+			bool get_Option_AsmStrModeSpecified() { return this->has_AsmStrMode_Value; }
+
+			/* void get_AsmStrMode()
+			 * Returns the ASM stream type specified.
+			 */
+			asm_ostream::STREAM_TYPE get_AsmStrMode() { return this->st; }
+
+			/* bool has_Option_WordSize
+			 * Return whether -b was specified
+			 */
+			bool get_Option_WordSize() { return this->has_Option_WordSize; }
+
+			/* bool has_WordSize_Value
+			 * Return whether -b has a value
+			 */
+			bool get_Option_WordSizeSpecified() { return this->has_WordSize_Value; }
+
 			/* void get_Option_AsmInputSpecified
 			 * Return whether or not ASM Input option -i had a value specified for it
 			 */
@@ -125,6 +151,11 @@ namespace priscas
 			 */
 			int get_memBitwidth() { return this->mem_bitwidth; }
 
+			/* get_Wordsize()
+			 * Get the word size
+			 */
+			size_t get_Wordsize() { return this->width; }
+
 			/* Env default constructor
 			 * Everything is set to false. Put everything else to default values
 			 */
@@ -138,8 +169,12 @@ namespace priscas
 				has_Option_MemWidth(false),
 				has_Option_CpuSelect(false),
 				has_AsmInput_Value(false),
+				has_Option_AsmStrMode(false),
+				has_AsmStrMode_Value(false),
+				st(asm_ostream::BIN),
 				channel_count(1),
-				cpu_count(1)
+				cpu_count(1),
+				width(4)
 			{}
 
 		private:
@@ -157,9 +192,16 @@ namespace priscas
 			bool has_Option_CpuSelect;	// -c option specified
 			bool has_AsmInput_Value;	// -i option has a value
 			bool has_AsmOutput_Value;       // -o option has a value
+			bool has_Option_AsmStrMode;	// -s option specified
+			bool has_AsmStrMode_Value;	// -s option has a value
+			asm_ostream::STREAM_TYPE st;	// -s value
+			bool has_Option_WordSize;	// -b option specified 
+			bool has_WordSize_Value;	// -b option has a valid value	
 			unsigned mem_bitwidth;		// memory bitwidth (default 16)
 			unsigned channel_count;		// amount of memory channels (currently 1), future use
 			unsigned cpu_count;			// amount of cpu sockets (currently 1), future use
+			unsigned word_size;
+			unsigned width;
 	};
 }
 

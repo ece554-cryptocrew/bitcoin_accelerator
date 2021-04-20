@@ -41,7 +41,9 @@ module mem_ctrl
 	output logic tx_done,
 	output logic rd_valid,
 	output logic host_re, // might need since controls fifo shifting...
-	output logic host_we
+	output logic host_we,
+	output logic host_rgo,
+	output logic host_wgo
 );
 	localparam FILL_COUNT = CL_SIZE_WIDTH / WORD_SIZE;
 	localparam FILL_BITS = $clog2(FILL_COUNT);
@@ -69,9 +71,12 @@ module mem_ctrl
 	// State Elements
 	sm_state state;
 	logic [FILL_BITS-1:0] fill_count;
-	logic [CL_SIZE_WIDTH-1:0] line_buffer;
+	reg [CL_SIZE_WIDTH-1:0] line_buffer;
 
 	logic [WORD_SIZE-1:0] line_out [FILL_COUNT-1:0];
+
+	// Bubble : for undocumented required stalls on the DMA system
+	reg bubble;
 
 	genvar gv;
 	generate
@@ -89,6 +94,8 @@ module mem_ctrl
 		ready = 1'b1;
 		host_re = 1'b0;
 		host_we = 1'b0;
+		host_rgo = 1'b0;
+		host_wgo = 1'b0;
 		rd_valid = 1'b0;
 
 		case(state)
@@ -100,19 +107,30 @@ module mem_ctrl
 
 			HOSTOP: begin
 
-				if(op == WRITE && host_wr_ready) begin
-				// Write
-				/* Here, we should just write the data and then
-				 * return to READY when done
-				 */
-					tx_done = 1'b1;
-					host_we = 1'b1;
+				if(op == WRITE) begin
+					host_wgo = 1'b1;
+
+					if(host_wr_ready && bubble) begin
+						// Write
+						/* Here, we should just write the data and then
+						 * return to READY when done
+						 */
+						tx_done = 1'b1;
+						host_we = 1'b1;
+					end
 				end	
 				else if(op == READ) begin
 				// Read
 				/* Just fill the cache line buffer with a single read
 				 */
-					host_re = 1'b1;
+					host_rgo = 1'b1;
+					if(host_rd_ready && bubble) begin
+						/* It seems Read Enable is not really a "read enable"
+						 * it's mostly for ack'ing to the DMA engine that
+						 * you've read the data and you are ready to shift the old data out. Hence why we need a bubble (probably)
+						 */
+						host_re = 1'b1;
+					end
 				end
 			end
 				
@@ -139,67 +157,79 @@ module mem_ctrl
 			state <= STARTUP;
 			fill_count <= '0;
 			line_buffer <= '0;
+			bubble <= '0;
 		end
 
-		case(state)
-			STARTUP: begin
-				if(host_init) begin
-					// We've init'd, we can go start servicing
-					state <= READY;
-				end
-			end
-
-			READY: begin
-				if(op_in == READ) begin
-					state <= HOSTOP;
-				end
-				else if(op_in == WRITE) begin
-					state <= FILL;
-				end
-			end
-
-			FILL: begin
-				// We fill until we can fill no more!
-				// TODO: clean this up through logical simplification
-				if(&fill_count == 1'b1) begin
-					fill_count <= '0;
-
-					if(op_in == WRITE) begin
-						state <= HOSTOP;
-						line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
-					end
-					else if(op_in == READ) begin
+		else begin
+			case(state)
+				STARTUP: begin
+					if(host_init) begin
+						// We've init'd, we can go start servicing
 						state <= READY;
 					end
 				end
-				else begin
-					// If we are writing, fill the line buffer with
-					// data from common data bus read in
-					if(op_in == WRITE) begin
-						line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
+
+				READY: begin
+					if(op_in == READ) begin
+						state <= HOSTOP;
 					end
-					fill_count <= fill_count + 1;
+					else if(op_in == WRITE) begin
+						state <= FILL;
+					end
 				end
-			end
 
-			HOSTOP: begin
-				if(op == READ && host_rd_ready) begin
-					// Read
-					line_buffer <= host_data_bus_read_in;
-					state <= FILL;
-				end
-				else if(op == WRITE && host_wr_ready) begin
-					// Write
-					/* Here, we should just write the data and then
-					 * return to READY when done
-					 */
-					state <= READY;
-				end
-			end
+				FILL: begin
+					// We fill until we can fill no more!
+					// TODO: clean this up through logical simplification
+					if(&fill_count == 1'b1) begin
+						fill_count <= '0;
 
-			default begin
-			end
-		endcase
+						if(op_in == WRITE) begin
+							state <= HOSTOP;
+							line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
+						end
+						else if(op_in == READ) begin
+							state <= READY;
+						end
+					end
+					else begin
+						// If we are writing, fill the line buffer with
+						// data from common data bus read in
+						if(op_in == WRITE) begin
+							line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
+						end
+						else if(op_in == READ) begin
+							bubble <= '0;
+						end
+						fill_count <= fill_count + 1;
+					end
+				end
+
+				HOSTOP: begin
+					if(op == READ && host_rd_ready) begin
+						// Read
+						line_buffer <= host_data_bus_read_in;
+						state <= FILL;
+						bubble <= bubble + 1;
+					end
+					else if(op == WRITE && host_wr_ready && bubble) begin
+						// Write
+						/* Here, we should just write the data and then
+						 * return to READY when done
+						 */
+						state <= READY;
+						bubble <= 1'b0;
+					end
+					else if(op == WRITE && !bubble) begin
+						// Wait a cycle to let any address changes propagate down the chain.
+						bubble <= bubble + 1;
+					end
+				end
+
+				default begin
+				end
+			endcase
+		end
 	end
 
 	// Continuous Assigns

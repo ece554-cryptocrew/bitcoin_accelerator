@@ -20,6 +20,8 @@
 //////////////////////////////////////////////////////////////////////////////
 #ifndef __MTSSTREAM_H__
 #define __MTSSTREAM_H__
+#include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstdint>
 #include "primitives.h"
@@ -32,13 +34,32 @@ namespace priscas
 	class asm_ostream
 	{
 		public:	
-			void append(uint8_t ui);
-			asm_ostream(const char * filename);
+
+			enum STREAM_TYPE
+			{
+				BIN,
+				MIF,
+				HEX
+			};
+
+			void append(uint8_t* begin, size_t count);
+			asm_ostream(const char * filename, STREAM_TYPE stin);
 			~asm_ostream();
+
+			void set_mode(STREAM_TYPE stin) { this->st = stin; }
+			void set_width(size_t newwidth) { this->width = newwidth; }
+			void finalize();
+
 		private:
 			FILE * f;
 			asm_ostream(asm_ostream &);
 			asm_ostream& operator=(asm_ostream &);
+
+			STREAM_TYPE st;
+
+			UPString_Vec mif_insts;
+			size_t width;
+			size_t total_bytes;
 	};
 }
 

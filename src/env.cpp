@@ -28,6 +28,43 @@ namespace priscas
 
 		for(size_t argind = 0; argind < argc; argind++)
 		{
+			if(args[argind] == "-s")
+			{
+				this->has_Option_AsmStrMode = true;
+
+				if((argind + 1) < argc)
+				{
+					this->has_AsmStrMode_Value = true;
+
+					if(args[argind + 1] == "hex") st = asm_ostream::HEX; 
+					else if(args[argind + 1] == "bin") st = asm_ostream::BIN;
+					else if(args[argind + 1] == "mif") st = asm_ostream::MIF;
+					else
+					{
+						this->has_AsmStrMode_Value = false;
+					}
+				}
+			}
+
+			if(args[argind] == "-b")
+			{
+				this->has_Option_WordSize = true;
+
+				if((argind + 1) < argc)
+				{
+					this->width = atoi(args[argind + 1].c_str());
+
+					if(width <= 0)
+					{
+						this->has_WordSize_Value = false;
+					}
+					else
+					{
+						this->has_WordSize_Value = true;
+					}
+				}
+			}
+
 			if(args[argind] == "-l")
 			{
 				this->has_Option_AsmMode = true;
