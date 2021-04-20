@@ -36,13 +36,13 @@ code_entry:
 	ADDI $g14, $g14, 1
 	STI $g14, $zero, 0x2054
 	ADDI $g14, $g14, 1
-	STI $g14, $zero, 0x2154
+	STI $g14, $zero,  0x2154
 	ADDI $g14, $g14, 1
 	STI $g14, $zero, 0x3054
 	ADDI $g14, $g14, 1
 	STI $g14, $zero, 0x3154
 	ADDI $g14, $g14, 1
-	STI $g14, $zero, 0x4054
+	STI $g14, $zero  0x4054
 	ADDI $g14, $g14, 1
 	STI $g14, $zero, 0x4154
 	ADDI $g14, $g14, 1
@@ -76,7 +76,7 @@ code_entry:
 	ADDI $g0, $g1, 0x80000000
 	STI $g0, $zero, 0x6000 ; ACB_2
 	
-	LDI $g1, $zero, 0X6100
+	LDI $g1, $zero, 0x6100 ;here
 	ADDI $g0, $g1, 0x80000000
 	STI $g0, $zero, 0x6100 ; ACB_3
 	
@@ -97,8 +97,8 @@ code_entry:
 	STI $g0, $zero, 0x8100 ; ACB_7
 
 ;Have loop that polls for
-loop_begin 
 
+loop_begin: 
 	LDI $g0, $zero, 0x5000 ; Status register for accelerator 1
 	
 	SUBI $g1, $g0, 0x40000001
@@ -133,14 +133,14 @@ loop_begin
 	ADDI $g4, $zero, 0x1054 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_1_end
+accel_1_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x1054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to ready TODO does not check is already set may be needed
 	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
 	STI $g0, $zero, 0x5000 ;Store new status values
-accel_2
+accel_2:
 	LDI $g0, $zero, 0x5100 ; Status register for accelerator 1
 
 	SUBI $g1, $g0, 0x40000001; Check if accelerator done By checking specific bit
@@ -175,14 +175,14 @@ accel_2
 	ADDI $g4, $zero, 0x1154 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_2_end
+accel_2_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x1154 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	SUBI $g0, $g0, 0x40000000 ;Set hash_valid to false to ready TODO does not check is already set may be needed
 	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
 	STI $g0, $zero, 0x5100 ;Store new status values
-accel_3
+accel_3:
 	LDI $g0, $zero, 0x6000 ; Status register for accelerator 1
 
 	SUBI $g1, $g0, 0x40000001 ; Check if accelerator done By checking specific bit
@@ -217,14 +217,14 @@ accel_3
 	ADDI $g4, $zero, 0x2054 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_3_end
+accel_3_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x2054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
 	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
 	STI $g0, $zero, 0x6000 ;Store new status values
-accel_4
+accel_4:
 
 	LDI $g0, $zero, 0x6100 ; Status register for accelerator 1
 
@@ -260,14 +260,14 @@ accel_4
 	ADDI $g4, $zero, 0x2154 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_4_end
+accel_4_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x2154 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
 	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
 	STI $g0, $zero, 0x6100 ;Store new status values
-accel_5
+accel_5:
 
 	LDI $g0, $zero, 0x7000 ; Status register for accelerator 1
 
@@ -303,14 +303,14 @@ accel_5
 	ADDI $g4, $zero, 0x3054 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_5_end
+accel_5_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x2054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
 	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
 	STI $g0, $zero, 0x6000 ;Store new status values
-accel_6
+accel_6:
 
 	LDI $g0, $zero, 0x7100 ; Status register for accelerator 1
 
@@ -346,14 +346,14 @@ accel_6
 	ADDI $g4, $zero, 0x3154 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_6_end
+accel_6_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x3154 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
 	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
 	STI $g0, $zero, 0x7100 ;Store new status values
-accel_7
+accel_7:
 
 	LDI $g0, $zero, 0x8000 ; Status register for accelerator 1
 
@@ -389,14 +389,14 @@ accel_7
 	ADDI $g4, $zero, 0x4054 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_7_end
+accel_7_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x4054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
 	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
 	STI $g0, $zero, 0x8000 ;Store new status values
-accel_8
+accel_8:
 
 	LDI $g0, $zero, 0x8100 ; Status register for accelerator 1
 
@@ -432,7 +432,7 @@ accel_8
 	ADDI $g4, $zero, 0x4154 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
-accel_8_end
+accel_8_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x4154 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
@@ -442,7 +442,7 @@ accel_8_end
 
 	JMP loop_begin
 
-correct_hash_found
+correct_hash_found:
 	LDB $g0, $g4, 0x0;get final nonce value
 	STI $g0, $zero, 0x9000 ;send it to the host
 	ADDI $g0, $zero, 1

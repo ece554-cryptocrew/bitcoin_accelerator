@@ -15,7 +15,7 @@ module mem_ctrl
 #(
 	parameter WORD_SIZE = 32,
 	parameter CL_SIZE_WIDTH = 512,
-	parameter ADDR_BITCOUNT = 64
+	parameter ADDR_BITCOUNT = 17
 	
 )
 (
