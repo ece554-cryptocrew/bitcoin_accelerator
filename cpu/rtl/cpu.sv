@@ -82,8 +82,8 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     logic         rf_wrt_en;
     logic [31:0]  rf_reg1, reg2;
     logic         rf_err;
-
     logic [31:0]  rf_instr;
+
     logic [31:0]  stl_if_instr;
     logic [3:0]   stl_dec_wrt_reg;
     logic         stl_dec_wrt_en;
@@ -154,7 +154,7 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     cpu_pipereg #(.PIPE_WIDTH(1)) CF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_CF), .pipe_out(CF_flg), .pipe_en(alu_CF_en));
 
     //Misc
-    cpu_pipereg #(.PIPE_WIDTH(1)) Ex_rd_vld (.clk(clk), .rst_n(rst_n), .pipe_in(ex_rd_en), .pipe_out(ex_rd_valid), .pipe_en(1'b1));
+    cpu_pipereg #(.PIPE_WIDTH(1)) Ex_rd_vld (.clk(clk), .rst_n(rst_n), .pipe_in(ex_rd_en), .pipe_out(ex_rd_valid), .pipe_en(1'b1)); // rd valid should be good cycle after rd request
 
     // Top Level Logic //
 
