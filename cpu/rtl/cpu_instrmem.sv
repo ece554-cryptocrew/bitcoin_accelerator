@@ -6,8 +6,8 @@
 //
 // Detail: Instruction memory for the CPU.
 //         Read only, byte Addressable, 64k Bytes (2^16 addresses).
-//         Reads access 2 bytes at...
-//           data_mem[addr], data_mem[addr+1]
+//         Reads access 4 bytes at...
+//           mem[addr], mem[addr+1]...
 //         Initialized by loader on reset, first instruction at 0x0000.
 //         
 // Mem Map: 
@@ -15,43 +15,40 @@
 // 0x0000-0xFFFF
 //
 /////////////////////////////////////////////////////////////////////////////////////
-module cpu_instrmem (clk, rst_n, addr, instr, err);
+module cpu_instrmem (clk, rst_n, addr, wrt_en, wrt_data, rd_out);
 
     input             clk, rst_n;
     input      [15:0] addr; 
-    output reg [31:0] instr;
-    output reg        err;
+    input             wrt_en;
+    input      [31:0] wrt_data;
+    output reg [31:0] rd_out;
 
     localparam MEM_SIZE = 65536;
 
-    logic [31:0] instr_mem [0:MEM_SIZE-1];
-
-    // Error if instruction addr not at valid location
-    // Should be a multiple of 4 (0x0000, 0x0004, etc)
-    assign err = (addr % 4 != 0);
+    logic [31:0] mem [0:MEM_SIZE-1];
 
     // Read logic
-    // Set instr to 0 if invalid address
-    //assign instr = (addr % 4 == 0) ? instr_mem[addr+3:addr] : 32'h0; //TODO: does this work? no
-    always_comb begin
-        if (addr % 4 == 0) begin
-            instr[7:0] = instr_mem[addr];
-            instr[15:8] = instr_mem[addr+1];
-            instr[23:16] = instr_mem[addr+2];
-            instr[31:24] = instr_mem[addr+3];
-            /*
-            for (integer i = 0; i < 3; i = i + 1) begin
-                instr[i] = instr_mem[addr+i]; //TODO: Pretty sure this is wrong
-            end
-            */
-        end 
-        else instr = 32'h0;
+    // Set rd_out to 0 if invalid address
+    //assign rd_out = (addr % 4 == 0) ? mem[addr+3:addr] : 32'h0; //TODO: does this work? no
+    always_ff @(posedge clk or negedge rst_n) begin
+        rd_out[7:0] <= mem[addr];
+        rd_out[15:8] <= mem[addr+1];
+        rd_out[23:16] <= mem[addr+2];
+        rd_out[31:24] <= mem[addr+3];
     end
 
     // Write logic
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            // TODO: Load from loader
+            for (integer i = 0; i < MEM_SIZE; i = i + 1) begin
+                mem[i] <= 8'h0;
+            end
+        end
+        else if (wrt_en) begin
+            mem[addr]   <= wrt_data[7:0];
+            mem[addr+1] <= wrt_data[15:8];
+            mem[addr+2] <= wrt_data[23:16];
+            mem[addr+3] <= wrt_data[31:24];
         end
     end
 

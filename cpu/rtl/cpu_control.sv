@@ -32,7 +32,8 @@ module cpu_control (instr, alu_op, alu_imm_src, rf_write_en, datamem_write_en, d
     assign err = 1'b0; //TODO: Do we want this? Lot of work for invalid opcodes
 
     // Assign control signals
-    //TODO: fix for push and pop
+    //TODO: fix for push and pop?
+    //TODO: Add stall detection unit, assign the two stall signals
     assign alu_op = instr[31:24];
     assign alu_imm_src = instr[24];
     assign rf_write_en = (instr[31:28] != 4'b0011) && // No RF write for jump/branch or stores
@@ -46,5 +47,6 @@ module cpu_control (instr, alu_op, alu_imm_src, rf_write_en, datamem_write_en, d
                               (instr[31:24] == 8'b10000001);
     assign pc_src = (instr[31:28] == 4'b0011);
     assign pc_jmp_src = (instr[31:28] == 4'b0011) && (instr[27:24] == 4'b1111); //Only JMPI
+
     
 endmodule

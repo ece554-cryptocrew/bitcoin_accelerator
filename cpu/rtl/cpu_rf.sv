@@ -14,8 +14,8 @@ module cpu_rf(clk, rst_n, sel1, sel2, wrt_sel, wrt_data, wrt_en, reg1, reg2, err
     input  [3:0]  sel1, sel2, wrt_sel;
     input  [31:0] wrt_data;
     input         wrt_en;
-    output [31:0] reg1, reg2;
-    output        err;
+    output logic [31:0] reg1, reg2;
+    output logic        err;
 
     logic [31:0] regs [0:15];
 
@@ -23,8 +23,9 @@ module cpu_rf(clk, rst_n, sel1, sel2, wrt_sel, wrt_data, wrt_en, reg1, reg2, err
     assign err = ((wrt_data != 32'h0) & (wrt_sel == 4'h0) & wrt_en);
 
     // Read logic
-    assign reg1 = regs[sel1];
-    assign reg2 = regs[sel2];
+    // assign reg1 = regs[sel1]; // TODO: Think this is supposed to be done synchro, not sure
+    // assign reg2 = regs[sel2];
+
 
     // Write logic
     always_ff @(posedge clk or negedge rst_n) begin
@@ -36,6 +37,8 @@ module cpu_rf(clk, rst_n, sel1, sel2, wrt_sel, wrt_data, wrt_en, reg1, reg2, err
         else if (wrt_en) begin
             regs[wrt_sel] <= wrt_data;
         end
+        reg1 <= regs[sel1];
+        reg2 <= regs[sel2];
     end
 
 endmodule

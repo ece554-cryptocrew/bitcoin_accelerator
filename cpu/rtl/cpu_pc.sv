@@ -9,17 +9,17 @@
 //         pc_next is calculated at top level.        
 //
 /////////////////////////////////////////////////////////////////////////////////////
-module cpu_pc(clk, rst_n, pc_next, pc);
+module cpu_pc(clk, rst_n, pc_next, pc_out);
     input             clk, rst_n;
     input      [15:0] pc_next;
-    output reg [15:0] pc;
+    output reg [15:0] pc_out;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            pc <= 16'h0;
+            pc_out <= 16'h0;
         end
         else begin
-            pc <= pc_next;
+            pc_out <= pc_next;
         end
     end
 
