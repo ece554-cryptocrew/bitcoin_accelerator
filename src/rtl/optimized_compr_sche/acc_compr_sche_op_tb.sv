@@ -88,10 +88,9 @@ for (int k = 0; k < 1000; k++) begin
     @(posedge clk); // @ HASH
     ms_init = 0;
     ms_enable = 1;
-    for (int i = 0; i < 64; i++) begin
+    for (int i = 0; i <= 64; i++) begin
         @(posedge clk);
     end
-    @(posedge clk);
     ms_enable = 0;
     @(posedge clk); // @ UPD2
     @(posedge clk); // @ DONE
@@ -112,10 +111,9 @@ for (int k = 0; k < 1000; k++) begin
     @(posedge clk); // @ HASH
     ms_init = 0;
     ms_enable = 1;
-    for (int i = 0; i < 64; i++) begin
+    for (int i = 0; i <= 64; i++) begin
         @(posedge clk);
     end
-    @(posedge clk);
     ms_enable = 0;
     @(posedge clk); // @ UPD2
     @(posedge clk); // @ DONE
@@ -140,16 +138,15 @@ for (int k = 0; k < 1000; k++) begin
     @(posedge clk); // @ HASH
     ms_init = 0;
     ms_enable = 1;
-    for (int i = 0; i < 64; i++) begin
+    for (int i = 0; i <= 64; i++) begin
         @(posedge clk);
     end
-    @(posedge clk);
     ms_enable = 0;
     @(posedge clk); // @ UPD2
     @(posedge clk); // @ DONE
     $display("final hash = %h\n", cm_out);
     $fwrite(f2, "%h\n", cm_out);
-    @(posedge clk); // @ INIT
+    @(posedge clk); // @ IDLE
 //// stage 3 hashing ////
 /////////////////////////
 end // end for

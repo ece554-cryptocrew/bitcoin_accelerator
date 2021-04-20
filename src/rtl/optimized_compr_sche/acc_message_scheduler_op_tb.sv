@@ -16,8 +16,8 @@ msg_t new_msg = new();
 
 // DUT
 acc_message_scheduler_op DUT(.clk(clk), .rst_n(rst_n),
-                            .ms_init(ms_init), .ms_enable(ms_enable), .message(message),
-                            .ms_r0_out(ms_r0_out));
+                             .ms_init(ms_init), .ms_enable(ms_enable), .message(message),
+                             .ms_r0_out(ms_r0_out));
 
 // clock
 initial clk = 0;

@@ -1,24 +1,24 @@
-/*
-optimized version of the compressor
-1. replace '+' with carry save adders
-2. apply delay balancing to the critical path
-*/
 
-module accel_compressor_op (cm_out, hash_done, cm_init, cm_enable, w, clk, rst_n);
+module accel_compressor_op (cm_out,
+                            update_A_H, update_H0_7,
+                            rst_hash_n, is_hashing,
+                            w, i, 
+                            clk, rst_n);
 
-input cm_init;
-input cm_enable;
+input update_A_H, update_H0_7;
+input rst_hash_n;
+input is_hashing;
 input [31:0] w;
+input [6:0] i;
 input clk, rst_n;
-output reg hash_done;
+
 output [255:0] cm_out;
 
 logic [31:0] k [0:63]; // constants
-// logic [31:0] ki;
 logic [31:0] hash_init [0:7]; // initial hash values
 logic [31:0] hash [0:7]; // hash values
 logic [31:0] hash_next [0:7];
-logic [6:0] i; // counter
+
 
 // SHA-256 signals
 logic [31:0] A, A0, A1, B, C, D, E, F, G, H;
@@ -37,17 +37,7 @@ csa #(.dim(32)) csa5(.X(Sigma0_A), .Y(csa4_S), .Z({csa4_C[30:0], 1'b0}), .S(csa5
 csa #(.dim(32)) csa6(.X(D), .Y(csa3_S), .Z({csa3_C[30:0], 1'b0}), .S(csa6_S), .C(csa6_C));
 
 
-// state machine signals
-typedef enum reg [2:0] {IDLE, INIT, UPD1, HASH, UPD2, DONE} state_t;
-state_t state, next_state;
-logic update_A_H, update_H0_7;
-logic rst_i_n, rst_hash_n;
-logic is_hashing;
-logic done;
-
-
 // SHA-256
-assign done = (i == 7'b100_0000); // 64
 assign cm_out = { >> {hash} }; // pack H
 assign Maj_ABC = (A & B) ^ (B & C) ^ (C & A);
 assign Ch_EFG = (E & F) ^ ((~E) & G);
@@ -65,73 +55,6 @@ assign E_next = update_A_H ? hash[4] : (is_hashing ? (csa6_S + {csa6_C[30:0], 1'
 assign F_next = update_A_H ? hash[5] : (is_hashing ?  E : F);
 assign G_next = update_A_H ? hash[6] : (is_hashing ?  F : G);
 assign H_next = update_A_H ? hash[7] : (is_hashing ?  G : H);
-
-
-// state machine
-always_ff @(posedge clk, negedge rst_n) begin
-    if (!rst_n)
-        state <= IDLE;
-    else
-        state <= next_state;
-end
-
-always_comb begin
-    rst_i_n = 1;
-    rst_hash_n = 1;
-    is_hashing = 0;
-    hash_done = 0;
-    update_A_H = 0;
-    update_H0_7 = 0;
-    next_state = IDLE;
-
-    case (state)
-        // IDLE: reset counter i; wait
-        IDLE: begin
-            rst_i_n = 0;
-            if (cm_init)
-                next_state = INIT;
-            else if (cm_enable)
-                next_state = UPD1; 
-        end
-
-        // INIT: set initial hash values
-        INIT:  begin
-            rst_hash_n = 0;
-            if (cm_enable)
-                next_state = UPD1;
-            else
-                next_state = INIT;
-        end
-
-        // UPD1: [A:H] <- [H0:H7]
-        UPD1: begin
-           update_A_H = 1;
-           next_state = HASH; 
-        end
-
-        // HASH: hashing
-        HASH: begin
-            if (done)
-                next_state = UPD2;
-            else begin
-                is_hashing = 1;
-                next_state = HASH;
-            end
-        end
-
-        // UPD2: [H0:H7] <- [H0:H7] + [A:H]
-        UPD2: begin
-           update_H0_7 = 1;
-           next_state = DONE; 
-        end
-
-        // DONE: hashing completed
-        DONE: begin
-           hash_done = 1;
-           next_state = IDLE; 
-        end
-    endcase
-end
 
 
 // SHA-256 registers
@@ -161,7 +84,7 @@ always_ff @(posedge clk) begin
 end
 
 
-// hash values
+// hash value registers
 assign hash_next[0] = hash[0] + A;
 assign hash_next[1] = hash[1] + B;
 assign hash_next[2] = hash[2] + C;
@@ -178,17 +101,6 @@ always_ff @(posedge clk) begin
         hash <= hash_init;
     else if (update_H0_7)
         hash <= hash_next;
-end
-
-
-// hashing counter
-always_ff @(posedge clk) begin
-    if (!rst_n)
-        i <= 0;
-    else if (!rst_i_n)
-        i <= 0;
-    else if(is_hashing)
-        i <= i + 1;
 end
 
 

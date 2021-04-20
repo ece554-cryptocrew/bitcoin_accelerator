@@ -59,7 +59,7 @@ assign w = csa8_S + {csa8_C[30:0], 1'b0};
 /// ====================
 /// Circular Buffer
 /// ====================
-always_ff @(posedge clk, negedge rst_n) begin
+always_ff @(posedge clk) begin
     if (!rst_n) begin
 
         for (integer i = 0; i < CB_REG_COUNT; i++) begin
