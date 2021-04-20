@@ -97,7 +97,9 @@ namespace priscas
 			operation == RSI ? true:
 			operation == RORI ? true:
 			operation == LDB ? true:
-			operation == STB ? true:	
+			operation == STB ? true:
+			operation == STI ? true:
+			operation == LDI ? true:
 			false ;
 	}
 
@@ -123,8 +125,8 @@ namespace priscas
 		 	operation == BGTZ ? true:
 			operation == JMP ? true:
 			operation == JMPI ? true:
-			operation == LDI ? true:
-			operation == STI ? true: //last two encoding a little different than rest	
+			//operation == LDI ? true:
+			//operation == STI ? true: //last two encoding a little different than rest	
 			false;
 	}
 
@@ -392,13 +394,15 @@ namespace priscas
 					imm = priscas::get_imm(imm_s.c_str());
 								
 				}
-*/
+
+*/
         
       else if(r_inst(current_op))
       {
         // later, MUST check for branches
 				if((rs = priscas::friendly_to_numerical(args[2].c_str())) <= priscas::INVALID)
-					rs = priscas::get_reg_num(args[2].c_str());	
+					rs = priscas::get_reg_num(args[2].c_str());
+	
 			}
 
 			else if(i_inst(current_op)) //To handle LDI STI will need to code up encoding special
