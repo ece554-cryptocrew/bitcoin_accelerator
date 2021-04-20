@@ -10,11 +10,12 @@
 // 
 //
 /////////////////////////////////////////////////////////////////////////////////////
-module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr, accel_wrt_en, 
+module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr, accel_wrt_en, 
             ex_rd_data, ex_rd_valid, accel_rd_data, cpu_wrt_en, cpu_wrt_data, cpu_addr);
 
     input          clk, rst_n;
-    input          ex_wrt_en;
+    input          ex_im_wrt_en;
+    input          ex_mem_wrt_en;
     input  [15:0]  ex_addr;
     input  [31:0]  ex_wrt_data;
     input  [31:0]  accel_wrt_data;
@@ -36,10 +37,12 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
     logic [15:0]  mem_ex_addr; 
     logic [31:0]  mem_ex_wrt_data; 
     logic         mem_ex_wrt_en;
+    logic         mem_ex_rd_en;
     logic [15:0]  mem_accel_addr; 
     logic [31:0]  mem_accel_wrt_data; 
     logic         mem_accel_wrt_en;
     logic [31:0]  mem_cpu_rd_data; 
+    logic [31:0]  mem_ex_rd_data;
     logic [511:0] mem_accel_rd_data; 
 
     logic [31:0]  alu_A, alu_B, alu_Out;
@@ -49,10 +52,15 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
     logic         alu_ZF, alu_ZF_en;
     logic         alu_NF, alu_NF_en;
 
+    logic         NF_flg, ZF_flg, OF_flg, CF_flg;
+
     logic [15:0]  im_addr; 
     logic         im_wrt_en;
     logic [31:0]  im_wrt_data;
     logic [31:0]  im_rd_out;
+
+    logic [15:0]  im_rd_addr;
+    logic [15:0]  im_wrt_addr;
 
     logic [31:0]  ctrl_instr;
     logic [7:0]   ctrl_alu_op;
@@ -106,8 +114,8 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
     // Module Instantiations //
 
     cpu_datamem mem(.clk(clk), .rst_n(rst_n), .cpu_addr(mem_cpu_addr), .cpu_wrt_data(mem_cpu_wrt_data), .cpu_wrt_en(mem_cpu_wrt_en), .cpu_rd_en(mem_cpu_rd_en),
-                    .ex_wrt_en(mem_ex_wrt_en), .ex_addr(mem_ex_addr), .ex_wrt_data(mem_ex_wrt_data), .accel_addr(mem_accel_addr), .accel_wrt_data(mem_accel_wrt_data),
-                    .accel_wrt_en(mem_accel_wrt_en), .cpu_rd_data(mem_cpu_rd_data), .accel_rd_data(mem_accel_rd_data));
+                    .ex_wrt_en(mem_ex_wrt_en), .ex_rd_en(mem_ex_rd_en), .ex_addr(mem_ex_addr), .ex_wrt_data(mem_ex_wrt_data), .accel_addr(mem_accel_addr), .accel_wrt_data(mem_accel_wrt_data),
+                    .accel_wrt_en(mem_accel_wrt_en), .ex_rd_data(mem_ex_rd_data), .cpu_rd_data(mem_cpu_rd_data), .accel_rd_data(mem_accel_rd_data));
 
     cpu_alu alu(.A(alu_A), .B(alu_B), .Op(alu_Op), .Out(alu_Out), .OF(alu_OF), .OF_en(alu_OF_en), .CF(alu_CF), 
                 .CF_en(alu_CF_en), .ZF(alu_ZF), .ZF_en(alu_ZF_en), .NF(alu_NF), .NF_en(alu_NF_en));
@@ -130,40 +138,45 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
     // Pipeline Connections //
 
     /* [31:0] is reserved for control/stall signals
-    UNUSED = 31:17
-    alu_op = 16:9
-    alu_imm_src 8
-    rf_write_en = 7
-    datamem_write_en = 6 
-    datamem_read_en = 5
-    rf_write_mem_src = 4
-    pc_src = 3
-    pc_jmp_src = 2 
-    rw_stall = 1
-    jb_stall = 0 */
-    cpu_pipereg #(PIPE_WIDTH = IFID_WIDTH) IFID_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(IFID_in), .pipe_out(IFID_out), .pipe_en(IFID_en));
-    cpu_pipereg #(PIPE_WIDTH = IDEX_WIDTH) IDEX_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(IDEX_in), .pipe_out(IDEX_out), .pipe_en(IDEX_en));
-    cpu_pipereg #(PIPE_WIDTH = EXMEM_WIDTH) EXMEM_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(EXMEM_in), .pipe_out(EXMEM_out), .pipe_en(EXMEM_en));
-    cpu_pipereg #(PIPE_WIDTH = MEMWB_WIDTH) MEMWB_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(MEMWB_in), .pipe_out(MEMWB_out), .pipe_en(MEMWB_en));
+    UNUSED = 31:17, alu_op = 16:9, alu_imm_src 8, rf_write_en = 7, datamem_write_en = 6, datamem_read_en = 5, rf_write_mem_src = 4,
+    pc_src = 3, pc_jmp_src = 2, rw_stall = 1, jb_stall = 0 */
+    cpu_pipereg #(.PIPE_WIDTH(IFID_WIDTH)) IFID_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(IFID_in), .pipe_out(IFID_out), .pipe_en(IFID_en));
+    cpu_pipereg #(.PIPE_WIDTH(IDEX_WIDTH)) IDEX_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(IDEX_in), .pipe_out(IDEX_out), .pipe_en(IDEX_en));
+    cpu_pipereg #(.PIPE_WIDTH(EXMEM_WIDTH)) EXMEM_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(EXMEM_in), .pipe_out(EXMEM_out), .pipe_en(EXMEM_en));
+    cpu_pipereg #(.PIPE_WIDTH(MEMWB_WIDTH)) MEMWB_pipe (.clk(clk), .rst_n(rst_n), .pipe_in(MEMWB_in), .pipe_out(MEMWB_out), .pipe_en(MEMWB_en));
+
+    // Misc Registers //
+
+    //Flags
+    cpu_pipereg #(.PIPE_WIDTH(1)) NF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_NF), .pipe_out(NF_flg), .pipe_en(alu_NF_en));
+    cpu_pipereg #(.PIPE_WIDTH(1)) ZF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_ZF), .pipe_out(ZF_flg), .pipe_en(alu_ZF_en));
+    cpu_pipereg #(.PIPE_WIDTH(1)) OF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_OF), .pipe_out(OF_flg), .pipe_en(alu_OF_en));
+    cpu_pipereg #(.PIPE_WIDTH(1)) CF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_CF), .pipe_out(CF_flg), .pipe_en(alu_CF_en));
 
     // Top Level Logic //
 
-    // All External Outputs
-    assign ex_rd_data = mem_cpu_rd_data;
+    //All External Outputs
+    assign ex_rd_data = mem_ex_rd_data;
     assign ex_rd_valid = 1'b0; //TODO
     assign accel_rd_data = mem_accel_rd_data;
     assign cpu_wrt_en = mem_cpu_wrt_en;
     assign cpu_wrt_data = mem_cpu_wrt_data;
     assign cpu_addr = mem_cpu_addr;
     
-    // IF //TODO: PC logic
+    //IF //TODO: PC logic
     assign IFID_in[31:0] = 32'h0; //reserved //TODO: remove?
     assign IFID_in[63:32] = im_rd_out; //instruction
     assign IFID_en = 1'b1; //TODO: fix for stalls
-    //external inputs    
-    //TODO
+    assign im_rd_addr = pc_out;
+    assign im_addr = (im_wrt_en) ? im_wrt_addr : im_rd_addr; // read from pc if not writing from external
 
-    // ID //TODO: done?
+    assign pc_new = pc_out + 4; //TODO
+    //external inputs    
+    assign im_wrt_addr = ex_addr;
+    assign im_wrt_en = ex_im_wrt_en;
+    assign im_wrt_data = ex_wrt_data;
+
+    //ID //TODO: done?
     assign IDEX_in[31:0] = {15'h0, ctrl_alu_op, ctrl_alu_imm_src, ctrl_rf_write_en, ctrl_datamem_write_en, ctrl_datamem_read_en, //ctrl
                             ctrl_rf_write_mem_src, ctrl_pc_src, ctrl_pc_jmp_src, stl_rw_stall, stl_jb_stall}; 
     assign IDEX_in[63:32] = rf_reg1;
@@ -176,7 +189,7 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
     assign rf_sel2 = (rf_instr[31:24] == 8'b10000111 || rf_instr[31:24] == 8'b10000011) ? rf_instr[23:20] : rf_instr[15:12]; //Rd : Rt (Rd is second src reg for stores only)
     
 
-    // EX //TODO: flag outputs
+    //EX //TODO: flag outputs
     assign EXMEM_in[31:0] = IDEX_out[31:0]; //ctrl
     assign EXMEM_in[63:32] = alu_Out; //alu output
     assign EXMEM_in[95:64] = IDEX_out[95:64]; //pass reg2 for mem data
@@ -185,7 +198,7 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
     assign alu_A = IDEX_out[63:32]; //reg1
     assign alu_B = (IDEX_out[8]) ? IDEX_out[127:96] : IDEX_out[95:64]; //imm : reg2
 
-    // MEM //TODO: done?
+    //MEM //TODO: done?
     assign MEMWB_in[31:0] = EXMEM_out[31:0]; //ctrl
     assign MEMWB_in[63:32] = mem_cpu_rd_data; //cpu rd out data
     assign MEMWB_in[95:64] = EXMEM_out[63:32]; //from alu out, op result pass through
@@ -199,21 +212,22 @@ module cpu (clk, rst_n, ex_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_a
     assign mem_accel_addr = accel_addr;
     assign mem_accel_wrt_data = accel_wrt_data;
     assign mem_accel_wrt_en = accel_wrt_en;
-    assign mem_ex_addr = ex_addr; // TODO: ex signals from loader to dmem and imem
+    assign mem_ex_addr = ex_addr;
     assign mem_ex_wrt_data = ex_wrt_data;
-    assign mem_ex_wrt_en = ex_wrt_en;
+    assign mem_ex_wrt_en = ex_mem_wrt_en;
+    assign mem_ex_rd_en = ex_mem_rd_en;
 
-    // WB //TODO: done?
+    //WB //TODO: done?
     assign rf_wrt_data = (MEMWB_out[4]) ? MEMWB_out[63:32] : MEMWB_out[95:64]; //mem : alu
     assign rf_wrt_sel = MEMWB_out[127:96]; //wb reg
     assign rf_wrt_en = MEMWB_out[7]; //ctrl wrt en
 
-    // Stall detection //TODO: done?
+    //Stall detection //TODO: done?
     //out signals above
     assign stl_if_instr = im_rd_out; // next instruction
 	assign stl_dec_wrt_reg = rf_instr[23:20]; //wb reg
 	assign stl_dec_wrt_en = ctrl_rf_write_en; //wb en
-	assign stl_dec_jb_stall = stl_jb_stall; //active jb stall
+	assign stl_dec_jb_stall = (rf_instr[31:28] == 4'b0011); //if j or b instruction
 	assign stl_exec_wrt_reg = IDEX_out[159:128]; //wb reg
 	assign stl_exec_wrt_en = IDEX_out[7]; //wb en
 	assign stl_exec_jb_stall = IDEX_out[0]; //active jb stall

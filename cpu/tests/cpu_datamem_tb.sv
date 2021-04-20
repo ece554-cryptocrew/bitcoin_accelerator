@@ -8,6 +8,7 @@ module cpu_datamem_tb();
     logic        [15:0]  ex_addr; 
     logic        [31:0]  ex_wrt_data; 
     logic                ex_wrt_en;
+    logic                ex_rd_en;
     logic        [15:0]  accel_addr; 
     logic        [31:0]  accel_wrt_data; 
     logic                accel_wrt_en;
@@ -26,7 +27,7 @@ module cpu_datamem_tb();
     logic [31:0] mock_cpu_rd_data;
 
     cpu_datamem DUT (.clk(clk), .rst_n(rst_n), .cpu_addr(cpu_addr), .cpu_wrt_data(cpu_wrt_data), .cpu_wrt_en(cpu_wrt_en), .cpu_rd_en(cpu_rd_en),
-                     .ex_wrt_en(ex_wrt_en), .ex_addr(ex_addr), .ex_wrt_data(ex_wrt_data), .accel_addr(accel_addr), .accel_wrt_data(accel_wrt_data),
+                     .ex_wrt_en(ex_wrt_en), .ex_rd_en(ex_rd_en), .ex_addr(ex_addr), .ex_wrt_data(ex_wrt_data), .accel_addr(accel_addr), .accel_wrt_data(accel_wrt_data),
                      .accel_wrt_en(accel_wrt_en), .cpu_rd_data(cpu_rd_data), .accel_rd_data(accel_rd_data));
 
     initial begin
@@ -41,6 +42,7 @@ module cpu_datamem_tb();
         ex_addr = 16'h0;
         ex_wrt_data = 32'h0;
         ex_wrt_en = 1'h0;
+        ex_rd_en = 1'h0;
         accel_addr = 16'h0;
         accel_wrt_data = 32'h0;
         accel_wrt_en = 1'h0;
@@ -64,10 +66,11 @@ module cpu_datamem_tb();
             ex_addr = $urandom_range(15);
             ex_wrt_data = $urandom();
             ex_wrt_en = $urandom();
+            ex_rd_en = 1'h0; // disable for now, only used for priority checking anyways
             accel_addr = $urandom_range(15);
             accel_wrt_data = $urandom();
             accel_wrt_en = $urandom();
-            mode = (ex_wrt_en) ? EX : ((cpu_wrt_en | cpu_rd_en) ? CPU : ACCEL); // priority is EX wrt > CPU wrt/rd > ACCEL wrt/rd
+            mode = (ex_wrt_en | ex_rd_en) ? EX : ((cpu_wrt_en | cpu_rd_en) ? CPU : ACCEL); // priority is EX wrt > CPU wrt/rd > ACCEL wrt/rd
             @(posedge clk); //TODO: Why do we need >1 clk cycle? Problem?
             #1;
             $display("------------------------------------");

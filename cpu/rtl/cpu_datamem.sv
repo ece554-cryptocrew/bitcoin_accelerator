@@ -12,8 +12,8 @@
 
 // TODO: Mem arbitration should be BEFORE pipe
 
-module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, ex_wrt_en, ex_addr, ex_wrt_data, 
-                    accel_addr, accel_wrt_data, accel_wrt_en, cpu_rd_data, accel_rd_data);
+module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, ex_wrt_en, ex_rd_en, ex_addr, ex_wrt_data, 
+                    accel_addr, accel_wrt_data, accel_wrt_en, cpu_rd_data, ex_rd_data, accel_rd_data);
 
     input                clk, rst_n;
     input        [15:0]  cpu_addr; 
@@ -23,10 +23,12 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, e
     input        [15:0]  ex_addr; 
     input        [31:0]  ex_wrt_data; 
     input                ex_wrt_en;
+    input                ex_rd_en;
     input        [15:0]  accel_addr; 
     input        [31:0]  accel_wrt_data; 
     input                accel_wrt_en;
     output logic [31:0]  cpu_rd_data; 
+    output logic [31:0]  ex_rd_data;
     output logic [511:0] accel_rd_data; 
 
     logic [15:0]  addr_arb;
@@ -39,15 +41,16 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, e
 
     assign accel_rd_data = rd_data_raw;
     assign cpu_rd_data = rd_data_raw[31:0];
+    assign ex_rd_data = rd_data_raw[31:0];
 
     assign addr_arb = (ex_priority) ? ex_addr : ((cpu_priority) ? cpu_addr : accel_addr);
     assign wrt_data_arb = (ex_priority) ? ex_wrt_data : ((cpu_priority) ? cpu_wrt_data : accel_wrt_data);
     assign wrt_en_arb = (ex_priority) ? ex_wrt_en : ((cpu_priority) ? cpu_wrt_en : accel_wrt_en);
 
-    // TODO: is this the arbritration we want? Currently gives priority to host if writing (host cant read), 
+    // TODO: is this the arbritration we want? Currently gives priority to host if writing or reading, 
     //       then to cpu if writing or reading, then to accel
     // TODO: add fifo for storing accel reads and writes
-    assign ex_priority = ex_wrt_en; // host cant read from mem, so we dont check for it
+    assign ex_priority = (ex_wrt_en | ex_rd_en);
     assign cpu_priority = (cpu_wrt_en | cpu_rd_en);
 
 endmodule
