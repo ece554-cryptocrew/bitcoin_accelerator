@@ -10,12 +10,13 @@
 // 
 //
 /////////////////////////////////////////////////////////////////////////////////////
-module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr, accel_wrt_en, 
+module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr, accel_wrt_en, 
             ex_rd_data, ex_rd_valid, accel_rd_data, cpu_wrt_en, cpu_wrt_data, cpu_addr);
 
     input          clk, rst_n;
     input          ex_im_wrt_en;
     input          ex_mem_wrt_en;
+    input          ex_mem_rd_en;
     input  [15:0]  ex_addr;
     input  [31:0]  ex_wrt_data;
     input  [31:0]  accel_wrt_data;
@@ -73,7 +74,7 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_addr, ex_wrt_data, accel
     logic         ctrl_pc_jmp_src;
     logic         ctrl_err;
 
-    logic [15:0]  pc_next;
+    logic [15:0]  pc_new;
     logic [15:0]  pc_out;
 
     logic [3:0]   rf_sel1, rf_sel2, rf_wrt_sel;
@@ -153,6 +154,9 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_addr, ex_wrt_data, accel
     cpu_pipereg #(.PIPE_WIDTH(1)) OF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_OF), .pipe_out(OF_flg), .pipe_en(alu_OF_en));
     cpu_pipereg #(.PIPE_WIDTH(1)) CF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_CF), .pipe_out(CF_flg), .pipe_en(alu_CF_en));
 
+    //Misc
+    cpu_pipereg #(.PIPE_WIDTH(1)) Ex_rd_vld (.clk(clk), .rst_n(rst_n), .pipe_in(ex_rd_en), .pipe_out(ex_rd_valid), .pipe_en(1'b1));
+
     // Top Level Logic //
 
     //All External Outputs
@@ -167,7 +171,7 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_addr, ex_wrt_data, accel
     assign IFID_in[31:0] = 32'h0; //reserved //TODO: remove?
     assign IFID_in[63:32] = im_rd_out; //instruction
     assign IFID_en = 1'b1; //TODO: fix for stalls
-    assign im_rd_addr = pc_out;
+    assign im_rd_addr = pc_new;
     assign im_addr = (im_wrt_en) ? im_wrt_addr : im_rd_addr; // read from pc if not writing from external
 
     assign pc_new = pc_out + 4; //TODO
