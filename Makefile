@@ -11,10 +11,11 @@ OBJS =  env.o messages.o mips.o mtsstream.o \
 SHELL_MAIN = shell_entry.o
 ISA_GEN_MAIN = ISA_gen.o
 CLOAD_MAIN = cload.o
+X2B_MAIN = x2b.o
 INCLUDE = include
 LIB = -L. -lmtcore
 
-all: $(LIB_DIR)/libmtcore.a $(BIN_DIR)/class $(BIN_DIR)/cload
+all: $(LIB_DIR)/libmtcore.a $(BIN_DIR)/class $(BIN_DIR)/cload $(BIN_DIR)/x2b
 
 build/libmtcore.a: $(OBJS)
 	cd build; ar r libmtcore.a $(OBJS)
@@ -33,6 +34,9 @@ $(BIN_DIR)/class: $(LIB_DIR)/libmtcore.a $(SHELL_MAIN) $(INCLUDE)
 
 $(BIN_DIR)/cload: $(LIB_DIR)/libmtcore.a $(CLOAD_MAIN) $(INCLUDE)
 	cd build; $(CC) $(CLOAD_MAIN) $(LIB) -o ../$@
+
+$(BIN_DIR)/x2b: $(LIB_DIR)/libmtcore.a $(X2B_MAIN) $(INCLUDE)
+	cd build; $(CC) $(X2B_MAIN) $(LIB) -o ../$@
 
 .cpp.o:
 	$(CC) $(CFLAGS) -c $<
