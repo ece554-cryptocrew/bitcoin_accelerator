@@ -28,7 +28,7 @@ module cpu_stall(
 	output logic jb_stall);
 
 
-	assign rw_stall = (((if_instr[31:24] == 8'b00010001) || // Type L Instructions
+	assign rw_stall = (((if_instr[31:24] == 8'b00010001) || // If a type L instruction
 			       (if_instr[31:24] == 8'b00010011) ||
 			       (if_instr[31:24] == 8'b00010101) ||
 			       (if_instr[31:24] == 8'b00100111) ||
@@ -37,13 +37,13 @@ module cpu_stall(
 			       (if_instr[31:24] == 8'b10000101) ||
 			       (if_instr[31:24] == 8'b10000111)) && 
 				
-			       ((dec_wrt_en == 1'b1 && (dec_wrt_reg == if_instr[19:16])) ||
+			   ((dec_wrt_en == 1'b1 && (dec_wrt_reg == if_instr[19:16])) || // If L instruction and reading from a register that is still being written to
 			       (exec_wrt_en == 1'b1 && (exec_wrt_reg == if_instr[19:16])) ||
 			       (mem_wrt_en == 1'b1 && (mem_wrt_reg == if_instr[19:16])))) ? 1'b1 : 
 
 
 
-			       (((if_instr[31:24] == 8'b00010000) || // Type R Instructions
+			  (((if_instr[31:24] == 8'b00010000) || // If a type R instruction
 			       (if_instr[31:24] == 8'b00010010) ||
 			       (if_instr[31:24] == 8'b00010100) ||
 			       (if_instr[31:24] == 8'b00010110) ||
@@ -51,7 +51,7 @@ module cpu_stall(
 			       (if_instr[31:24] == 8'b00100010) ||
 			       (if_instr[31:24] == 8'b00100100)) &&
 
-				((dec_wrt_en == 1'b1 && ((dec_wrt_reg == if_instr[19:16]) || (dec_wrt_reg == if_instr[15:12]))) ||
+				((dec_wrt_en == 1'b1 && ((dec_wrt_reg == if_instr[19:16]) || (dec_wrt_reg == if_instr[15:12]))) || // If R instruction and reading from a register that is still being written to
 			       (exec_wrt_en == 1'b1 && ((exec_wrt_reg == if_instr[19:16]) || (exec_wrt_reg == if_instr[15:12]))) ||
 			       (mem_wrt_en == 1'b1 && ((mem_wrt_reg == if_instr[19:16])   ||(mem_wrt_reg == if_instr[15:12]))))) ? 1'b1 : 
 
