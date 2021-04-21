@@ -9,6 +9,9 @@
 .sr -r ./data/host7.bin 0x4000
 .sr -r ./data/host8.bin 0x4100
 
+;put in correct hash
+.sr -r ./data/correctHash.bin 0x0100
+
 ;Set starting address for original message
 .sr -r ./data/mmio1.bin 0x5006
 .sr -r ./data/mmio2.bin 0x5106
@@ -20,13 +23,14 @@
 .sr -r ./data/mmio8.bin 0x8106
 
 ;set instruction memory
-;.sr -r ./data/instruct.bin 0x10000
+.sr -r ./data/instruct.bin 0x10000
 ;Should set to the 17th bit
 
-;.wait 0x0 0x1 0 ;configured by logan where it is
+.wait 0x0 0x1 0 ;configured by logan where it is
 ;wait til machine is done
-;.sr -r output 0x1000,8
 
-.sr -s test 0x1000,0x4100
+;output end file
+.sr -r outputNoncei 0x1000,8
+
 .exit
 

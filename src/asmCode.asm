@@ -3,17 +3,17 @@
 
 code_entry:
 	; use g14 to be the current nonce value
-	ADDI $g14, $zero, 0x00000000 
+	ADDI $g14, $zero, 0x0000 
 	
 	;use g6 - g13 to hold proper output hash
-	ADDI $g6, $zero, 0x00000000
-	ADDI $g7, $zero, 0x00000000
-	ADDI $g8, $zero, 0x00000000
-	ADDI $g9, $zero, 0x00000000
-	ADDI $g10, $zero, 0x00000000
-	ADDI $g11, $zero, 0x00000000
-	ADDI $g12, $zero, 0x00000000
-	ADDI $g13, $zero, 0x00000000
+	LDI $g6, $zero, 0x0100
+	LDI $g7, $zero, 0x0104
+	LDI $g8, $zero, 0x0108
+	LDI $g9, $zero, 0x010C
+	LDI $g10, $zero, 0x0110
+	LDI $g11, $zero, 0x0114
+	LDI $g12, $zero, 0x0118
+	LDI $g13, $zero, 0x011C
  
   ; add constants for:
   ; - version number (4 bytes)
@@ -64,46 +64,67 @@ code_entry:
 	; Tell all accelerators to begin
 	;Do this by properly setting msg_ready signal to true
 
-	LDI $g1, $zero, 0x5000 ;Need to change specific bit should keep old info since already set to 0
-	ADDI $g0, $g1, 0x80000000
+	LDI $g1, $zero, 0x5000;
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x5000 ; ACB_0
 
 	LDI $g1, $zero, 0x5100
-	ADDI $g0, $g1, 0x80000000
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x5100 ; ACB_1
 	
 	LDI $g1, $zero, 0x6000
-	ADDI $g0, $g1, 0x80000000
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x6000 ; ACB_2
 	
 	LDI $g1, $zero, 0x6100 ;here
-	ADDI $g0, $g1, 0x80000000
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x6100 ; ACB_3
 	
 	LDI $g1, $zero, 0x7000
-	ADDI $g0, $g1, 0x80000000
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x7000 ; ACB_4
 	
 	LDI $g1, $zero, 0x7100
-	ADDI $g0, $g1, 0x80000000
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x7100 ; ACB_5
 
 	LDI $g1, $zero, 0x8000
-	ADDI $g0, $g1, 0x80000000
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x8000 ; ACB_6
 	
 	LDI $g1, $zero, 0x8100
-	ADDI $g0, $g1, 0x80000000
+	ADDI $g2, $zero, 0x8000
+	LSI $g2, $g2, 16
+	ADD $g0, $g1, $g2
 	STI $g0, $zero, 0x8100 ; ACB_7
 
 ;Have loop that polls for
 
 loop_begin: 
 	LDI $g0, $zero, 0x5000 ; Status register for accelerator 1
-	
-	SUBI $g1, $g0, 0x40000001
-	BGEZ accel_2
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001
+	BGEZ accel_2 //TODO make sure comparison right
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_2
 
 	LDI $g1, $zero, 0x5008 ; Get first part the output hash
@@ -137,15 +158,24 @@ accel_1_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x1054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to ready TODO does not check is already set may be needed
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
 	STI $g0, $zero, 0x5000 ;Store new status values
 accel_2:
 	LDI $g0, $zero, 0x5100 ; Status register for accelerator 1
-
-	SUBI $g1, $g0, 0x40000001; Check if accelerator done By checking specific bit
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001
 	BGEZ accel_3
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_3 
 
 	LDI $g0, $zero, 0x5108 ; Get first part the output hash
@@ -178,16 +208,25 @@ accel_2:
 accel_2_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x1154 ; Update to new nonce uses post incrament
-	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000 ;Set hash_valid to false to ready TODO does not check is already set may be needed
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
+	ADDI $g14, $g14, 1 ; Increament hash number
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
 	STI $g0, $zero, 0x5100 ;Store new status values
 accel_3:
 	LDI $g0, $zero, 0x6000 ; Status register for accelerator 1
-
-	SUBI $g1, $g0, 0x40000001 ; Check if accelerator done By checking specific bit
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001
 	BGEZ accel_4
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_4 
 
 	LDI $g0, $zero, 0x6008   ;Get first part the output hash
@@ -221,16 +260,26 @@ accel_3_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x2054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
+	
 	STI $g0, $zero, 0x6000 ;Store new status values
 accel_4:
 
 	LDI $g0, $zero, 0x6100 ; Status register for accelerator 1
-
-	SUBI $g1, $g0, 0x40000001; Check if accelerator done By checking specific bit
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001	
 	BGEZ accel_5
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_5 
 
 	LDI $g0, $zero, 0x6108 ; Get first part the output hash
@@ -264,16 +313,25 @@ accel_4_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x2154 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
 	STI $g0, $zero, 0x6100 ;Store new status values
 accel_5:
 
 	LDI $g0, $zero, 0x7000 ; Status register for accelerator 1
-
-	SUBI $g1, $g0, 0x40000001; Check if accelerator done By checking specific bit
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001
 	BGEZ accel_6
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_6 
 
 	LDI $g0, $zero, 0x7008 ; Get first part the output hash
@@ -307,16 +365,26 @@ accel_5_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x2054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
-	STI $g0, $zero, 0x6000 ;Store new status values
+	ADDI $g14, $g14, 1 ; Increament hash number
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
+	STI $g0, $zero, 0x7000 ;Store new status values
 accel_6:
 
 	LDI $g0, $zero, 0x7100 ; Status register for accelerator 1
-
-	SUBI $g1, $g0, 0x40000001; Check if accelerator done By checking specific bit
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001
 	BGEZ accel_6
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_6 
 
 	LDI $g0, $zero, 0x7108 ; Get first part the output hash
@@ -350,16 +418,26 @@ accel_6_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x3154 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
 	STI $g0, $zero, 0x7100 ;Store new status values
+
 accel_7:
 
 	LDI $g0, $zero, 0x8000 ; Status register for accelerator 1
-
-	SUBI $g1, $g0, 0x40000001; Check if accelerator done By checking specific bit
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001
 	BGEZ accel_7
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_7 
 
 	LDI $g0, $zero, 0x8008 ; Get first part the output hash
@@ -393,16 +471,27 @@ accel_7_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x4054 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
+	ADDI $g14, $g14, 1 ; Increament hash number
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
 	STI $g0, $zero, 0x8000 ;Store new status values
+
 accel_8:
 
 	LDI $g0, $zero, 0x8100 ; Status register for accelerator 1
-
-	SUBI $g1, $g0, 0x40000001; Check if accelerator done By checking specific bit
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0x1
+	SUB $g1, $g0, $g2 ; g0 - 0x400000001
 	BGEZ accel_8
-	SUBI $g1, $g0, 0x3FFFFFFF
+	ADDI $g2, $zero, 0x3FFF
+	LSI $g2, $g2, 16
+	ADDI $g2, $g2, 0xFFFF 
+	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_8 
 
 	LDI $g0, $zero, 0x8108 ; Get first part the output hash
@@ -436,8 +525,12 @@ accel_8_end:
 	;Set msg_ready here check if it gets unset
 	STI $g14, $zero, 0x4154 ; Update to new nonce uses post incrament
 	ADDI $g14, $g14, 1 ; Increament hash number	
-	SUBI $g0, $g0, 0x40000000;Set hash_valid to false to read
-	ADDI $g0, $g0, 0x80000000 ;Set msg_ready to ready
+	ADDI $g2, $zero, 0x4000
+	LSI $g2, $g2, 16
+	SUB $g0, $g0, $g2 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
+	ADDI $g2, $zero, 0x8000 
+	LSI $g2, $g2, 16
+	ADD $g0, $g0, $g2 ;Set msg_ready to ready
 	STI $g0, $zero, 0x8100 ;Store new status values
 
 	JMP loop_begin
@@ -446,7 +539,7 @@ correct_hash_found:
 	LDB $g0, $g4, 0x0;get final nonce value
 	STI $g0, $zero, 0x9000 ;send it to the host
 	ADDI $g0, $zero, 1
-	STI $g0, $zero, 0x9100
+	STI $g0, $zero, 0x0
   		; halt and send
 		; are we going to package the header for transmission to the bitcoin network? 
 		; are we going to send it to a GUI to show in our demo and compare speeds?
