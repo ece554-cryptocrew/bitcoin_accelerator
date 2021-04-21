@@ -100,9 +100,9 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     logic         stl_rw_stall;
     logic         stl_jb_stall;
 
-    localparam IFID_WIDTH = 64; // TODO: change to make pipe stages wider as needed
-    localparam IDEX_WIDTH = 160;
-    localparam EXMEM_WIDTH = 128;
+    localparam IFID_WIDTH = 96; // TODO: change to make pipe stages wider as needed
+    localparam IDEX_WIDTH = 192;
+    localparam EXMEM_WIDTH = 160;
     localparam MEMWB_WIDTH = 128;
 
     logic [IFID_WIDTH-1:0]  IFID_in, IFID_out;
@@ -169,11 +169,22 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     //IF //TODO: PC logic
     assign IFID_in[31:0] = 32'h0; //reserved //TODO: remove?
     assign IFID_in[63:32] = im_rd_out; //instruction
+    assign IDEX_in[95:64] = pc_out; //wb reg
     assign IFID_en = 1'b1; //TODO: fix for stalls
     assign im_rd_addr = pc_new;
     assign im_addr = (im_wrt_en) ? im_wrt_addr : im_rd_addr; // read from pc if not writing from external
-
-    assign pc_new = pc_out + 4; //TODO
+    //pc logic
+    // if jb instr in exec stage, take new pc if taken, keep piped-old pc if not taken. else just increment pc
+    assign pc_new = (stl_exec_jb_stall) ? ((pc_jb_taken) ?  : IDEX_out[191:160]): pc_out + 4; //TODO
+    assign pc_jb_taken = (alu_OP == 8'b00110001 && ZF_flg) || //beq
+                         (alu_OP == 8'b00110011 && !ZF_flg) || //bneq
+                         (alu_OP == 8'b00110101 && !ZF_flg && NF_flg) || //bltz
+                         (alu_OP == 8'b00110111 && !ZF_flg && !NF_flg) || //bgtz
+                         (alu_OP == 8'b00111001 && ZF_flg || NF_flg) || //blez
+                         (alu_OP == 8'b00111011 && ZF_flg || !NF_flg) || //bgez
+                         (alu_OP == 8'b00111101) || //jmp
+                         (alu_OP == 8'b00111111); //jmpi
+                         
     //external inputs    
     assign im_wrt_addr = ex_addr;
     assign im_wrt_en = ex_im_wrt_en;
@@ -186,20 +197,23 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     assign IDEX_in[95:64] = rf_reg2;
     assign IDEX_in[127:96] = {{16{rf_instr[15]}}, rf_instr[15:0]}; // imm TODO: for sure sign extended?
     assign IDEX_in[159:128] = rf_instr[23:20]; //wb reg
+    assign IDEX_in[191:160] = IDEX_in[95:64]; //pc piped
     assign IDEX_en = 1'b1; //TODO: fix for stalls
     assign rf_instr = IFID_out[63:32];
-    assign rf_sel1 = rf_instr[19:16]; //Rs
-    assign rf_sel2 = (rf_instr[31:24] == 8'b10000111 || rf_instr[31:24] == 8'b10000011) ? rf_instr[23:20] : rf_instr[15:12]; //Rd : Rt (Rd is second src reg for stores only)
-    
+    //(uses prev pipe stage to keep synchronus because of 1 cycle reads)
+    assign rf_sel1 = im_instr[19:16]; //Rs 
+    assign rf_sel2 = (im_instr[31:24] == 8'b10000111 || im_instr[31:24] == 8'b10000011) ? im_instr[23:20] : im_instr[15:12]; //Rd : Rt (Rd is second src reg for stores only) 
 
-    //EX //TODO: flag outputs
+    //EX  
     assign EXMEM_in[31:0] = IDEX_out[31:0]; //ctrl
     assign EXMEM_in[63:32] = alu_Out; //alu output
     assign EXMEM_in[95:64] = IDEX_out[95:64]; //pass reg2 for mem data
     assign EXMEM_in[127:96] = IDEX_out[159:128]; //wb reg pass through
+    assign EXMEM_in[159:128] = IDEX_out[191:160]; // pc piped
     assign EXMEM_en = 1'b1; //TODO: fix for stalls
     assign alu_A = IDEX_out[63:32]; //reg1
     assign alu_B = (IDEX_out[8]) ? IDEX_out[127:96] : IDEX_out[95:64]; //imm : reg2
+    assign alu_Op = IDEX_out[16:9];
 
     //MEM //TODO: done?
     assign MEMWB_in[31:0] = EXMEM_out[31:0]; //ctrl
@@ -207,10 +221,11 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     assign MEMWB_in[95:64] = EXMEM_out[63:32]; //from alu out, op result pass through
     assign MEMWB_in[127:96] = EXMEM_out[127:96]; //wb reg pass through
     assign MEMWB_en = 1'b1; //TODO: fix for stalls
-    assign mem_cpu_addr = EXMEM_out[63:32]; //from alu out, addr for mem //TODO: move pipe inside wrapper? no logic between mem modules and pipes
-    assign mem_cpu_wrt_data = EXMEM_out[95:64]; //from reg2 //TODO: move pipe inside wrapper? no logic between mem modules and pipes
-    assign mem_cpu_wrt_en = EXMEM_out[6]; //ctrl
-    assign mem_cpu_rd_en = EXMEM_out[5]; //ctrl
+    //(uses prev pipe stage to keep synchronus because of 1 cycle reads)
+    assign mem_cpu_addr = alu_Out;//EXMEM_out[63:32]; //from alu out, addr for mem 
+    assign mem_cpu_wrt_data = IDEX_out[95:64];//EXMEM_out[95:64]; //from reg2 
+    assign mem_cpu_wrt_en = IDEX_out[6];//EXMEM_out[6]; //ctrl
+    assign mem_cpu_rd_en = IDEX_out[5];//EXMEM_out[5]; //ctrl
     //external inputs
     assign mem_accel_addr = accel_addr;
     assign mem_accel_wrt_data = accel_wrt_data;
@@ -226,7 +241,6 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     assign rf_wrt_en = MEMWB_out[7]; //ctrl wrt en
 
     //Stall detection //TODO: done?
-    //out signals above
     assign stl_if_instr = im_rd_out; // next instruction
     assign stl_dec_wrt_reg = rf_instr[23:20]; //wb reg
     assign stl_dec_wrt_en = ctrl_rf_write_en; //wb en
