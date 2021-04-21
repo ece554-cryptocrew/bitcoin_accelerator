@@ -29,11 +29,49 @@ logic [6:0] i;
 logic [1:0] msg_sel;
 
 
-accel_control ctrl0 (.hash_done(hash_done), .save_hash(save_hash), .msg_sel(msg_sel),
-                     .update_A_H(update_A_H), .update_H0_7(update_H0_7),
-                     .rst_hash_n(rst_hash_n), .is_hashing(is_hashing), .i(i), 
-                     .ms_init(ms_init), .ms_enable(ms_enable),
-                     .hash_start(hash_start), .clk(clk), .rst_n(rst_n));
+acc_control_unit
+#(
+
+)
+ctrl0
+(
+    .clk(clk), .rst_n(rst_n),
+
+    .mem_listen_addr(),
+    .mem_listen_en(),
+    .mem_listen_data(),
+
+    .mem_acc_read_data(),
+    .mem_acc_read_data_valid(),
+    .mem_acc_write_done(),
+
+    .cm_out(hash),
+
+    /// Output
+    .mem_acc_read_addr(),
+    .mem_acc_read_en(),
+
+    .mem_acc_write_en(),
+    .mem_acc_write_data(),
+    .mem_acc_write_addr(),
+
+    .ms_init(ms_init),
+    .ms_enable(ms_enable),
+
+    .cm_is_hashing(is_hashing),
+    .cm_update_A_H(update_A_H),
+    .cm_update_H0_7(update_H0_7),
+    .cm_rst_hash_n(rst_hash_n),
+    .cm_cycle_count(i),
+
+    // Save intermediate hashes
+    .should_save_hash(save_hash),
+
+    // Message select
+    .msg_sel(msg_sel),
+
+    .hash_done(hash_done)
+);
 
 accel_compressor_op compr0 (.cm_out(hash),
                             .update_A_H(update_A_H), .update_H0_7(update_H0_7),
