@@ -1,17 +1,2 @@
-# Cloud Loader and ASsembler System (CLASS)
-Welcome to CLASS! The assembler for ECE554 Spring 2021 at UW-Madison.
-
-The Cloud Loader and Assembler System (CLASS) is a simple tool which allows, based on pRISCas,
-that serves as a barebones assembler system for custom ISAs of designs loaded to FPGAs.
-
-## Build Instructions
-### UNIX and UNIX-like
-Compilation on UNIX systems can be done using one of the many make utilities. To make just the Shell, typing `make` will suffice. After make is finished, just go to the `bin` directory (which will be created if it doesn't already exist) and run `class` or `cload`.
-#### 
-Other useful targets:
-#### `all` - the default target, builds the `class` executable and `cload` executable with debugging symbols and no optimization (debug)
-#### `clean` - clean the solution, remove executables and objects
-#### `release` - build the project as a release (that is, without debugging symbols and with optimization on)
-
-## Acknowledgments
-To implement Intel DevCloud capability, this project also makes use of code from University of Florida intel-training-modules (GPLv3 licensed, in the contrib folder).
+# CryptoCrew's Bitcoin Accelerator
+Bitcoin is a peer-to-peer (P2P) digital cash system which allows anyone, anywhere to mine Bitcoins. The mining process consists of being the first one to find the input to the SHA-256 function given a 256-bit output. The SHA-256 function is a mathematical operation run on digital data that outputs a computed hash. Because it is almost impossible to invert the SHA-256, the only feasible approach to find the input that generates the given output is to try each possible input until the intended output is reached. This type of brute force can be slow and energy-inefficient on a CPU, therefore, this project consists of a Bitcoin accelerator that improves the efficiency of running the SHA-256 cryptographic hash function. 
