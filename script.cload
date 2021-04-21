@@ -1,0 +1,32 @@
+.rst
+.resize 17
+.sr -r ./data/host1.bin 0x1000
+.sr -r ./data/host2.bin 0x1100
+.sr -r ./data/host3.bin 0x2000
+.sr -r ./data/host4.bin 0x2100
+.sr -r ./data/host5.bin 0x3000
+.sr -r ./data/host6.bin 0x3100
+.sr -r ./data/host7.bin 0x4000
+.sr -r ./data/host8.bin 0x4100
+
+;Set starting address for original message
+.sr -r ./data/mmio1.bin 0x5006
+.sr -r ./data/mmio2.bin 0x5106
+.sr -r ./data/mmio3.bin 0x6006
+.sr -r ./data/mmio4.bin 0x6106
+.sr -r ./data/mmio5.bin 0x7006
+.sr -r ./data/mmio6.bin 0x7106
+.sr -r ./data/mmio7.bin 0x8006
+.sr -r ./data/mmio8.bin 0x8106
+
+;set instruction memory
+;.sr -r ./data/instruct.bin 0x10000
+;Should set to the 17th bit
+
+;.wait 0x0 0x1 0 ;configured by logan where it is
+;wait til machine is done
+;.sr -r output 0x1000,8
+
+.sr -s test 0x1000,0x4100
+.exit
+
