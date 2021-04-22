@@ -138,16 +138,16 @@ output      reg                                     hash_done;
             reg       [$clog2(HASH_CYCLE_COUNT):0]  hash_cycle_counter;
 
            // Assert to start the hash_cycle counter
-            reg                                     hash_cycle_counter_en;
+            logic                                   hash_cycle_counter_en;
            // Deassert to reset the hash_cycle counter
-            reg                                     hash_cycle_counter_rst_n;
+            logic                                   hash_cycle_counter_rst_n;
 
             // Stage Counter
-            reg                              [1:0]  stage_counter;
+            logic                            [1:0]  stage_counter;
            // Assert to increment the stage counter
-            reg                                     stage_counter_inc;
+            logic                                   stage_counter_inc;
            // Deassert to reset the stage counter
-            reg                                     stage_counter_rst_n;
+            logic                                   stage_counter_rst_n;
 
 // ===============
 /// States
@@ -155,7 +155,7 @@ output      reg                                     hash_done;
 typedef enum reg [4:0] {
     IDLE,             // Reset/Idle
 
-    READ_MESSAGE,     // Read message from Data Memory
+    READ_MESSAGE_1,   // Read message from Data Memory
 
     WRITE_BUSY_BIT,   // Writing the busy bit to Data Memory
 
@@ -164,6 +164,7 @@ typedef enum reg [4:0] {
     HASH,             // Processing hash
     UPD2,             // [H0:H7] <- [H0:H7] + [A:H]
     MAYBE_DONE,       // Test if we are done or need another pass of hashing
+    READ_MESSAGE_2,    // Read the second half of block header from Data Memory
 
     // @optimization(ryan): There might be better ways to do this than to
     // hard code all 8 parts of the write.
@@ -187,7 +188,10 @@ state_t curr_state, next_state;
 always_comb begin
 
     // Reset all signals
-    next_state               = IDLE;
+    next_state               = IDLE; // default state
+
+    stage_counter_inc        = 0;
+    stage_counter_rst_n      = 1;
 
     ms_init                  = 1'b0;
     ms_enable                = 1'b0;
@@ -195,7 +199,7 @@ always_comb begin
     cm_is_hashing            = 1'b0;
     cm_update_A_H            = 1'b0;
     cm_update_H0_7           = 1'b0;
-    cm_rst_hash_n            = 1'b0;
+    cm_rst_hash_n            = 1'b1;
 
     should_save_hash         = 1'b0;
 
@@ -209,25 +213,27 @@ always_comb begin
     mem_acc_write_addr       = '0;
     mem_acc_write_data       = '0;
 
-    hash_done                = 1;
+    hash_done                = 1'b0;
 
     case (curr_state)
 
-        READ_MESSAGE: begin
+        IDLE: begin
+            // Wait for CPU to write the valid bit
+            if (mem_listen_en && mem_listen_addr == ACB_START_ADDR && mem_listen_data[0])
+                next_state = READ_MESSAGE_1;
+        end
+
+        READ_MESSAGE_1: begin
 
             // Signal the Arbiter we need to read something
             mem_acc_read_en   = 1'b1;
             mem_acc_read_addr = HCB_START_ADDR;
 
             // If we interface with an Arbiter, we wait here until Arbiter gives us the data
-            if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
-
-                // Write Busy bit in Status register if we are configured to do so
-                if (IS_WRITE_BUSY_BIT) next_state = WRITE_BUSY_BIT;
-                else                   next_state = HASH;
-
-            end else
-                next_state = READ_MESSAGE;
+            if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid)
+                next_state = WRITE_BUSY_BIT;
+            else
+                next_state = READ_MESSAGE_1;
 
         end
 
@@ -248,7 +254,6 @@ always_comb begin
 
         INIT: begin
             cm_rst_hash_n = 0;
-
             next_state = UPD1;
         end
 
@@ -260,12 +265,6 @@ always_comb begin
         end
 
         HASH: begin
-            cm_is_hashing = 1;
-            ms_enable     = 1'b1;
-
-            // Start the cycle counter
-            hash_cycle_counter_en = 1'b1;
-
             // Here we count some amount of cycles to determine if the hash is complete
             // @review(ryan): 64 might not be the right number
             if (hash_cycle_counter == HASH_CYCLE_COUNT) begin
@@ -273,8 +272,13 @@ always_comb begin
                 hash_cycle_counter_rst_n = 1'b0;
                 next_state               = UPD2;
 
-            end else
+            end
+            else begin 
+                cm_is_hashing = 1;
+                ms_enable = 1;
+                hash_cycle_counter_en = 1;
                 next_state = HASH;
+            end
         end
 
         // UPD2: [H0:H7] <- [H0:H7] + [A:H]
@@ -284,12 +288,31 @@ always_comb begin
         end
 
         MAYBE_DONE: begin
-            stage_counter_inc  = 1;
-            should_save_hash   = 1;
+            should_save_hash = 1;
 
-            if (stage_counter == 2'b0)      next_state = UPD1;
-            else if (stage_counter == 2'b1) next_state = INIT;
-            else                            next_state = WRITE_H0;
+            if (stage_counter == 2'b0) begin
+                stage_counter_inc  = 1;
+                next_state = READ_MESSAGE_2;
+            end
+            else if (stage_counter == 2'b1) begin
+                stage_counter_inc  = 1;
+                next_state = INIT;
+            end
+            else begin
+                stage_counter_rst_n = 0;
+                next_state = WRITE_H0;
+            end
+        end
+
+        // fetch the second half of the block header
+        READ_MESSAGE_2: begin
+            mem_acc_read_en   = 1'b1;
+            mem_acc_read_addr = HCB_START_ADDR;
+
+            if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid)
+                next_state = UPD1;
+            else
+                next_state = READ_MESSAGE_2;
         end
 
         WRITE_H0: begin
@@ -414,21 +437,13 @@ always_comb begin
 
         end
 
-        // IDLE
-        default: begin
-
-            // Wait for CPU to write the valid bit
-            if (mem_listen_en && mem_listen_addr == ACB_START_ADDR && mem_listen_data[0])
-                next_state = READ_MESSAGE;
-        end
-
     endcase
 end
 
 // =================
 // State Transition
 // =================
-always_ff @(posedge clk, negedge rst_n) begin
+always_ff @(posedge clk) begin
     if (!rst_n) curr_state <= IDLE;
     else        curr_state <= next_state;
 end
@@ -436,9 +451,13 @@ end
 // =================
 // Hash Cycle Counter
 // =================
-always_ff @(posedge clk, negedge rst_n) begin
-         if (!rst_n || !hash_cycle_counter_rst_n) hash_cycle_counter <= '0;
-    else if (hash_cycle_counter_en)               hash_cycle_counter <= hash_cycle_counter + 1;
+always_ff @(posedge clk) begin
+        if (!rst_n)
+            hash_cycle_counter <= '0;
+        else if (!hash_cycle_counter_rst_n)
+            hash_cycle_counter <= '0;
+        else if (hash_cycle_counter_en)
+            hash_cycle_counter <= hash_cycle_counter + 1;
 end
 
 assign cm_cycle_count = hash_cycle_counter;
@@ -447,8 +466,9 @@ assign cm_cycle_count = hash_cycle_counter;
 // Stage Counter
 // =================
 always_ff @(posedge clk) begin
-    if (!rst_n || !stage_counter_rst_n) stage_counter <= 0;
-    else if (stage_counter_inc)         stage_counter <= stage_counter + 1;
+    if (!rst_n)                     stage_counter <= 0;
+    else if (!stage_counter_rst_n)  stage_counter <= 0;
+    else if (stage_counter_inc)     stage_counter <= stage_counter + 1;
 end
 
 assign msg_sel = stage_counter;
