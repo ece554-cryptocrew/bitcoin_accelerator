@@ -307,7 +307,7 @@ always_comb begin
         // fetch the second half of the block header
         READ_MESSAGE_2: begin
             mem_acc_read_en   = 1'b1;
-            mem_acc_read_addr = HCB_START_ADDR;
+            mem_acc_read_addr = HCB_START_ADDR + MEM_ACC_READ_DATA_SIZE;
 
             if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid)
                 next_state = UPD1;
