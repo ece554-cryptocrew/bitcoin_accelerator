@@ -11,7 +11,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////////
 module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr, accel_wrt_en, 
-            ex_rd_data, ex_rd_valid, accel_rd_data, cpu_wrt_en, cpu_wrt_data, cpu_addr);
+            ex_rd_data, accel_rd_data, cpu_wrt_en, cpu_wrt_data, cpu_addr);
 
     input          clk, rst_n;
     input          ex_im_wrt_en;
@@ -23,7 +23,7 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     input  [15:0]  accel_addr;
     input          accel_wrt_en;
     output [31:0]  ex_rd_data;
-    output         ex_rd_valid;
+    //output         ex_rd_valid;
     output [511:0] accel_rd_data;
     output         cpu_wrt_en;
     output [31:0]  cpu_wrt_data;
@@ -156,13 +156,13 @@ module cpu (clk, rst_n, ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en, ex_addr, ex_w
     cpu_pipereg #(.PIPE_WIDTH(1)) CF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_CF), .pipe_out(CF_flg), .pipe_en(alu_CF_en));
 
     //Misc
-    cpu_pipereg #(.PIPE_WIDTH(1)) Ex_rd_vld (.clk(clk), .rst_n(rst_n), .pipe_in(ex_rd_en), .pipe_out(ex_rd_valid), .pipe_en(1'b1)); // rd valid should be good cycle after rd request
+    //cpu_pipereg #(.PIPE_WIDTH(1)) Ex_rd_vld (.clk(clk), .rst_n(rst_n), .pipe_in(ex_rd_en), .pipe_out(ex_rd_valid), .pipe_en(1'b1)); // rd valid should be good cycle after rd request
 
     // Top Level Logic //
 
     //All External Outputs
     assign ex_rd_data = mem_ex_rd_data;
-    assign ex_rd_valid = 1'b0; //TODO
+    //assign ex_rd_valid = 1'b0; //TODO
     assign accel_rd_data = mem_accel_rd_data;
     assign cpu_wrt_en = mem_cpu_wrt_en;
     assign cpu_wrt_data = mem_cpu_wrt_data;
