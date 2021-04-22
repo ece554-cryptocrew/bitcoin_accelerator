@@ -1,5 +1,11 @@
-
 cpu/work/
 cpu/transcript
 cpu/bitcoin_miner.mpf
 cpu/bitcoin_miner.cr.mti
+
+# ModelSim junk
+work/
+*.wlf
+transcript
+*.mpf
+*.mti
