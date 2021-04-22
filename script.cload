@@ -26,6 +26,7 @@
 .sr -r ./data/instruct.bin 0x10000
 ;Should set to the 17th bit
 
+.run
 .wait 0x0 0x1 0 ;configured by logan where it is
 ;wait til machine is done
 
