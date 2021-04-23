@@ -12,15 +12,6 @@
 ;put in correct hash
 .sr -r ./data/correctHash.bin 0x0100
 
-;Set starting address for original message TODO: Needed?
-.sr -r ./data/mmio1.bin 0x5006
-.sr -r ./data/mmio2.bin 0x5106
-.sr -r ./data/mmio3.bin 0x6006
-.sr -r ./data/mmio4.bin 0x6106
-.sr -r ./data/mmio5.bin 0x7006
-.sr -r ./data/mmio6.bin 0x7106
-.sr -r ./data/mmio7.bin 0x8006
-.sr -r ./data/mmio8.bin 0x8106
 
 ;set instruction memory
 .sr -r ./data/instruct.bin 0x10000

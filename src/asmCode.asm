@@ -175,7 +175,7 @@ accel_2:
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
-	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_3 
 
 	LDI $g0, $zero, 0x5108 ; Get first part the output hash
@@ -226,7 +226,7 @@ accel_3:
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
-	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_4 
 
 	LDI $g0, $zero, 0x6008   ;Get first part the output hash
@@ -279,7 +279,7 @@ accel_4:
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
-	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_5 
 
 	LDI $g0, $zero, 0x6108 ; Get first part the output hash
@@ -331,7 +331,7 @@ accel_5:
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
-	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_6 
 
 	LDI $g0, $zero, 0x7008 ; Get first part the output hash
@@ -384,7 +384,7 @@ accel_6:
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
-	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_6 
 
 	LDI $g0, $zero, 0x7108 ; Get first part the output hash
@@ -437,7 +437,7 @@ accel_7:
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
-	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_7 
 
 	LDI $g0, $zero, 0x8008 ; Get first part the output hash
@@ -491,7 +491,7 @@ accel_8:
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
-	SUB $g1, $g0, g2 ; g0 - 0x3FFFFFFF
+	SUB $g1, $g0, $g2 ; g0 - 0x3FFFFFFF
 	BLEZ accel_8 
 
 	LDI $g0, $zero, 0x8108 ; Get first part the output hash
