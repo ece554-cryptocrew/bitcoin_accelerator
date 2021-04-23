@@ -21,13 +21,13 @@ module mem_ctrl
 (
 	input wire clk,
 	input wire rst_n,
-	input wire host_init,
+	input wire host_init, // from host, not to cpu
 	input wire host_rd_ready,
 	input wire host_wr_ready,
 
 	input logic [1:0] op,
-	input wire [ADDR_BITCOUNT-1:0] raw_address,
-	input wire [ADDR_BITCOUNT-1:0] address_offset,
+	input wire [ADDR_BITCOUNT-1:0] raw_address, //from host, use in cpu
+	input wire [ADDR_BITCOUNT-1:0] address_offset, // from host, not to cpu
 
 	input logic [WORD_SIZE-1:0] common_data_bus_read_in, 
 	output logic [WORD_SIZE-1:0] common_data_bus_write_out, 
@@ -35,11 +35,11 @@ module mem_ctrl
 	input logic [CL_SIZE_WIDTH-1:0] host_data_bus_read_in,
 	output logic [CL_SIZE_WIDTH-1:0] host_data_bus_write_out,
 
-	output logic [ADDR_BITCOUNT-1:0] corrected_address,
+	output logic [ADDR_BITCOUNT-1:0] corrected_address, //output to host, not from cpu
 
-	output logic ready,
-	output logic tx_done,
-	output logic rd_valid,
+	output logic ready, //stall until ready if MIF
+	output logic tx_done, //last word of read from host 
+	output logic rd_valid, // read is ready from host, first word of 64 byte read
 	output logic host_re, // might need since controls fifo shifting...
 	output logic host_we,
 	output logic host_rgo,
