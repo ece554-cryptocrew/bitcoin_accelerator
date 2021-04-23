@@ -12,7 +12,7 @@
 ;put in correct hash
 .sr -r ./data/correctHash.bin 0x0100
 
-;Set starting address for original message
+;Set starting address for original message;TODO may not be needed
 .sr -r ./data/mmio1.bin 0x5006
 .sr -r ./data/mmio2.bin 0x5106
 .sr -r ./data/mmio3.bin 0x6006

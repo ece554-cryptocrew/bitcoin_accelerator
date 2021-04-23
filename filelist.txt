@@ -1,0 +1,3 @@
+./cpu/rtl/*.sv
+./rtl/mem_ctrl.sv
+
