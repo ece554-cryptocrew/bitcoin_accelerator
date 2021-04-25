@@ -1,19 +1,37 @@
 module accelerators
 #(
     // Number of accelerators we have in parallel
-    parameter NUM_ACCELERATORS       = 8,
+    parameter NUM_ACCELERATORS          = 8,
 
     // Address size for both the Memory and the Clients' ports
-    parameter ADDR_SIZE              = 32,
+    parameter ADDR_SIZE                 = 32,
 
     // Size of the write port to the Memory and the Clients
-    parameter WRITE_DATA_SIZE        = 32,
+    parameter WRITE_DATA_SIZE           = 32,
 
     // Size of the read port to the Memory and the Clients
-    parameter READ_DATA_SIZE         = 512,
+    parameter READ_DATA_SIZE            = 512,
 
     // Set to indicate there is an Arbiter before we touch the Memory
-    parameter IS_MEM_USE_ARBITER     = 1
+    parameter IS_MEM_USE_ARBITER        = 1,
+
+    // CPU address line redirected from Data Memory for monitoring MMIO
+    parameter MEM_LISTEN_ADDR_SIZE      = 16,
+
+    // CPU data line redirected from Data Memory for monitoring MMIO
+    parameter MEM_LISTEN_DATA_SIZE      = 32,
+
+    // Address line going back to the Data Memory
+    parameter MEM_ACC_READ_ADDR_SIZE    = 16,
+
+    // Data line coming from the Data Memory
+    parameter MEM_ACC_READ_DATA_SIZE    = 512,
+
+    // Address line going out from the Accelerator to the Data Memory
+    parameter MEM_ACC_WRITE_ADDR_SIZE   = 16,
+
+    // Data line going out from the Accelerator to the Data Memory
+    parameter MEM_ACC_WRITE_DATA_SIZE   = 32
 )
 (
     clk, rst_n,
@@ -54,6 +72,9 @@ module accelerators
  input              [MEM_ACC_READ_DATA_SIZE - 1:0]  mem_acc_read_data;
 
  input                                              mem_acc_write_done;
+ 
+ input                                              upstream_write_done; // not used
+ input                                              upstream_read_valid; // not used
 
 output                                              mem_acc_read_en;
 output              [MEM_ACC_READ_ADDR_SIZE - 1:0]  mem_acc_read_addr;
@@ -72,6 +93,24 @@ output             [MEM_ACC_WRITE_DATA_SIZE - 1:0]  mem_acc_write_data;
           wire                   [ADDR_SIZE - 1:0]  arbiter_write_addr [NUM_ACCELERATORS - 1:0];
           wire             [WRITE_DATA_SIZE - 1:0]  arbiter_write_data [NUM_ACCELERATORS - 1:0];
           wire            [NUM_ACCELERATORS - 1:0]  arbiter_write_done;
+
+// ===============
+/// Constants
+// ===============
+/// Communication Block Addresses
+    // Host Communication Block (from host)
+    // 0x1000 (HCB_0)       0x1100 (HCB_1)
+    // 0x2000 (HCB_2)       0x2100 (HCB_3)
+    // 0x3000 (HCB_4)       0x3100 (HCB_5)
+    // 0x4000 (HCB_6)       0x4100 (HCB_7)
+    // Accelerator Communication Block
+    // 0x5000 (ACB_0)       0x5100 (ACB_1)
+    // 0x6000 (ACB_2)       0x6100 (ACB_3)
+    // 0x7000 (ACB_4)       0x7100 (ACB_5)
+    // 0x8000 (ACB_6)       0x8100 (ACB_7)
+localparam logic [15:0] HCB [0:7] = {16'h1000, 16'h1100, 16'h2000, 16'h2100, 16'h3000, 16'h3100, 16'h4000, 16'h4100};
+localparam logic [15:0] ACB [0:7] = {16'h5000, 16'h5100, 16'h6000, 16'h6100, 16'h7000, 16'h7100, 16'h8000, 16'h8100};
+
 
 /// Modules
 arbiter
@@ -96,8 +135,8 @@ acc_arbiter
 
     .mem_read_data(mem_acc_read_data),
 
-    .upstream_write_done,
-    .upstream_read_valid,
+    .upstream_write_done(upstream_write_done),
+    .upstream_read_valid(upstream_read_valid),
 
     /// Output
     .client_read_data(arbiter_read_data),
@@ -116,14 +155,18 @@ acc_arbiter
 genvar i;
 generate
 for (i = 0; i < NUM_ACCELERATORS; i++) begin
-    accel accelerator
+    accel
+    #(.HCB_START_ADDR(HCB[i]),
+      .ACB_START_ADDR(ACB[i])
+     )
+    accelerator
     (
-        .clk, .rst_n,
+        .clk(clk), .rst_n(rst_n),
 
         /// Inputs
-        .mem_listen_addr,
-        .mem_listen_en,
-        .mem_listen_data,
+        .mem_listen_addr(mem_listen_addr),
+        .mem_listen_en(mem_listen_en),
+        .mem_listen_data(mem_listen_data),
 
         .mem_acc_read_data(arbiter_read_data),
         .mem_acc_read_data_valid(arbiter_read_valid[i]),
@@ -142,3 +185,5 @@ for (i = 0; i < NUM_ACCELERATORS; i++) begin
     );
 end
 endgenerate
+
+endmodule

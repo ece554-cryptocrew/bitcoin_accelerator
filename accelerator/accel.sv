@@ -4,22 +4,26 @@
 // hash_done: will be asserted when hashing is done
 // hash: the SHA-256 hash of the block header(blk_hdr)
 
-
-module accel(hash_done, hash, // output
-             mem_acc_read_addr,
-             mem_acc_read_en,
-             mem_acc_write_en,
-             mem_acc_write_data,
-             mem_acc_write_addr,
+module
+accel
+#(parameter HCB_START_ADDR = 16'h1000,
+  parameter ACB_START_ADDR = 16'h5000
+ )
+(hash_done, hash, // output
+mem_acc_read_addr,
+mem_acc_read_en,
+mem_acc_write_en,
+mem_acc_write_data,
+mem_acc_write_addr,
              
-             mem_listen_addr, // input
-             mem_listen_en,
-             mem_listen_data,
-             mem_acc_read_data,
-             mem_acc_read_data_valid,
-             mem_acc_write_done,
-             clk, rst_n
-            );
+mem_listen_addr, // input
+mem_listen_en,
+mem_listen_data,
+mem_acc_read_data,
+mem_acc_read_data_valid,
+mem_acc_write_done,
+clk, rst_n
+);
 
 input clk, rst_n;
 
@@ -52,7 +56,11 @@ logic [6:0] cm_cycle_count;
 logic [1:0] msg_sel;
 
 
-acc_control_unit #() ctrl0
+acc_control_unit
+#(.HCB_START_ADDR(HCB_START_ADDR),
+  .ACB_START_ADDR(ACB_START_ADDR)
+ )
+ctrl0
 (
     // input
     .clk(clk), .rst_n(rst_n),
