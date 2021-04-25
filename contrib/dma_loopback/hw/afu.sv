@@ -119,18 +119,38 @@ module afu
 
    wire [31:0] cpu_in;
    wire [31:0] cpu_out; // Todo, parameterize
+	
+   // cpu netlist
+   logic ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en;
+   logic [15:0] ex_addr;
+   logic [31:0] ex_wrt_data;
+   logic [31:0]  accel_wrt_data;
+   logic [15:0]  accel_addr;
+   logic accel_wrt_en;
+   logic [31:0]  ex_rd_data;
+   logic [511:0] accel_rd_data;
+   logic cpu_wrt_en;
+   logic [31:0]  cpu_wrt_data;
+   logic [15:0]  cpu_addr;
 
    cpu
    mock
    (
        .clk(clk),
        .rst_n(~rst),
-       .tx_done(tx_done),
-       .rd_valid(rd_valid),
-       .op(mem_op),
-       .io_address(cpu_addr),
-       .common_data_bus_in(cpu_in),
-       .common_data_bus_out(cpu_out)
+       .ex_im_wrt_en(ex_im_wrt_en), 
+       .ex_mem_wrt_en(ex_emm_wrt_en), 
+       .ex_mem_rd_en(ex_mem_rd_en), 
+       .ex_addr(ex_addr), 
+       .ex_wrt_data(ex_wrt_data), 
+       .accel_wrt_data(accel_wrt_data),
+       .accel_addr(accel_addr),
+       .accel_wrt_en(accel_wrt_en),
+       .ex_rd_data(ex_rd_data),
+       .accel_rd_data(accel_rd_data),
+       .cpu_wrt_en(cpu_wrt_en)
+       .cpu_wrt_data(cpu_wrt_data)
+       .cpu_addr(cpu_addr)
    );
 
    // Memory Controller module
