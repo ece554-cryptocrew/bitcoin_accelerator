@@ -1,28 +1,28 @@
 .rst
 .resize 17
-.sr -r ./data/host1.bin 0x1000
-.sr -r ./data/host2.bin 0x1100
-.sr -r ./data/host3.bin 0x2000
-.sr -r ./data/host4.bin 0x2100
-.sr -r ./data/host5.bin 0x3000
-.sr -r ./data/host6.bin 0x3100
-.sr -r ./data/host7.bin 0x4000
-.sr -r ./data/host8.bin 0x4100
+.sr -r ./host1.bin 0x1000
+.sr -r ./host2.bin 0x1100
+.sr -r ./host3.bin 0x2000
+.sr -r ./host4.bin 0x2100
+.sr -r ./host5.bin 0x3000
+.sr -r ./host6.bin 0x3100
+.sr -r ./host7.bin 0x4000
+.sr -r ./host8.bin 0x4100
 
 ;put in correct hash
-.sr -r ./data/correctHash.bin 0x0100
+.sr -r ./correctHash.bin 0x0100
 
 
 ;set instruction memory
-.sr -r ./data/instruct.bin 0x10000
+.sr -r ./instruct.bin 0x10000
 ;Should set to the 17th bit
 
 .run
-.wait 0x0 0x1 0 ;configured by logan where it is
+.wait 0x0 0x1 1 ;configured by logan where it is
 ;wait til machine is done
 
 ;output end file
-.sr -r outputNoncei 0x1000,8
+.sr -r outputNonce 0x100,8
 
 .exit
 

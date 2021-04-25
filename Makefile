@@ -43,7 +43,10 @@ $(BIN_DIR)/class: $(LIB_DIR)/libmtcore.a $(SHELL_MAIN) $(INCLUDE)
 
 $(BIN_DIR)/x2b: $(LIB_DIR)/libmtcore.a $(X2B_MAIN) $(INCLUDE)
 	cd build; $(CC) $(X2B_MAIN) $(LIB) -o ../$@
-	
+
+$(BIN_DIR)/hash: $(LIB_DIR)/libmtcore.a hash.o
+	cd build; $(CC) hash.o $(LIB) -o ../$@
+
 
 $(BIN_DIR)/cload: $(LIB_DIR)/libmtcore.a $(CLOAD_MAIN) $(CLOAD_OBJS) $(INCLUDE) 
 	cd build; $(CC) $(CLOAD_MAIN) $(CLOAD_OBJS) $(LIB) $(LIB_CLOAD) -o ../$@
