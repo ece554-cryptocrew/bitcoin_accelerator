@@ -22,7 +22,7 @@
 ;wait til machine is done
 
 ;output end file
-.sr -r outputNonce 0x100,8
+.sr -s outputNonce 0x9000,8
 
 .exit
 
