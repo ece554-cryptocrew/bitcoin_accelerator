@@ -24,7 +24,7 @@
 // 0x4000 (HCB_6)
 // 0x4100 (HCB_7)
 //
-// Accelerator Communication
+// Accelerator Communication //TODO rd/wr addr for accel?
 // 0x5000 (ACB_0)
 // 0x5100 (ACB_1)
 // 0x6000 (ACB_2)

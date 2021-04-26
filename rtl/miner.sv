@@ -12,26 +12,61 @@
 //         ac_ signals connect accelerator block and CPU.
 //
 /////////////////////////////////////////////////////////////////////////////////////
-module miner (clk, rst_n);
+module miner (
+    input clk, rst_n,
+    input he_host_init,
+    input he_host_rd_ready,
+    input he_host_wr_ready,
+    input [63:0] he_raw_address,
+    input [63:0] he_address_offset,
+    input [511:0] he_host_data_bus_read_in,
+    output [511:0] he_host_data_bus_write_out,
+    output [63:0] hc_corrected_address,
+    output host_re,
+	output host_we,
+	output host_rgo,
+	output host_wgo
+    );
 
-    input clk, rst_n;
-    
+    logic [1:0]  hc_op;
+    logic [31:0] hc_common_data_bus_read_in;
+    logic [31:0] hc_common_data_bus_write_out;
+    logic        hc_ready, tx_done, rd_valid;
+
+    logic [31:0]  ac_accel_wrt_data;
+    logic [15:0]  ac_accel_addr;
+    logic         ac_accel_wrt_en;
+    logic         ac_accel_rd_en;
+    logic [511:0] ac_accel_rd_data;
+    logic         ac_cpu_wrt_en;
+    logic [31:0]  ac_cpu_wrt_data;
+    logic [15:0]  ac_cpu_addr;
+    logic         ac_mem_acc_write_done;
+    logic         ac_mem_acc_read_data_valid;
+
+    logic         ac_upstream_write_done;
+    logic         ac_upstream_read_valid;
+
     //TODO: no wires done yet
     cpu   cpu0 (.clk(clk), 
-                .rst_n(rst_n), 
-                .ex_im_wrt_en(), 
-                .ex_mem_wrt_en(), 
-                .ex_mem_rd_en(), 
+                .rst_n(rst_n),  
                 .ex_addr(hc_raw_address[15:0]), 
                 .ex_wrt_data(hc_common_data_bus_write_out), 
-                .accel_wrt_data(), 
-                .accel_addr(), 
-                .accel_wrt_en(), 
+                .accel_wrt_data(ac_accel_wrt_data), 
+                .accel_addr(ac_accel_addr), 
+                .accel_wrt_en(ac_accel_wrt_en),
+                .accel_rd_en(ac_accel_rd_en),
+                .accel_wrt_done(ac_mem_acc_write_done),
+                .accel_rd_valid(ac_mem_acc_read_data_valid),
                 .ex_rd_data(hc_common_data_bus_read_in), 
-                .accel_rd_data(), 
-                .cpu_wrt_en(), 
-                .cpu_wrt_data(), 
-                .cpu_addr());
+                .accel_rd_data(ac_accel_rd_data), 
+                .cpu_wrt_en(ac_cpu_wrt_en), 
+                .cpu_wrt_data(ac_cpu_wrt_data), 
+                .cpu_addr(ac_cpu_addr),
+                .ready(hc_ready), 
+                .tx_done(hc_tx_done), 
+                .rd_valid(hc_rd_valid),
+                .op(hc_op));
     
     mem_ctrl  #(.WORD_SIZE(32), 
                 .CL_SIZE_WIDTH(512), 
@@ -41,7 +76,7 @@ module miner (clk, rst_n);
                 .host_init(he_host_init), 
                 .host_rd_ready(he_host_rd_ready), 
                 .host_wr_ready(he_host_wr_ready), 
-                .op(op), 
+                .op(hc_op), 
                 .raw_address(he_raw_address), 
                 .address_offset(he_address_offset), 
                 .common_data_bus_read_in(hc_common_data_bus_read_in), 
@@ -49,13 +84,31 @@ module miner (clk, rst_n);
                 .host_data_bus_read_in(he_host_data_bus_read_in), 
                 .host_data_bus_write_out(he_host_data_bus_write_out), 
                 .corrected_address(hc_corrected_address), 
-                .ready(ready), 
-                .tx_done(tx_done), 
-                .rd_valid(rd_valid), 
+                .ready(hc_ready), 
+                .tx_done(hc_tx_done), 
+                .rd_valid(hc_rd_valid), 
                 .host_re(he_host_re), 
                 .host_we(he_host_we), 
                 .host_rgo(he_host_rgo), 
                 .host_wgo(he_host_wgo));
 
+    accelerators accelerators0(.clk(clk), 
+                               .rst_n(rst_n),
+                               .mem_listen_addr(ac_cpu_addr), 
+                               .mem_listen_en(ac_cpu_wrt_en),
+                               .mem_listen_data(ac_cpu_wrt_data),
+                               .mem_acc_read_data(ac_accel_rd_data),
+                               .mem_acc_read_data_valid(ac_mem_acc_read_data_valid),
+                               .mem_acc_write_done(ac_mem_acc_write_done),
+                               .upstream_write_done(ac_upstream_write_done), 
+                               .upstream_read_valid(ac_upstream_read_valid), 
+                               .mem_acc_read_addr(ac_accel_addr), //TODO: same addr?
+                               .mem_acc_read_en(ac_accel_rd_en),
+                               .mem_acc_write_en(ac_accel_wrt_en), 
+                               .mem_acc_write_data(ac_accel_wrt_data), 
+                               .mem_acc_write_addr(ac_accel_addr));
+
+    assign ac_upstream_write_done = 1'b0;
+    assign ac_upstream_read_valid = 1'b0;
 
 endmodule
