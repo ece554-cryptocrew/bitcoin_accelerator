@@ -539,7 +539,7 @@ correct_hash_found:
 	LDB $g0, $g4, 0x0;get final nonce value
 	STI $g0, $zero, 0x9000 ;send it to the host
 	ADDI $g0, $zero, 1
-	STI $g0, $zero, 0x0
+	STI $g0, $zero, 0xD000
   		; halt and send
 		; are we going to package the header for transmission to the bitcoin network? 
 		; are we going to send it to a GUI to show in our demo and compare speeds?
