@@ -17,7 +17,7 @@ module miner (
     input he_host_init,
     input he_host_rd_ready,
     input he_host_wr_ready,
-    input [63:0] he_raw_address,
+    input [63:0] hc_raw_address,
     input [63:0] he_address_offset,
     input [511:0] he_host_data_bus_read_in,
     output [511:0] he_host_data_bus_write_out,

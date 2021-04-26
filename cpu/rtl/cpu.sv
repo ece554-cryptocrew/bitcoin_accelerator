@@ -15,9 +15,6 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
             accel_rd_data, cpu_wrt_en, cpu_wrt_data, cpu_addr, ready, tx_done, rd_valid, op);
 
     input          clk, rst_n;
-    input          ex_im_wrt_en;
-    input          ex_mem_wrt_en;
-    input          ex_mem_rd_en;
     input  [15:0]  ex_addr;
     input  [31:0]  ex_wrt_data;
     input  [31:0]  accel_wrt_data;
@@ -66,7 +63,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     logic [15:0]  im_addr; 
     logic         im_wrt_en;
     logic [31:0]  im_wrt_data;
-    logic [31:0]  im_rd_out;
+    logic [31:0]  im_instr;
 
     logic [15:0]  im_rd_addr;
     logic [15:0]  im_wrt_addr;
@@ -145,7 +142,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     cpu_alu alu(.A(alu_A), .B(alu_B), .Op(alu_Op), .Out(alu_Out), .OF(alu_OF), .OF_en(alu_OF_en), .CF(alu_CF), 
                 .CF_en(alu_CF_en), .ZF(alu_ZF), .ZF_en(alu_ZF_en), .NF(alu_NF), .NF_en(alu_NF_en));
 
-    cpu_instrmem im(.clk(clk), .rst_n(rst_n), .addr(im_addr), .wrt_en(im_wrt_en), .wrt_data(im_wrt_data), .rd_out(im_rd_out));
+    cpu_instrmem im(.clk(clk), .rst_n(rst_n), .addr(im_addr), .wrt_en(im_wrt_en), .wrt_data(im_wrt_data), .rd_out(im_instr));
 
     cpu_control ctrl(.instr(ctrl_instr), .alu_op(ctrl_alu_op), .alu_imm_src(ctrl_alu_imm_src), .rf_write_en(ctrl_rf_write_en), .datamem_write_en(ctrl_datamem_write_en),
                      .datamem_read_en(ctrl_datamem_read_en), .rf_write_mem_src(ctrl_rf_write_mem_src), .pc_src(ctrl_pc_src), .pc_jmp_src(ctrl_pc_jmp_src), .err(ctrl_err));
@@ -180,7 +177,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
 
     // State Machine //
     typedef enum reg [3:0] {
-        IDLE,
+        CPU_IDLE,
         INIT_IM,
         INIT_DM,
         RUN,
@@ -190,35 +187,35 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     
     //Transition
     always_ff @(posedge clk) begin
-        if (!rst_n) curr_state <= IDLE;
+        if (!rst_n) curr_state <= CPU_IDLE;
         else curr_state <= next_state;
     end
 
     always_comb begin
-        next_state = IDLE; // default state
-        op = 2'b00;
+        next_state = CPU_IDLE; // default state
+        op_in = IDLE;
         ex_im_wrt_en = 1'b0;
         ex_mem_wrt_en = 1'b0;
         ex_mem_rd_en = 1'b0;
         cpu_init_stall = 1'b0;
         case (curr_state)
-            IDLE: begin
+            CPU_IDLE: begin
                 cpu_init_stall = 1'b1;
                 if (ready)
                     next_state = INIT_IM;
                 else
-                    next_state = IDLE;
+                    next_state = CPU_IDLE;
             end
             INIT_IM: begin
                 cpu_init_stall = 1'b1;
-                if ()
+                if (ready)
                     next_state = INIT_DM;
                 else
                     next_state = INIT_IM;
             end
             INIT_DM: begin
                 cpu_init_stall = 1'b1;
-                if ()
+                if (ready)
                     next_state = RUN;
                 else
                     next_state = INIT_DM;
@@ -229,6 +226,8 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
             WRT_HOST: begin
                 
             end
+        endcase
+    end
 
     // Top Level Logic //
 
@@ -241,7 +240,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     
     //IF //TODO: PC logic
     assign IFID_in[31:0] = 32'h0; //reserved //TODO: remove?
-    assign IFID_in[63:32] = (stl_jb_stall | stl_rw_stall) ? 32'h0 : im_rd_out; //injected nop if active stall : instruction
+    assign IFID_in[63:32] = (stl_jb_stall | stl_rw_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
     //assign IFID_in[95:64] = pc_out; //pc pipe
     assign IFID_en = 1'b1; //TODO: fix for stalls
     assign im_rd_addr = pc_new;
@@ -250,14 +249,14 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     // if jb instr in exec stage, take new pc if taken, keep piped-old pc if not taken. else just increment pc
     assign pc_new = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? pc_curr : pc_curr + 4;
     assign pc_curr = (pc_jb_taken) ? alu_Out : pc_out; //TODO
-    assign pc_jb_taken = (alu_OP == 8'b00110001 && ZF_flg) || //beq  //high if jb target is taken
-                         (alu_OP == 8'b00110011 && !ZF_flg) || //bneq
-                         (alu_OP == 8'b00110101 && !ZF_flg && NF_flg) || //bltz
-                         (alu_OP == 8'b00110111 && !ZF_flg && !NF_flg) || //bgtz
-                         (alu_OP == 8'b00111001 && ZF_flg || NF_flg) || //blez
-                         (alu_OP == 8'b00111011 && ZF_flg || !NF_flg) || //bgez
-                         (alu_OP == 8'b00111101) || //jmp
-                         (alu_OP == 8'b00111111); //jmpi
+    assign pc_jb_taken = (alu_Op == 8'b00110001 && ZF_flg) || //beq  //high if jb target is taken
+                         (alu_Op == 8'b00110011 && !ZF_flg) || //bneq
+                         (alu_Op == 8'b00110101 && !ZF_flg && NF_flg) || //bltz
+                         (alu_Op == 8'b00110111 && !ZF_flg && !NF_flg) || //bgtz
+                         (alu_Op == 8'b00111001 && ZF_flg || NF_flg) || //blez
+                         (alu_Op == 8'b00111011 && ZF_flg || !NF_flg) || //bgez
+                         (alu_Op == 8'b00111101) || //jmp
+                         (alu_Op == 8'b00111111); //jmpi
                          
     //external inputs    
     assign im_wrt_addr = ex_addr;
@@ -316,7 +315,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     assign rf_wrt_en = MEMWB_out[7]; //ctrl wrt en
 
     //Stall detection //TODO: done?
-    assign stl_if_instr = im_rd_out; // next instruction
+    assign stl_if_instr = im_instr; // next instruction
     assign stl_dec_wrt_reg = rf_instr[23:20]; //wb reg
     assign stl_dec_wrt_en = ctrl_rf_write_en; //wb en
     assign stl_dec_jb_stall = (rf_instr[31:28] == 4'b0011); //if j or b instruction

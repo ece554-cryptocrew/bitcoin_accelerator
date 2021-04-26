@@ -28,7 +28,7 @@ module cpu_datamem (clk, rst_n, cpu_addr, cpu_wrt_data, cpu_wrt_en, cpu_rd_en, e
     input        [31:0]  accel_wrt_data; 
     input                accel_wrt_en;
     input                accel_rd_en;
-    output               accel_wrt_done, accel_rd_valid;
+    output logic         accel_wrt_done, accel_rd_valid;
     output logic [31:0]  cpu_rd_data; 
     output logic [31:0]  ex_rd_data;
     output logic [511:0] accel_rd_data; 
