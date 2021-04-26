@@ -120,20 +120,36 @@ module afu
    wire [31:0] cpu_in;
    wire [31:0] cpu_out; // Todo, parameterize
 	
-   // cpu netlist
-   logic ex_im_wrt_en, ex_mem_wrt_en, ex_mem_rd_en;
-   logic [15:0] ex_addr;
-   logic [31:0] ex_wrt_data;
-   logic [31:0]  accel_wrt_data;
-   logic [15:0]  accel_addr;
-   logic accel_wrt_en;
-   logic [31:0]  ex_rd_data;
-   logic [511:0] accel_rd_data;
-   logic cpu_wrt_en;
-   logic [31:0]  cpu_wrt_data;
-   logic [15:0]  cpu_addr;
-
-   cpu
+   // miner netlist
+   logic he_host_init, he_host_rd_ready, he_host_wr_ready;
+   logic [63:0] he_raw_address, he_address_offset;
+   logic [511:0] he_host_data_bus_read_in, he_host_data_bus_write_out;
+   logic [63:0] he_corrected_address;
+   logic host_re, host_we, host_rgo, host_wgo;
+   
+   // miner instantiates cpu, mem_ctrl, and accelerators	
+   miner 
+   m1
+   (
+	   .clk(clk), 
+	   .rst_n(~rst),
+	   .he_host_init(he_host_init),
+	   .he_host_rd_ready(he_host_rd_ready),
+	   .he_host_wr_ready(he_host_wr_ready),
+	   .he_raw_address(he_raw_address),
+	   .he_address_offset(he_address_offset),
+	   .he_host_data_bus_read_in(he_host_data_bus_read_in),
+	   .he_host_data_bus_write_out(he_host_data_bus_write_out),
+	   .hc_corrected_address(hc_corrected_address),
+	   .host_re(host_re),
+	   .host_we(host_we),
+	   .host_rgo(host_rgo),
+	   .host_wgo(host_wgo)
+    );	
+	
+	
+	
+   /*cpu
    mock
    (
        .clk(clk),
@@ -176,7 +192,7 @@ module afu
        .host_we(local_dma_we),
        .host_rgo(rd_go),
        .host_wgo(wr_go)
-   );
+   );*/
 
 
    // Assign the starting addresses from the memory map.
