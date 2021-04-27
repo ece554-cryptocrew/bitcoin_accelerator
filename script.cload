@@ -18,7 +18,7 @@
 ;Should set to the 17th bit
 
 .run
-.wait 0xD000 0x1 0 ;configured by logan where it is
+.wait 0xD000 0x1 20000 ;configured by logan where it is
 ;wait til machine is done
 
 ;output end file
