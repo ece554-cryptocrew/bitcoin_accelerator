@@ -190,6 +190,10 @@ module afu
 
    // The AFU is done when the DMA is done writing size cache lines.
    assign done = dma.wr_done;
+
+   always_ff @(posedge clk) begin
+     $display("host_rd_ready: %0h", ~dma.empty);
+   end
             
 endmodule
 
