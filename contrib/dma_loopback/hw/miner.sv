@@ -103,7 +103,7 @@ module miner (
                                .mem_acc_write_done(ac_mem_acc_write_done),
                                .upstream_write_done(ac_upstream_write_done), 
                                .upstream_read_valid(ac_upstream_read_valid), 
-                               .mem_acc_read_addr(ac_accel_rd_addr), //TODO: same addr?
+                               .mem_acc_read_addr(ac_accel_rd_addr),
                                .mem_acc_read_en(ac_accel_rd_en),
                                .mem_acc_write_en(ac_accel_wrt_en), 
                                .mem_acc_write_data(ac_accel_wrt_data), 

@@ -107,7 +107,7 @@ module mem_ctrl
 
 			HOSTOP: begin
 
-				if(op == WRITE) begin
+				if(op_in == WRITE) begin
 					host_wgo = 1'b1;
 
 					if(host_wr_ready && bubble) begin
@@ -119,7 +119,7 @@ module mem_ctrl
 						host_we = 1'b1;
 					end
 				end	
-				else if(op == READ) begin
+				else if(op_in == READ) begin
 				// Read
 				/* Just fill the cache line buffer with a single read
 				 */
@@ -129,7 +129,7 @@ module mem_ctrl
 				
 			FILL: begin
 
-				if(op == READ) begin
+				if(op_in == READ) begin
 					host_re = 1'b1;
 					rd_valid = 1'b1;
 
