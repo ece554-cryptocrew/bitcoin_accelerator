@@ -136,7 +136,7 @@ module afu
 	   .he_host_init(he_host_init),
 	   .he_host_rd_ready(he_host_rd_ready),
 	   .he_host_wr_ready(he_host_wr_ready),
-	   .he_raw_address(he_raw_address),
+	   .hc_raw_address(he_raw_address),
 	   .he_address_offset(he_address_offset),
 	   .he_host_data_bus_read_in(he_host_data_bus_read_in),
 	   .he_host_data_bus_write_out(he_host_data_bus_write_out),
