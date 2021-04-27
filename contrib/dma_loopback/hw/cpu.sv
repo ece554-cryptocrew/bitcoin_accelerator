@@ -271,6 +271,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
 
         case (curr_state)
             CPU_IDLE: begin
+                $display("IDLE")
                 cpu_init_stall = 1'b1;
                 if (ready)
                     next_state = WAIT_INIT_DM;
@@ -278,6 +279,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     next_state = CPU_IDLE;
             end
             WAIT_INIT_DM: begin
+                $display("WAIT INIT DM");
                 cpu_init_stall = 1'b1;
                 set_curr_addr = 1'b1;
                 ex_addr = {48'h0, DM_ADDRS[dm_count]};
@@ -292,6 +294,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     next_state = WAIT_INIT_DM;
             end
             INIT_DM: begin
+                $display("INIT DM");
                 cpu_init_stall = 1'b1;
                 mem_ex_addr = curr_addr;
                 mem_ex_wrt_data = ex_wrt_data;
@@ -312,6 +315,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 end
             end
             WAIT_INIT_IM: begin
+                $display("WAIT INIT IM");
                 cpu_init_stall = 1'b1;
                 set_curr_addr = 1'b1;
                 ex_addr = {47'h0, 1'b1, IM_ADDRS[im_count]};
@@ -326,6 +330,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     next_state = WAIT_INIT_IM;
             end
             INIT_IM: begin
+                $display("INIT IM");
                 cpu_init_stall = 1'b1;
                 im_wrt_addr = curr_addr;
                 im_wrt_data = ex_wrt_data;
@@ -346,6 +351,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 end
             end
             RUN: begin
+                $display("RUN");
                 if ((mem_cpu_addr >= 16'h9000) && mem_cpu_wrt_en) begin
                     next_state = WRT_HOST;
                     ex_addr = {48'h0, mem_cpu_addr};
@@ -356,7 +362,8 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     next_state = RUN;
                 end
             end
-            WRT_HOST: begin 
+            WRT_HOST: begin
+                $display("WRT HOST"); 
                 ex_addr = {48'h0, mem_cpu_addr};
                 ex_rd_data = mem_cpu_wrt_data;
                 op_in = WRITE;
