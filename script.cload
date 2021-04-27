@@ -18,7 +18,7 @@
 ;Should set to the 17th bit
 
 .run
-.wait 0x0 0x1 1 ;configured by logan where it is TODO: change to addr xD000
+.wait 0xD000 0x1 0 ;configured by logan where it is
 ;wait til machine is done
 
 ;output end file

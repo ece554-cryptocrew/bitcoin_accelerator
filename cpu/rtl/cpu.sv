@@ -15,7 +15,6 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
             accel_rd_data, cpu_wrt_en, cpu_wrt_data, cpu_addr, ready, tx_done, rd_valid, op);
 
     input          clk, rst_n;
-    input  [15:0]  ex_addr;
     input  [31:0]  ex_wrt_data;
     input  [31:0]  accel_wrt_data;
     input  [15:0]  accel_addr;
@@ -23,6 +22,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     input          accel_rd_en;
     input          ready, tx_done, rd_valid; //TODO: to state machine
     output         accel_wrt_done, accel_rd_valid;
+    output [63:0]  ex_addr;
     output [31:0]  ex_rd_data;
     output [511:0] accel_rd_data;
     output         cpu_wrt_en;
@@ -31,10 +31,6 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     output [1:0]   op;
 
     // Net List //
-
-    logic ex_im_wrt_en;
-    logic ex_mem_wrt_en;
-    logic ex_mem_rd_en;
 
     logic [15:0]  mem_cpu_addr; 
     logic [31:0]  mem_cpu_wrt_data; 
@@ -108,11 +104,49 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     logic         stl_jb_stall;
 
     logic         cpu_init_stall;
+    
 
     localparam IFID_WIDTH = 64; // TODO: change to make pipe stages wider as needed
     localparam IDEX_WIDTH = 160;
     localparam EXMEM_WIDTH = 160;
     localparam MEMWB_WIDTH = 128;
+
+    localparam logic [15:0] DM_ADDRS [0:15] = 
+        {16'h1000, 16'h1040,
+         16'h1100, 16'h1140,
+         16'h2000, 16'h2040, 
+         16'h2100, 16'h2140,
+         16'h3000, 16'h3040,
+         16'h3100, 16'h3140,
+         16'h4000, 16'h4040,
+         16'h4100, 16'h4140};
+
+localparam logic [15:0] DM_ADDRS [0:47] = 
+        {16'h0000, 16'h0040,
+         16'h0080, 16'h00C0,
+         16'h0100, 16'h0140,
+         16'h0180, 16'h01C0,
+         16'h0200, 16'h0240,
+         16'h0280, 16'h02C0,
+         16'h0300, 16'h0340,
+         16'h0380, 16'h03C0,
+         16'h0400, 16'h0440,
+         16'h0480, 16'h04C0,
+         16'h0500, 16'h0540,
+         16'h0580, 16'h05C0,
+         16'h0600, 16'h0640,
+         16'h0680, 16'h06C0,
+         16'h0700, 16'h0740,
+         16'h0780, 16'h07C0,
+         16'h0800, 16'h0840,
+         16'h0880, 16'h08C0,
+         16'h0900, 16'h0940,
+         16'h0980, 16'h09C0,
+         16'h0A00, 16'h0A40,
+         16'h0A80, 16'h0AC0,
+         16'h0B00, 16'h0B40,
+         16'h0B80, 16'h0BC0};
+         
 
     typedef enum logic [1:0]
 	{
@@ -124,6 +158,10 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
 
     opcode op_in;
     assign op = op_in;
+
+    logic [7:0] im_count, new_im_count, dm_count, new_dm_count;
+    logic [15:0] curr_addr;
+    logic inc_curr_addr;
 
     logic [IFID_WIDTH-1:0]  IFID_in, IFID_out;
     logic [IDEX_WIDTH-1:0]  IDEX_in, IDEX_out;
@@ -176,9 +214,11 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     cpu_pipereg #(.PIPE_WIDTH(1)) CF_flag (.clk(clk), .rst_n(rst_n), .pipe_in(alu_CF), .pipe_out(CF_flg), .pipe_en(alu_CF_en));
 
     // State Machine //
-    typedef enum reg [3:0] {
+    typedef enum reg [2:0] {
         CPU_IDLE,
+        WAIT_INIT_IM,
         INIT_IM,
+        WAIT_INIT_DM,
         INIT_DM,
         RUN,
         WRT_HOST
@@ -191,34 +231,117 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
         else curr_state <= next_state;
     end
 
+    //counter
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) im_count <= 8'h0;
+        else im_count <= new_im_count;
+    end
+    //counter
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) dm_count <= 8'h0;
+        else dm_count <= new_dm_count;
+    end
+    //addr to output
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) curr_addr <= 16'h0;
+        else if (set_curr_addr) curr_addr <= DM_ADDRS[dm_count] + 4;
+        else if (inc_curr_addr) curr_addr <= curr_addr + 4;
+        
+    end
+
     always_comb begin
         next_state = CPU_IDLE; // default state
         op_in = IDLE;
-        ex_im_wrt_en = 1'b0;
-        ex_mem_wrt_en = 1'b0;
-        ex_mem_rd_en = 1'b0;
         cpu_init_stall = 1'b0;
+        mem_ex_addr = 16'h0;
+        mem_ex_wrt_data = 32'b0;
+        mem_ex_wrt_en = 1'b0;
+        mem_ex_rd_en = 1'b0;    
+        im_wrt_addr = 16'h0;
+        im_wrt_en = 1'b0;
+        im_wrt_data = 32'b0;
+        ex_addr = 64'h0;
+        inc_curr_addr = 1'b0;
+        set_curr_addr = 1'b0;
+        ex_rd_data = 32'b0;
+        new_im_count = im_count;
+        new_dm_count = dm_count;
+
         case (curr_state)
             CPU_IDLE: begin
                 cpu_init_stall = 1'b1;
                 if (ready)
-                    next_state = INIT_IM;
+                    next_state = WAIT_INIT_DM;
                 else
                     next_state = CPU_IDLE;
             end
-            INIT_IM: begin
+            WAIT_INIT_DM: begin
                 cpu_init_stall = 1'b1;
-                if (ready)
+                set_curr_addr = 1'b1;
+                ex_addr = {48'h0, DM_ADDRS[dm_count]};
+                op_in = READ;
+                if (rd_valid) begin
                     next_state = INIT_DM;
+                    mem_ex_addr = DM_ADDRS[dm_count];
+                    mem_ex_wrt_data = ex_wrt_data;
+                    mem_ex_wrt_en = 1'b1;  
+                end
                 else
-                    next_state = INIT_IM;
+                    next_state = WAIT_INIT_DM;
             end
             INIT_DM: begin
                 cpu_init_stall = 1'b1;
-                if (ready)
-                    next_state = RUN;
-                else
+                mem_ex_addr = curr_addr;
+                mem_ex_wrt_data = ex_wrt_data;
+                mem_ex_wrt_en = 1'b1;
+                inc_curr_addr = 1'b1; 
+                op_in = READ;
+                if (tx_done) begin
+                    if (dm_count >= 15) begin
+                        next_state = WAIT_INIT_IM;
+                    end
+                    else begin
+                        next_state = WAIT_INIT_DM;
+                        new_dm_count = dm_count + 1;
+                    end
+                end
+                else begin
                     next_state = INIT_DM;
+                end
+            end
+            WAIT_INIT_IM: begin
+                cpu_init_stall = 1'b1;
+                set_curr_addr = 1'b1;
+                ex_addr = {47'h0, 1'b1, IM_ADDRS[im_count]};
+                op_in = READ;
+                if (rd_valid) begin
+                    next_state = INIT_IM;
+                    im_addr = IM_ADDRS[im_count];
+                    im_wrt_data = ex_wrt_data;
+                    im_wrt_en = 1'b1;  
+                end
+                else
+                    next_state = WAIT_INIT_IM;
+            end
+            INIT_IM: begin
+                cpu_init_stall = 1'b1;
+                im_addr = curr_addr;
+                im_wrt_data = ex_wrt_data;
+                im_wrt_en = 1'b1;
+                inc_curr_addr = 1'b1; 
+                op_in = READ;
+                if (tx_done) begin
+                    if (im_count >= 47) begin
+                        next_state = RUN;
+                    end
+                    else begin
+                        next_state = WAIT_INIT_IM;
+                        new_im_count = im_count + 1;
+                    end
+                end
+                else begin
+                    next_state = INIT_IM;
+                end
             end
             RUN: begin
                 
@@ -232,7 +355,6 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     // Top Level Logic //
 
     //All External Outputs
-    assign ex_rd_data = mem_ex_rd_data;
     assign accel_rd_data = mem_accel_rd_data;
     assign cpu_wrt_en = mem_cpu_wrt_en;
     assign cpu_wrt_data = mem_cpu_wrt_data;
@@ -257,11 +379,6 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
                          (alu_Op == 8'b00111011 && ZF_flg || !NF_flg) || //bgez
                          (alu_Op == 8'b00111101) || //jmp
                          (alu_Op == 8'b00111111); //jmpi
-                         
-    //external inputs    
-    assign im_wrt_addr = ex_addr;
-    assign im_wrt_en = ex_im_wrt_en;
-    assign im_wrt_data = ex_wrt_data;
 
     //ID //TODO: done?
     assign IDEX_in[31:0] = {15'h0, ctrl_alu_op, ctrl_alu_imm_src, ctrl_rf_write_en, ctrl_datamem_write_en, ctrl_datamem_read_en, //ctrl
@@ -303,11 +420,6 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     assign mem_accel_addr = accel_addr;
     assign mem_accel_wrt_data = accel_wrt_data;
     assign mem_accel_wrt_en = accel_wrt_en;
-    
-    assign mem_ex_addr = ex_addr;
-    assign mem_ex_wrt_data = ex_wrt_data;
-    assign mem_ex_wrt_en = ex_mem_wrt_en;
-    assign mem_ex_rd_en = ex_mem_rd_en;
 
     //WB //TODO: done?
     assign rf_wrt_data = (MEMWB_out[4]) ? MEMWB_out[63:32] : MEMWB_out[95:64]; //mem : alu
