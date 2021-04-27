@@ -14,14 +14,13 @@
 /////////////////////////////////////////////////////////////////////////////////////
 module miner (
     input clk, rst_n,
-    input he_host_init,
-    input he_host_rd_ready,
-    input he_host_wr_ready,
-    input [63:0] hc_raw_address,
-    input [63:0] he_address_offset,
-    input [511:0] he_host_data_bus_read_in,
-    output [511:0] he_host_data_bus_write_out,
-    output [63:0] hc_corrected_address,
+    input host_init,
+    input host_rd_ready,
+    input host_wr_ready,
+    input [63:0] address_offset,
+    input [511:0] host_data_bus_read_in,
+    output [511:0] host_data_bus_write_out,
+    output [63:0] corrected_address,
     output host_re,
 	output host_we,
 	output host_rgo,
@@ -32,6 +31,7 @@ module miner (
     logic [31:0] hc_common_data_bus_read_in;
     logic [31:0] hc_common_data_bus_write_out;
     logic        hc_ready, tx_done, rd_valid;
+    logic [63:0] hc_raw_address;
 
     logic [31:0]  ac_accel_wrt_data;
     logic [15:0]  ac_accel_addr;
