@@ -174,17 +174,10 @@ module afu
        .host_init(go),
        .host_rd_ready(~dma.empty),
        .host_wr_ready(~dma.full),
-       //.op(mem_op), // CPU Defined
-       //.raw_address(cpu_addr), // Address in the CPU space
        .address_offset(wr_addr),
-       //.common_data_bus_read_in(cpu_out), // CPU data word bus, input
-       //.common_data_bus_write_out(cpu_in),
        .host_data_bus_read_in(dma.rd_data),
        .host_data_bus_write_out(dma.wr_data),
        .corrected_address(final_addr),
-       //.ready(ready), // Usable for the host CPU
-       //.tx_done(tx_done), // Again, notifies CPU when ever a read or write is complete
-       //.rd_valid(rd_valid), // Notifies CPU whenever the data on the databus is valid
        .host_re(local_dma_re),
        .host_we(local_dma_we),
        .host_rgo(rd_go),
