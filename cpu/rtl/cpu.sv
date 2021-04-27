@@ -111,7 +111,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     localparam EXMEM_WIDTH = 160;
     localparam MEMWB_WIDTH = 128;
 
-    localparam logic [15:0] DM_ADDRS [0:15] = 
+    localparam logic [15:0] DM_ADDRS [0:16] = 
         {16'h1000, 16'h1040,
          16'h1100, 16'h1140,
          16'h2000, 16'h2040, 
@@ -119,7 +119,8 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
          16'h3000, 16'h3040,
          16'h3100, 16'h3140,
          16'h4000, 16'h4040,
-         16'h4100, 16'h4140};
+         16'h4100, 16'h4140,
+         16'h0100};
 
 localparam logic [15:0] IM_ADDRS [0:47] = 
         {16'h0000, 16'h0040,
@@ -298,7 +299,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 inc_curr_addr = 1'b1; 
                 op_in = READ;
                 if (tx_done) begin
-                    if (dm_count >= 15) begin
+                    if (dm_count >= 16) begin
                         next_state = WAIT_INIT_IM;
                     end
                     else begin
