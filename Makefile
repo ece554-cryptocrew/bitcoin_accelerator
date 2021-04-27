@@ -20,7 +20,7 @@ LIB_CLOAD_COMMON = -luuid -lopae-cxx-core -lMPF-cxx -lMPF
 LIB_CLOAD = -lopae-c $(LIB_CLOAD_COMMON)
 LIB_CLOAD_SIM = -lopae-c-ase $(LIB_CLOAD_COMMON)
 
-all: $(LIB_DIR)/libmtcore.a class cload $(BIN_DIR)/x2b
+all: $(LIB_DIR)/libmtcore.a class cload $(BIN_DIR)/x2b $(BIN_DIR)/hash
 
 class: $(BIN_DIR)/class
 
