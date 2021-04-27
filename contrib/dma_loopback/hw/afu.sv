@@ -146,26 +146,7 @@ module afu
 	   .host_we(host_we),
 	   .host_rgo(host_rgo),
 	   .host_wgo(host_wgo)
-    );	
-   cpu
-   mock
-   (
-       .clk(clk),
-       .rst_n(~rst),
-       .ex_im_wrt_en(ex_im_wrt_en), 
-       .ex_mem_wrt_en(ex_emm_wrt_en), 
-       .ex_mem_rd_en(ex_mem_rd_en), 
-       .ex_addr(ex_addr), 
-       .ex_wrt_data(ex_wrt_data), 
-       .accel_wrt_data(accel_wrt_data),
-       .accel_addr(accel_addr),
-       .accel_wrt_en(accel_wrt_en),
-       .ex_rd_data(ex_rd_data),
-       .accel_rd_data(accel_rd_data),
-       .cpu_wrt_en(cpu_wrt_en)
-       .cpu_wrt_data(cpu_wrt_data)
-       .cpu_addr(cpu_addr)
-   );*/
+    );*/
 
    // Memory Controller module
    miner miner1(
