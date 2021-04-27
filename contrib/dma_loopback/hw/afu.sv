@@ -171,8 +171,7 @@ module afu
    );*/
 
    // Memory Controller module
-   miner
-   miner1(
+   miner miner1(
        .clk(clk),
        .rst_n(~rst),
        .host_init(go),
