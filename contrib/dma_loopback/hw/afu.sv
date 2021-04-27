@@ -192,7 +192,7 @@ module afu
    assign done = dma.wr_done;
 
    always_ff @(posedge clk) begin
-     $display("rd_go: %0h final_addr: %0h dma.rd_data: %0h", rd_go, final_addr, dma.rd_data);
+     $display("rd_go: %0h final_addr: %0h dma.rd_data: ", rd_go, final_addr);
      $display("go: %0h size: %0h", go, size);
    end
             
