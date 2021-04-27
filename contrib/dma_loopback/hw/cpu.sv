@@ -153,7 +153,6 @@ localparam logic [15:0] IM_ADDRS [0:47] =
 	{
 		IDLE = 2'b00,
 		READ = 2'b01,
-        UNUSED = 2'b10,
 		WRITE = 2'b11 
 	} opcode;
 
@@ -229,7 +228,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     
     //Transition
     always_ff @(posedge clk) begin
-        $display("CPU state: %s", curr_state);    
+        $display("CPU state: %s Op: %0h", curr_state, Op);    
         if (!rst_n) curr_state <= CPU_IDLE;
         else curr_state <= next_state;
     end
