@@ -1,4 +1,8 @@
+#include <chrono>
+#include <ctime>  
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <fstream>
 using namespace std;
 
@@ -11,7 +15,15 @@ int main(int argc, char** argv)
 		fprintf(stdout, "Usage: hash input bitcoinheader expected output hash\n");
 		return 1;
 	}
+	//Get nonce as a decimal for calculations
+	std::stringstream str;
+	std::string str1= argv[1];
+	std::string s1 = str1.substr(152, 159);
+	str << std::hex << s1;
+	unsigned int nonce;
+	str >> nonce;
 
+	//create host memor files
 	ofstream host1("host1.txt");
 	ofstream host2("host2.txt");
 	ofstream host3("host3.txt");
@@ -50,6 +62,7 @@ int main(int argc, char** argv)
 	host8.close();
 	correct.close();
 	char command[50];
+	//convert to bin files
 	sprintf (command, "bin/x2b host1.txt host1.bin");
 	system(command);
 	sprintf (command, "bin/x2b host2.txt host2.bin");
@@ -69,14 +82,25 @@ int main(int argc, char** argv)
 	sprintf (command, "bin/x2b correctHash.txt correctHash.bin");
 	system(command);
 
-
+	//instruction code
 	sprintf (command, "bin/class -i src/asmCode.asm -o instruct.bin");
 	system(command);	
-
+	//start timer
+	auto start = std::chrono::system_clock::now();
+	//run script to kick off fpga
 	sprintf (command, "bin/cload -i script.cload");
 	system(command);
+	auto end = std::chrono::system_clock::now();
+	//output timing
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+	std::cout << "total hashes: " << nonce << "\n";
+	std::cout << "hashes per second: " << elapsed_seconds.count()/nonce << " hashes per sec\n";
+
 
 	sprintf (command, "rm host*");
+	system(command);
+	sprintf(command, "rm correctHash.*");
 	system(command);
 
 
