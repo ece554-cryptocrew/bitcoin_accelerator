@@ -119,7 +119,7 @@ module afu
 
    wire [31:0] cpu_in;
    wire [31:0] cpu_out; // Todo, parameterize
-	
+	/*
    // miner netlist
    logic he_host_init, he_host_rd_ready, he_host_wr_ready;
    logic [63:0] he_raw_address, he_address_offset;
@@ -128,6 +128,7 @@ module afu
    logic host_re, host_we, host_rgo, host_wgo;
    
    // miner instantiates cpu, mem_ctrl, and accelerators	
+   
    miner 
    m1
    (
@@ -167,11 +168,11 @@ module afu
        .cpu_wrt_en(cpu_wrt_en)
        .cpu_wrt_data(cpu_wrt_data)
        .cpu_addr(cpu_addr)
-   );
+   );*/
 
    // Memory Controller module
-   mem_ctrl
-   memory(
+   miner
+   miner1(
        .clk(clk),
        .rst_n(~rst),
        .host_init(go),
@@ -192,7 +193,7 @@ module afu
        .host_we(local_dma_we),
        .host_rgo(rd_go),
        .host_wgo(wr_go)
-   );*/
+   );
 
 
    // Assign the starting addresses from the memory map.

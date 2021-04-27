@@ -47,10 +47,9 @@ module miner (
     logic         ac_upstream_write_done;
     logic         ac_upstream_read_valid;
 
-    //TODO: no wires done yet
     cpu   cpu0 (.clk(clk), 
                 .rst_n(rst_n),  
-                .ex_addr(hc_raw_address[15:0]), 
+                .ex_addr(hc_raw_address), 
                 .ex_wrt_data(hc_common_data_bus_write_out), 
                 .accel_wrt_data(ac_accel_wrt_data), 
                 .accel_addr(ac_accel_addr), 
