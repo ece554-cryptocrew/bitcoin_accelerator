@@ -198,12 +198,12 @@ module mem_ctrl
 				end
 
 				HOSTOP: begin
-					if(op == READ && host_rd_ready) begin
+					if(op_in == READ && host_rd_ready) begin
 						// Read
 						line_buffer <= host_data_bus_read_in;
 						state <= FILL;
 					end
-					else if(op == WRITE && host_wr_ready && bubble) begin
+					else if(op_in == WRITE && host_wr_ready && bubble) begin
 						// Write
 						/* Here, we should just write the data and then
 						 * return to READY when done
@@ -211,7 +211,7 @@ module mem_ctrl
 						state <= READY;
 						bubble <= 1'b0;
 					end
-					else if(op == WRITE && !bubble) begin
+					else if(op_in == WRITE && !bubble) begin
 						// Wait a cycle to let any address changes propagate down the chain.
 						bubble <= bubble + 1;
 					end
