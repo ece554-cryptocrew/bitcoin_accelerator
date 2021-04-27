@@ -22,8 +22,8 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     input          accel_rd_en;
     input          ready, tx_done, rd_valid; //TODO: to state machine
     output         accel_wrt_done, accel_rd_valid;
-    output [63:0]  ex_addr;
-    output [31:0]  ex_rd_data;
+    output logic [63:0]  ex_addr;
+    output logic [31:0]  ex_rd_data;
     output [511:0] accel_rd_data;
     output         cpu_wrt_en;
     output [31:0]  cpu_wrt_data;
@@ -121,7 +121,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
          16'h4000, 16'h4040,
          16'h4100, 16'h4140};
 
-localparam logic [15:0] DM_ADDRS [0:47] = 
+localparam logic [15:0] IM_ADDRS [0:47] = 
         {16'h0000, 16'h0040,
          16'h0080, 16'h00C0,
          16'h0100, 16'h0140,
@@ -162,6 +162,7 @@ localparam logic [15:0] DM_ADDRS [0:47] =
     logic [7:0] im_count, new_im_count, dm_count, new_dm_count;
     logic [15:0] curr_addr;
     logic inc_curr_addr;
+    logic set_curr_addr;
 
     logic [IFID_WIDTH-1:0]  IFID_in, IFID_out;
     logic [IDEX_WIDTH-1:0]  IDEX_in, IDEX_out;
@@ -261,9 +262,9 @@ localparam logic [15:0] DM_ADDRS [0:47] =
         im_wrt_en = 1'b0;
         im_wrt_data = 32'b0;
         ex_addr = 64'h0;
+        ex_rd_data = 32'h0;
         inc_curr_addr = 1'b0;
         set_curr_addr = 1'b0;
-        ex_rd_data = 32'b0;
         new_im_count = im_count;
         new_dm_count = dm_count;
 
@@ -316,7 +317,7 @@ localparam logic [15:0] DM_ADDRS [0:47] =
                 op_in = READ;
                 if (rd_valid) begin
                     next_state = INIT_IM;
-                    im_addr = IM_ADDRS[im_count];
+                    im_wrt_addr = IM_ADDRS[im_count];
                     im_wrt_data = ex_wrt_data;
                     im_wrt_en = 1'b1;  
                 end
@@ -325,7 +326,7 @@ localparam logic [15:0] DM_ADDRS [0:47] =
             end
             INIT_IM: begin
                 cpu_init_stall = 1'b1;
-                im_addr = curr_addr;
+                im_wrt_addr = curr_addr;
                 im_wrt_data = ex_wrt_data;
                 im_wrt_en = 1'b1;
                 inc_curr_addr = 1'b1; 
@@ -344,10 +345,26 @@ localparam logic [15:0] DM_ADDRS [0:47] =
                 end
             end
             RUN: begin
-                
+                if ((mem_cpu_addr >= 16'h9000) && mem_cpu_wrt_en) begin
+                    next_state = WRT_HOST;
+                    ex_addr = {48'h0, mem_cpu_addr};
+                    ex_rd_data = mem_cpu_wrt_data;
+                    op_in = WRITE;
+                end
+                else begin
+                    next_state = RUN;
+                end
             end
-            WRT_HOST: begin
-                
+            WRT_HOST: begin 
+                ex_addr = {48'h0, mem_cpu_addr};
+                ex_rd_data = mem_cpu_wrt_data;
+                op_in = WRITE;
+                if (tx_done) begin
+                    next_state = RUN;
+                end
+                else begin
+                    next_state = WRT_HOST;
+                end
             end
         endcase
     end
