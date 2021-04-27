@@ -229,7 +229,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     
     //Transition
     always_ff @(posedge clk) begin
-        $display("state: %s", curr_state);    
+        if (curr_state !== CPU_IDLE) $display("state: %s", curr_state);    
         if (!rst_n) curr_state <= CPU_IDLE;
         else curr_state <= next_state;
     end
