@@ -403,7 +403,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
 
     //ID //TODO: done?
     assign IDEX_in[31:0] = {15'h0, ctrl_alu_op, ctrl_alu_imm_src, ctrl_rf_write_en, ctrl_datamem_write_en, ctrl_datamem_read_en, //ctrl
-                            ctrl_rf_write_mem_src, ctrl_pc_src, ctrl_pc_jmp_src, stl_rw_stall, stl_jb_stall}; 
+                            ctrl_rf_write_mem_src, ctrl_pc_src, ctrl_pc_jmp_src, stl_rw_stall, stl_dec_jb_stall}; 
     assign IDEX_in[63:32] = rf_reg1;
     assign IDEX_in[95:64] = rf_reg2;
     assign IDEX_in[127:96] = {16'h0, rf_instr[15:0]}; // imm TODO: for sure sign extended?
