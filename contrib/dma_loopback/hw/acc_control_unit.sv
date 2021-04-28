@@ -335,6 +335,7 @@ always_comb begin
 
         WRITE_H0: begin
             if (HCB_START_ADDR == 16'h1000) $display("          out hash: %h", cm_out);
+            if (HCB_START_ADDR == 16'h1000) $display("          H0:%h, addr:%h", cm_out[MEM_ACC_WRITE_DATA_SIZE * 1 - 1: MEM_ACC_WRITE_DATA_SIZE * 0], (ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 0));
             // @hack: This signal should only be used for testing purposes.
             hash_done = 1;
 
@@ -352,7 +353,7 @@ always_comb begin
         end
 
         WRITE_H1: begin
-
+            if (HCB_START_ADDR == 16'h1000) $display("          H1:%h, addr:%h", cm_out[MEM_ACC_WRITE_DATA_SIZE * 2 - 1: MEM_ACC_WRITE_DATA_SIZE * 1], (ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 1));
             mem_acc_write_en    = 1'b1;
             mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 1;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 2 - 1: MEM_ACC_WRITE_DATA_SIZE * 1];
