@@ -183,7 +183,7 @@ typedef enum reg [4:0] {
 state_t curr_state, next_state;
 
 always_ff @(posedge clk) begin
-    $display("ACB:%0h; state:%s; status:%h; listen_en:%0h, listen_addr:%h", ACB_START_ADDR, curr_state, mem_listen_data, mem_listen_en, mem_listen_addr);
+    $display("  ACC ACB:%0h; state:%s; status:%h; listen_en:%0h, listen_addr:%h", ACB_START_ADDR, curr_state, mem_listen_data, mem_listen_en, mem_listen_addr);
 end
 
 // ===============
@@ -305,7 +305,7 @@ always_comb begin
             end
             else begin
                 stage_counter_rst_n = 0;
-                $display("      hash: %0h", cm_out);
+                $display("          hash: %0h", cm_out);
                 next_state = WRITE_H0;
             end
         end
