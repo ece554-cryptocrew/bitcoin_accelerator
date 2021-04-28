@@ -147,7 +147,7 @@ module mem_ctrl
 	end
 	
 	always_ff@ (posedge clk, negedge rst_n) begin
-		$display("MEM state: %s Op_in: %s host_rd_ready: %0h", state, op_in, host_rd_ready);
+		//$display("MEM state: %s Op_in: %s host_rd_ready: %0h", state, op_in, host_rd_ready);
 		if(!rst_n) begin
 			state <= STARTUP;
 			fill_count <= '0;

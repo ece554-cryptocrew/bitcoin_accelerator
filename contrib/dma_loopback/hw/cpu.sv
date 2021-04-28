@@ -228,7 +228,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     
     //Transition
     always_ff @(posedge clk) begin
-        $display("CPU state: %s Op: %0h", curr_state, op);    
+        //$display("CPU state: %s Op: %0h", curr_state, op);    
         if (!rst_n) curr_state <= CPU_IDLE;
         else curr_state <= next_state;
     end
@@ -458,5 +458,9 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign stl_wb_wrt_reg = MEMWB_out[127:96]; //wb reg
     assign stl_wb_wrt_en = MEMWB_out[7]; //wb en
     assign stl_wb_jb_stall = MEMWB_out[0]; //active jb stall
+
+    always_ff @(posedge clk) begin
+        $display("CPU pc:%0h im_instr(Op):%0h", pc_curr, im_instr[31:24]);    
+    end
 
 endmodule
