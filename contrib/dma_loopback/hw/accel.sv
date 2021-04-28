@@ -124,6 +124,6 @@ end
 // 2'b01: second half of message from data memory; need to be padded
 // 2'b1x: saved hash
 assign message = msg_sel[1] ? {intermediate_hash, 1'b1, 191'b0, 64'b1_0000_0000} : 
-                 msg_sel[0] ? {mem_acc_read_data[511:384], 1'b1, 319'b0, 64'b10_1000_0000} : mem_acc_read_data;
+                 msg_sel[0] ? {mem_acc_read_data[511:384], 1'b1, 319'b0, 64'b10_1000} : mem_acc_read_data;
 
 endmodule
