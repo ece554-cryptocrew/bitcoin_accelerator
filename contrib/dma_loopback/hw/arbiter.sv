@@ -194,4 +194,8 @@ assign client_read_data = mem_read_data;
 assign mem_read_en  = |client_read_grants;
 assign mem_write_en = |client_write_grants;
 
+always_ff @(posedge clk) begin
+    $display("      ARB upstream_read_valid: %0b client vector: %b", upstream_read_valid, client_read_valid);    
+end
+
 endmodule
