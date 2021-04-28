@@ -111,7 +111,7 @@ module miner (
 
     assign ac_accel_addr = (ac_accel_wrt_en) ? ac_accel_wrt_addr : ac_accel_rd_addr;
 
-    assign ac_upstream_write_done = 1'b0;
-    assign ac_upstream_read_valid = 1'b0;
+    assign ac_mem_acc_write_done = 1'b0;
+    assign ac_mem_acc_read_data_valid = 1'b0;
 
 endmodule
