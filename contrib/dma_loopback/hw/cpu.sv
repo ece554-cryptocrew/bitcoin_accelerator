@@ -446,12 +446,12 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign mem_accel_wrt_en = accel_wrt_en;
     assign mem_accel_rd_en = accel_rd_en;
 
-    //WB //TODO: done?
+    //WB
     assign rf_wrt_data = (MEMWB_out[4]) ? MEMWB_out[63:32] : MEMWB_out[95:64]; //mem : alu
     assign rf_wrt_sel = MEMWB_out[127:96]; //wb reg
     assign rf_wrt_en = MEMWB_out[7]; //ctrl wrt en
 
-    //Stall detection //TODO: done?
+    //Stall detection
     assign stl_if_instr = im_instr; // next instruction
     assign stl_dec_wrt_reg = rf_instr[23:20]; //wb reg
     assign stl_dec_wrt_en = ctrl_rf_write_en; //wb en
