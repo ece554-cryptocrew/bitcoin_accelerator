@@ -383,7 +383,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign IFID_in[63:32] = (stl_jb_stall | stl_rw_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
     //assign IFID_in[95:64] = pc_out; //pc pipe
     assign IFID_en = 1'b1; //TODO: fix for stalls
-    assign im_rd_addr = pc_new;
+    assign im_rd_addr = pc_curr;
     assign im_addr = (im_wrt_en) ? im_wrt_addr : im_rd_addr; // read from pc if not writing from external
     //pc logic
     // if jb instr in exec stage, take new pc if taken, keep piped-old pc if not taken. else just increment pc
@@ -460,7 +460,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign stl_wb_jb_stall = MEMWB_out[0]; //active jb stall
 
     always_ff @(posedge clk) begin
-        $display("CPU state:%s pc_curr:%0h pc_new:%0h im_instr(Op):%0h", curr_state, pc_curr, pc_new, im_instr[31:24]);    
+        $display("CPU state:%s pc_curr:%0h pc_out:%0h pc_new:%0h im_instr(Op):%0h", curr_state, pc_curr, pc_new, im_instr[31:24]);    
     end
 
 endmodule
