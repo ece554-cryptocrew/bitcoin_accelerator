@@ -50,10 +50,13 @@ logic cm_rst_hash_n, cm_is_hashing;
 logic ms_init, ms_enable;
 logic should_save_hash;
 logic [511:0] message; // message expanded by message scheduler
+logic [511:0] message_stg3;
+logic [511:0] message_buf; // block header from data memory
 logic [255:0] intermediate_hash;
 logic [31:0] w;
 logic [6:0] cm_cycle_count;
 logic [1:0] msg_sel;
+logic do_buf_hdr;
 
 
 acc_control_unit
@@ -98,6 +101,9 @@ ctrl0
     // Message select
     .msg_sel(msg_sel),
 
+    // cache block header
+    .do_buf_hdr(do_buf_hdr),
+
     .hash_done(hash_done)
 );
 
@@ -118,12 +124,22 @@ always_ff @(posedge clk) begin
         intermediate_hash <= hash;
 end
 
+// message buffer
+always_ff @(posedge clk) begin
+    if (!rst_n)
+        message_buf <= 0;
+    else if (do_buf_hdr)
+        message_buf <= mem_acc_read_data;
+end
+
 
 // next message to be expanded
 // 2'b00: first half of message from data memory
 // 2'b01: second half of message from data memory; need to be padded
 // 2'b1x: saved hash
-assign message = msg_sel[1] ? {intermediate_hash, 1'b1, 191'b0, 64'b1_0000_0000} : 
-                 msg_sel[0] ? {mem_acc_read_data[511:384], 1'b1, 319'b0, 64'b10_1000_0000} : mem_acc_read_data;
+assign message = msg_sel[1] ?  message_stg3 : (msg_sel[0] ? {message_buf[511:384], 1'b1, 319'b0, 64'b10_1000_0000} : message_buf);
+
+assign message_stg3 = {intermediate_hash, 1'b1, 191'b0, 64'b1_0000_0000}; // stage 3 message
+
 
 endmodule

@@ -79,6 +79,9 @@ module acc_control_unit
     // Message select
     msg_sel,
 
+    // Assert to cache the block header
+    do_buf_hdr,
+
     // Signals all three stages of hashing is done
     hash_done
 );
@@ -131,6 +134,8 @@ output                [$clog2(HASH_CYCLE_COUNT):0]  cm_cycle_count;
 output      reg                                     should_save_hash;
 
 output                                       [1:0]  msg_sel;
+
+output      reg                                     do_buf_hdr;
 
 output      reg                                     hash_done;
 
@@ -207,6 +212,7 @@ always_comb begin
     cm_rst_hash_n            = 1'b1;
 
     should_save_hash         = 1'b0;
+    do_buf_hdr               = 1'b0;
 
     hash_cycle_counter_en    = 1'b0;
     hash_cycle_counter_rst_n = 1'b1;
@@ -238,6 +244,7 @@ always_comb begin
             // If we interface with an Arbiter, we wait here until Arbiter gives us the data
             if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
                 next_state = WRITE_BUSY_BIT;
+                do_buf_hdr = 1;
                 if (HCB_START_ADDR == 16'h1000) $display("          read1: %h", mem_acc_read_data);
             end
             else
@@ -319,6 +326,7 @@ always_comb begin
 
             if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
                 next_state = UPD1;
+                do_buf_hdr = 1;
                 if (HCB_START_ADDR == 16'h1000) $display("          read2: %h", mem_acc_read_data);
             end
             else
