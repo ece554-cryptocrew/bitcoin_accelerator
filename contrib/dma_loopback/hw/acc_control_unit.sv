@@ -222,10 +222,10 @@ always_comb begin
     case (curr_state)
 
         IDLE: begin
+            $display("      status: %0h", mem_listen_data);
             // Wait for CPU to write the valid bit
             if (mem_listen_en && mem_listen_addr == ACB_START_ADDR && mem_listen_data[0]) begin
                 next_state = READ_MESSAGE_1;
-                $display("      status: %0h", mem_listen_data);
             end
         end
 
