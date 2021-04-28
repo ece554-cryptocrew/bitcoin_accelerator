@@ -389,7 +389,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign im_instr_in = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
     //assign IFID_in[95:64] = pc_out; //pc pipe
     assign IFID_en = 1'b1; //TODO: fix for stalls
-    assign im_rd_addr = pc_curr;
+    assign im_rd_addr = pc_new;
     assign im_addr = (im_wrt_en) ? im_wrt_addr : im_rd_addr; // read from pc if not writing from external
     //pc logic
     // if jb instr in exec stage, take new pc if taken, keep piped-old pc if not taken. else just increment pc
