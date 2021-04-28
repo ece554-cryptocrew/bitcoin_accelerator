@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 	//start timer
 	auto start = std::chrono::system_clock::now();
 	//run script to kick off fpga
-	sprintf (command, "bin/cload -i script.cload");
+	sprintf (command, "bin/cload_sim -i script.cload");
 	system(command);
 	auto end = std::chrono::system_clock::now();
 	//output timing
