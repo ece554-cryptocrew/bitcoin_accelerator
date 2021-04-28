@@ -64,7 +64,6 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     logic [15:0]  im_rd_addr;
     logic [15:0]  im_wrt_addr;
 
-    logic [31:0]  ctrl_instr;
     logic [7:0]   ctrl_alu_op;
     logic         ctrl_alu_imm_src;
     logic         ctrl_rf_write_en;
@@ -183,7 +182,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
 
     cpu_instrmem im(.clk(clk), .rst_n(rst_n), .addr(im_addr), .wrt_en(im_wrt_en), .wrt_data(im_wrt_data), .rd_out(im_instr));
 
-    cpu_control ctrl(.instr(ctrl_instr), .alu_op(ctrl_alu_op), .alu_imm_src(ctrl_alu_imm_src), .rf_write_en(ctrl_rf_write_en), .datamem_write_en(ctrl_datamem_write_en),
+    cpu_control ctrl(.instr(rf_instr), .alu_op(ctrl_alu_op), .alu_imm_src(ctrl_alu_imm_src), .rf_write_en(ctrl_rf_write_en), .datamem_write_en(ctrl_datamem_write_en),
                      .datamem_read_en(ctrl_datamem_read_en), .rf_write_mem_src(ctrl_rf_write_mem_src), .pc_src(ctrl_pc_src), .pc_jmp_src(ctrl_pc_jmp_src), .err(ctrl_err));
 
     cpu_pc pc(.clk(clk), .rst_n(rst_n), .pc_next(pc_new), .pc_out(pc_out));
@@ -438,6 +437,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign mem_accel_addr = accel_addr;
     assign mem_accel_wrt_data = accel_wrt_data;
     assign mem_accel_wrt_en = accel_wrt_en;
+    assign mem_accel_rd_en = accel_rd_en;
 
     //WB //TODO: done?
     assign rf_wrt_data = (MEMWB_out[4]) ? MEMWB_out[63:32] : MEMWB_out[95:64]; //mem : alu
