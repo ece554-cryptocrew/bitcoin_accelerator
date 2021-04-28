@@ -76,7 +76,7 @@ endcase
 end
 
 assign ZF = (Out == 32'h0);
-assign NF = (Out < 32'h0);
+assign NF = (Out[32]);
 assign OF = 1'b0; // not used for now
 assign CF = 1'b0;
 
