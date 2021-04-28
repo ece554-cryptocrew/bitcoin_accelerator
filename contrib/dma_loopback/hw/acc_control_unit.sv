@@ -182,6 +182,10 @@ typedef enum reg [4:0] {
 } state_t;
 state_t curr_state, next_state;
 
+always_ff @(posedge clk) begin
+        $display("ACC HCB:%0d state:%s", HCB_START_ADDR, curr_state);    
+    end
+
 // ===============
 // FSM
 // ===============
@@ -300,6 +304,7 @@ always_comb begin
             end
             else begin
                 stage_counter_rst_n = 0;
+                $display("      hash: %0h", cm_out);
                 next_state = WRITE_H0;
             end
         end
@@ -446,6 +451,7 @@ end
 always_ff @(posedge clk) begin
     if (!rst_n) curr_state <= IDLE;
     else        curr_state <= next_state;
+
 end
 
 // =================
