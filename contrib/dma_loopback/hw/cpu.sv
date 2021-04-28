@@ -460,7 +460,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign stl_wb_jb_stall = MEMWB_out[0]; //active jb stall
 
     always_ff @(posedge clk) begin
-        $display("CPU state:%s pc_curr:%0h pc_out:%0h pc_new:%0h im_instr(Op):%0h pc_jb_taken:%0h", curr_state, pc_curr, pc_out, pc_new, im_instr[31:24], pc_jb_taken);    
+        $display("state:%s pc_curr:%0h pc_out:%0h pc_new:%0h im_instr(Op):%0h taken:%0h, alu_Op:%0h, alu_Out:%0h", curr_state, pc_curr, pc_out, pc_new, im_instr[31:24], pc_jb_taken, alu_Op, alu_Out);    
     end
 
 endmodule
