@@ -467,8 +467,8 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign stl_wb_jb_stall = MEMWB_out[0]; //active jb stall
 
     always_ff @(posedge clk) begin
-        $display("CPU state:%s pc:%0h im:%0h addr:%0h wrData:%0h wr:%0h rd:%0h rdData:%0h, rwS:%0h", 
-            curr_state, pc_curr, im_instr[31:24], mem_cpu_addr, mem_cpu_wrt_data, mem_cpu_wrt_en, mem_cpu_rd_en, mem_cpu_rd_data, stl_rw_stall);    
+        $display("CPU state:%s pc:%0h im:%0h addr:%0h wrData:%0h wr:%0h rd:%0h rdData:%0h, reg2:%0h", 
+            curr_state, pc_curr, im_instr[31:24], mem_cpu_addr, mem_cpu_wrt_data, mem_cpu_wrt_en, mem_cpu_rd_en, mem_cpu_rd_data, IDEX_out[95:64]);    
     end
 
 endmodule
