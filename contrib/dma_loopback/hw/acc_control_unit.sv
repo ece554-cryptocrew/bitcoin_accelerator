@@ -335,13 +335,13 @@ always_comb begin
 
         WRITE_H0: begin
             if (HCB_START_ADDR == 16'h1000) $display("          out hash: %h", cm_out);
-            if (HCB_START_ADDR == 16'h1000) $display("          H0:%h, addr:%h", cm_out[MEM_ACC_WRITE_DATA_SIZE * 1 - 1: MEM_ACC_WRITE_DATA_SIZE * 0], (ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 0));
+            if (HCB_START_ADDR == 16'h1000) $display("          H0:%h, addr:%h", cm_out[MEM_ACC_WRITE_DATA_SIZE * 1 - 1: MEM_ACC_WRITE_DATA_SIZE * 0], (ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 0));
             // @hack: This signal should only be used for testing purposes.
             hash_done = 1;
 
             // Write a portion (MEM_ACC_WRITE_DATA_SIZE) of the hash to the Data Memory
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 0;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 0;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 1 - 1: MEM_ACC_WRITE_DATA_SIZE * 0];
 
             // If we interface with an Arbiter, we wait here until it has written the data
@@ -353,9 +353,9 @@ always_comb begin
         end
 
         WRITE_H1: begin
-            if (HCB_START_ADDR == 16'h1000) $display("          H1:%h, addr:%h", cm_out[MEM_ACC_WRITE_DATA_SIZE * 2 - 1: MEM_ACC_WRITE_DATA_SIZE * 1], (ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 1));
+            if (HCB_START_ADDR == 16'h1000) $display("          H1:%h, addr:%h", cm_out[MEM_ACC_WRITE_DATA_SIZE * 2 - 1: MEM_ACC_WRITE_DATA_SIZE * 1], (ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 1));
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 1;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 1;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 2 - 1: MEM_ACC_WRITE_DATA_SIZE * 1];
 
             if (IS_MEM_USE_ARBITER && mem_acc_write_done)
@@ -368,7 +368,7 @@ always_comb begin
         WRITE_H2: begin
 
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 2;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 2;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 3 - 1: MEM_ACC_WRITE_DATA_SIZE * 2];
 
             if (IS_MEM_USE_ARBITER && mem_acc_write_done)
@@ -381,7 +381,7 @@ always_comb begin
         WRITE_H3: begin
 
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 3;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 3;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 4 - 1: MEM_ACC_WRITE_DATA_SIZE * 3];
 
             if (IS_MEM_USE_ARBITER && mem_acc_write_done)
@@ -394,7 +394,7 @@ always_comb begin
         WRITE_H4: begin
 
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 4;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 4;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 5 - 1: MEM_ACC_WRITE_DATA_SIZE * 4];
 
             if (IS_MEM_USE_ARBITER && mem_acc_write_done)
@@ -407,7 +407,7 @@ always_comb begin
         WRITE_H5: begin
 
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 5;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 5;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 6 - 1: MEM_ACC_WRITE_DATA_SIZE * 5];
 
             if (IS_MEM_USE_ARBITER && mem_acc_write_done)
@@ -420,7 +420,7 @@ always_comb begin
         WRITE_H6: begin
 
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 6;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 6;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 7 - 1: MEM_ACC_WRITE_DATA_SIZE * 6];
 
             if (IS_MEM_USE_ARBITER && mem_acc_write_done)
@@ -433,7 +433,7 @@ always_comb begin
         WRITE_H7: begin
 
             mem_acc_write_en    = 1'b1;
-            mem_acc_write_addr  = ACB_H0_ADDR + MEM_ACC_WRITE_DATA_SIZE * 7;
+            mem_acc_write_addr  = ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 7;
             mem_acc_write_data  = cm_out[MEM_ACC_WRITE_DATA_SIZE * 8 - 1: MEM_ACC_WRITE_DATA_SIZE * 7];
 
             if (IS_MEM_USE_ARBITER && mem_acc_write_done)
