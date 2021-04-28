@@ -27,7 +27,6 @@ module cpu_stall(
 	output logic rw_stall,
 	output logic jb_stall);
 
-
 	assign rw_stall = (((if_instr[31:24] == 8'b00010001) || // If a type L instruction
 			       (if_instr[31:24] == 8'b00010011) ||
 			       (if_instr[31:24] == 8'b00010101) ||
