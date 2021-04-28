@@ -37,8 +37,18 @@ module cpu_rf(clk, rst_n, sel1, sel2, wrt_sel, wrt_data, wrt_en, reg1, reg2, err
         else if (wrt_en) begin
             regs[wrt_sel] <= wrt_data;
         end
-        reg1 <= regs[sel1];
-        reg2 <= regs[sel2];
+        
     end
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (wrt_en && (wrt_sel == sel1)) reg1 <= wrt_data;
+        else reg1 <= regs[sel1]; 
+    end
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (wrt_en && (wrt_sel == sel2)) reg2 <= wrt_data;
+        else reg2 <= regs[sel2]; 
+    end
+
 
 endmodule
