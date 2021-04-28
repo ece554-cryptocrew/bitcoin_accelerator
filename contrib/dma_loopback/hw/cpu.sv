@@ -388,12 +388,12 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     // if jb instr in exec stage, take new pc if taken, keep piped-old pc if not taken. else just increment pc
     assign pc_new = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? pc_curr : (pc_curr + 16'h0004);
     assign pc_curr = (pc_jb_taken) ? alu_Out : pc_out; //TODO
-    assign pc_jb_taken = (alu_Op == 8'b00110001 && ZF_flg) || //beq  //high if jb target is taken
-                         (alu_Op == 8'b00110011 && !ZF_flg) || //bneq
-                         (alu_Op == 8'b00110101 && !ZF_flg && NF_flg) || //bltz
-                         (alu_Op == 8'b00110111 && !ZF_flg && !NF_flg) || //bgtz
-                         (alu_Op == 8'b00111001 && ZF_flg || NF_flg) || //blez
-                         (alu_Op == 8'b00111011 && ZF_flg || !NF_flg) || //bgez
+    assign pc_jb_taken = (alu_Op == 8'b00110001 && (ZF_flg)) || //beq  //high if jb target is taken
+                         (alu_Op == 8'b00110011 && (!ZF_flg)) || //bneq
+                         (alu_Op == 8'b00110101 && (!ZF_flg && NF_flg)) || //bltz
+                         (alu_Op == 8'b00110111 && (!ZF_flg && !NF_flg)) || //bgtz
+                         (alu_Op == 8'b00111001 && (ZF_flg || NF_flg)) || //blez
+                         (alu_Op == 8'b00111011 && (ZF_flg || !NF_flg)) || //bgez
                          (alu_Op == 8'b00111101) || //jmp
                          (alu_Op == 8'b00111111); //jmpi
 
