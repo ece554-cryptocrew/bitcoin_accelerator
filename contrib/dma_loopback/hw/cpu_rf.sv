@@ -22,11 +22,6 @@ module cpu_rf(clk, rst_n, sel1, sel2, wrt_sel, wrt_data, wrt_en, reg1, reg2, err
     // Error if trying to write non-zero number to R0, R0 stays zero
     assign err = ((wrt_data != 32'h0) & (wrt_sel == 4'h0) & wrt_en);
 
-    // Read logic
-    // assign reg1 = regs[sel1]; // TODO: Think this is supposed to be done synchro, not sure
-    // assign reg2 = regs[sel2];
-
-
     // Write logic
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
