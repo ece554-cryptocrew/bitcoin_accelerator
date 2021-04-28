@@ -236,9 +236,10 @@ always_comb begin
             mem_acc_read_addr = HCB_START_ADDR;
 
             // If we interface with an Arbiter, we wait here until Arbiter gives us the data
-            if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid)
+            if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
                 next_state = WRITE_BUSY_BIT;
-                //if (HCB_START_ADDR == 16'h1000) $display("          read1: %0h", mem_acc_read_data);
+                if (HCB_START_ADDR == 16'h1000) $display("          read1: %0h", mem_acc_read_data);
+            end
             else
                 next_state = READ_MESSAGE_1;
 
@@ -307,7 +308,7 @@ always_comb begin
             end
             else begin
                 stage_counter_rst_n = 0;
-                //if (HCB_START_ADDR == 16'h1000) $display("          out hash: %0h", cm_out);
+                if (HCB_START_ADDR == 16'h1000) $display("          out hash: %0h", cm_out);
                 next_state = WRITE_H0;
             end
         end
@@ -317,9 +318,10 @@ always_comb begin
             mem_acc_read_en   = 1'b1;
             mem_acc_read_addr = HCB_START_ADDR + MEM_ACC_READ_DATA_SIZE;
 
-            if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid)
+            if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
                 next_state = UPD1;
-                //if (HCB_START_ADDR == 16'h1000) $display("          read2: %0h", mem_acc_read_data);
+                if (HCB_START_ADDR == 16'h1000) $display("          read2: %0h", mem_acc_read_data);
+            end
             else
                 next_state = READ_MESSAGE_2;
         end
