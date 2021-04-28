@@ -308,7 +308,6 @@ always_comb begin
             end
             else begin
                 stage_counter_rst_n = 0;
-                if (HCB_START_ADDR == 16'h1000) $display("          out hash: %h", cm_out);
                 next_state = WRITE_H0;
             end
         end
@@ -327,7 +326,7 @@ always_comb begin
         end
 
         WRITE_H0: begin
-
+            if (HCB_START_ADDR == 16'h1000) $display("          out hash: %h", cm_out);
             // @hack: This signal should only be used for testing purposes.
             hash_done = 1;
 
