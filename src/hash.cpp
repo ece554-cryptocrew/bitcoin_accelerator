@@ -98,10 +98,10 @@ int main(int argc, char** argv)
 	std::cout << "hashes per second: " << elapsed_seconds.count()/nonce << " hashes per sec\n";
 
 
-	sprintf (command, "rm host*");
-	system(command);
-	sprintf(command, "rm correctHash.*");
-	system(command);
+	//sprintf (command, "rm host*");
+	//system(command);
+	//sprintf(command, "rm correctHash.*");
+	//system(command);
 
 
 }
