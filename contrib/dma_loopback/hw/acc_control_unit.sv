@@ -182,9 +182,9 @@ typedef enum reg [4:0] {
 } state_t;
 state_t curr_state, next_state;
 
-// always_ff @(posedge clk) begin
-//     $display("ACB:%0h; state:%s; status:%h; listen_en:%0h, listen_addr:%h", ACB_START_ADDR, curr_state, mem_listen_data, mem_listen_en, mem_listen_addr);
-// end
+always_ff @(posedge clk) begin
+    $display("ACB:%0h; state:%s; status:%h; listen_en:%0h, listen_addr:%h", ACB_START_ADDR, curr_state, mem_listen_data, mem_listen_en, mem_listen_addr);
+end
 
 // ===============
 // FSM
