@@ -119,14 +119,14 @@ namespace priscas
 	bool i_inst(opcode operation)
 	{
 		return
+			operation == BGEZ ? true:
+			operation == BLEZ ? true:
 			operation == BEQ ? true :
 			operation == BNEQ ? true:
 			operation == BLTZ ? true:
 		 	operation == BGTZ ? true:
 			operation == JMP ? true:
 			operation == JMPI ? true:
-			//operation == LDI ? true:
-			//operation == STI ? true: //last two encoding a little different than rest	
 			false;
 	}
 
@@ -297,8 +297,7 @@ namespace priscas
 			if	(
 					(l_inst(current_op) && args.size() != 4) ||
 					(r_inst(current_op) && args.size() != 4) ||
-					(i_inst(current_op) && args.size() != 2 && !mem_inst(current_op)) ||
-					(i_inst(current_op) && args.size() != 3 && mem_inst(current_op)) ||
+					(i_inst(current_op) && args.size() != 2) ||
 					(d_inst(current_op) && args.size() != 2)				
 				)
 			{
@@ -329,13 +328,7 @@ namespace priscas
 
 				else
 				{
-				//	if(mem_inst(current_op)){
-				//		rs = priscas::get_reg_num(args[1].c_str());
-				//		imm = priscas::get_imm(args[2].cstr());
-				//	}
-				//	else{
 						imm = priscas::get_imm(args[1].c_str());
-				//	}
 				}
 			}
 			

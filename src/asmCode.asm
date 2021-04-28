@@ -120,7 +120,7 @@ loop_begin:
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0x1
 	SUB $g1, $g0, $g2 ; g0 - 0x400000001
-	BGEZ accel_2 //TODO make sure comparison right
+	BGEZ accel_2 ;TODO make sure comparison right
 	ADDI $g2, $zero, 0x3FFF
 	LSI $g2, $g2, 16
 	ADDI $g2, $g2, 0xFFFF 
