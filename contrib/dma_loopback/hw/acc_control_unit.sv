@@ -183,7 +183,7 @@ typedef enum reg [4:0] {
 state_t curr_state, next_state;
 
 always_ff @(posedge clk) begin
-        $display("ACC HCB:%0h state:%s", HCB_START_ADDR, curr_state);    
+    $display("ACB:%0h; state:%s; status:%h; listen_en:%0h, listen_addr:%h", ACB_START_ADDR, curr_state, mem_listen_data, mem_listen_en, mem_listen_addr);
     end
 
 // ===============
@@ -222,9 +222,6 @@ always_comb begin
     case (curr_state)
 
         IDLE: begin
-            $display("      status: %0h", mem_listen_data);
-            $display(" listen_en: %0h", mem_listen_en);
-            $display(" listen_addr: %0h", mem_listen_addr);
             // Wait for CPU to write the valid bit
             if (mem_listen_en && mem_listen_addr == ACB_START_ADDR && mem_listen_data[0]) begin
                 next_state = READ_MESSAGE_1;
