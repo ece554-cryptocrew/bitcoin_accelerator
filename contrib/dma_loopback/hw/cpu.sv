@@ -186,7 +186,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     cpu_control ctrl(.instr(ctrl_instr), .alu_op(ctrl_alu_op), .alu_imm_src(ctrl_alu_imm_src), .rf_write_en(ctrl_rf_write_en), .datamem_write_en(ctrl_datamem_write_en),
                      .datamem_read_en(ctrl_datamem_read_en), .rf_write_mem_src(ctrl_rf_write_mem_src), .pc_src(ctrl_pc_src), .pc_jmp_src(ctrl_pc_jmp_src), .err(ctrl_err));
 
-    cpu_pc pc(.clk(clk), .rst_n(rst_n), .pc_next(pc_next), .pc_out(pc_out));
+    cpu_pc pc(.clk(clk), .rst_n(rst_n), .pc_next(pc_new), .pc_out(pc_out));
 
     cpu_rf rf(.clk(clk), .rst_n(rst_n), .sel1(rf_sel1), .sel2(rf_sel2), .wrt_sel(rf_wrt_sel), 
               .wrt_data(rf_wrt_data), .wrt_en(rf_wrt_en), .reg1(rf_reg1), .reg2(rf_reg2), .err(rf_err));
@@ -460,7 +460,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign stl_wb_jb_stall = MEMWB_out[0]; //active jb stall
 
     always_ff @(posedge clk) begin
-        $display("CPU state:%s pc_curr:%0h pc_next:%0h im_instr(Op):%0h", curr_state, pc_curr, pc_next, im_instr[31:24]);    
+        $display("CPU state:%s pc_curr:%0h pc_new:%0h im_instr(Op):%0h", curr_state, pc_curr, pc_new, im_instr[31:24]);    
     end
 
 endmodule
