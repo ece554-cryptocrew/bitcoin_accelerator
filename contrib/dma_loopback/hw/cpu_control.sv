@@ -36,9 +36,10 @@ module cpu_control (instr, alu_op, alu_imm_src, rf_write_en, datamem_write_en, d
     //TODO: Add stall detection unit, assign the two stall signals
     assign alu_op = instr[31:24];
     assign alu_imm_src = instr[24];
-    assign rf_write_en = (instr[31:28] != 4'b0011) && // No RF write for jump/branch or stores
-                         (instr[31:24] != 8'b10000111) &&
-                         (instr[31:24] != 8'b10000011); 
+    assign rf_write_en = (instr[31:28] == 4'b0001) || //ALU Ops
+                         (instr[31:28] == 4'b0010) || 
+                         (instr[31:24] == 8'b10000001) || //Loads
+                         (instr[31:24] == 8'b10000101);
     assign datamem_write_en = (instr[31:24] == 8'b10000111) || //Only for stores
                               (instr[31:24] == 8'b10000011);
     assign datamem_read_en = (instr[31:24] == 8'b10000101) || //Only for loads
