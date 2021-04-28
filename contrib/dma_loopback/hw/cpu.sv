@@ -59,7 +59,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     logic [15:0]  im_addr; 
     logic         im_wrt_en;
     logic [31:0]  im_wrt_data;
-    logic [31:0]  im_instr;
+    logic [31:0]  im_instr, im_instr_in;
 
     logic [15:0]  im_rd_addr;
     logic [15:0]  im_wrt_addr;
@@ -385,7 +385,8 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     
     //IF //TODO: PC logic
     assign IFID_in[31:0] = 32'h0; //reserved //TODO: remove?
-    assign IFID_in[63:32] = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
+    assign IFID_in[63:32] = im_instr_in;
+    assign im_instr_in = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
     //assign IFID_in[95:64] = pc_out; //pc pipe
     assign IFID_en = 1'b1; //TODO: fix for stalls
     assign im_rd_addr = pc_curr;
@@ -414,8 +415,8 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign IDEX_en = 1'b1; //TODO: fix for stalls
     assign rf_instr = IFID_out[63:32];
     //(uses prev pipe stage to keep synchronus because of 1 cycle reads)
-    assign rf_sel1 = im_instr[19:16]; //Rs 
-    assign rf_sel2 = (im_instr[31:24] == 8'b10000111 || im_instr[31:24] == 8'b10000011) ? im_instr[23:20] : im_instr[15:12]; //Rd : Rt (Rd is second src reg for stores only) 
+    assign rf_sel1 = im_instr_in[19:16]; //Rs 
+    assign rf_sel2 = (im_instr_in[31:24] == 8'b10000111 || im_instr_in[31:24] == 8'b10000011) ? im_instr_in[23:20] : im_instr_in[15:12]; //Rd : Rt (Rd is second src reg for stores only) 
 
     //EX  
     assign EXMEM_in[31:0] = IDEX_out[31:0]; //ctrl
