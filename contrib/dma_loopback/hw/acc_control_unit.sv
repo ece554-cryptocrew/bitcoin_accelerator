@@ -223,6 +223,8 @@ always_comb begin
 
         IDLE: begin
             $display("      status: %0h", mem_listen_data);
+            $display(" listen_en: %0h", mem_listen_en);
+            $display(" listen_addr: %0h", mem_listen_addr);
             // Wait for CPU to write the valid bit
             if (mem_listen_en && mem_listen_addr == ACB_START_ADDR && mem_listen_data[0]) begin
                 next_state = READ_MESSAGE_1;
