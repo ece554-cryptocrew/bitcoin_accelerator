@@ -233,7 +233,7 @@ always_comb begin
 
             // Signal the Arbiter we need to read something
             mem_acc_read_en   = 1'b1;
-            mem_acc_read_addr = HCB_START_ADDR;
+            mem_acc_read_addr = HCB_START_ADDR + 16;
 
             // If we interface with an Arbiter, we wait here until Arbiter gives us the data
             if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
