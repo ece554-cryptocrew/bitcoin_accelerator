@@ -159,7 +159,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign op = op_in;
 
     logic [7:0] im_count, new_im_count, dm_count, new_dm_count;
-    logic [15:0] curr_addr;
+    logic [15:0] im_curr_addr, dm_curr_addr;
     logic inc_curr_addr;
     logic set_curr_addr;
 
@@ -244,10 +244,14 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     end
     //addr to output
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) curr_addr <= 16'h0;
-        else if (set_curr_addr) curr_addr <= DM_ADDRS[dm_count] + 4;
-        else if (inc_curr_addr) curr_addr <= curr_addr + 4;
-        
+        if (!rst_n) dm_curr_addr <= 16'h0;
+        else if (set_curr_addr) dm_curr_addr <= DM_ADDRS[dm_count] + 4;
+        else if (inc_curr_addr) dm_curr_addr <= dm_curr_addr + 4;   
+    end
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) im_curr_addr <= 16'h0;
+        else if (set_curr_addr) im_curr_addr <= IM_ADDRS[im_count] + 4;
+        else if (inc_curr_addr) im_curr_addr <= im_curr_addr + 4;   
     end
 
     always_comb begin
@@ -292,7 +296,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
             end
             INIT_DM: begin
                 cpu_init_stall = 1'b1;
-                mem_ex_addr = curr_addr;
+                mem_ex_addr = dm_curr_addr;
                 mem_ex_wrt_data = ex_wrt_data;
                 mem_ex_wrt_en = 1'b1;
                 inc_curr_addr = 1'b1; 
@@ -326,7 +330,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
             end
             INIT_IM: begin
                 cpu_init_stall = 1'b1;
-                im_wrt_addr = curr_addr;
+                im_wrt_addr = im_curr_addr;
                 im_wrt_data = ex_wrt_data;
                 im_wrt_en = 1'b1;
                 inc_curr_addr = 1'b1; 
