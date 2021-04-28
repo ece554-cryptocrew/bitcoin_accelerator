@@ -40,6 +40,7 @@ module cpu_stall(
 				
 			   ((dec_wrt_en == 1'b1 && (dec_wrt_reg == if_instr[19:16])) || // If L instruction and reading from a register that is still being written to
 			       (exec_wrt_en == 1'b1 && (exec_wrt_reg == if_instr[19:16])) ||
+				   (wb_wrt_en == 1'b1 && (wb_wrt_reg == if_instr[19:16])) ||
 			       (mem_wrt_en == 1'b1 && (mem_wrt_reg == if_instr[19:16])))) ? 1'b1 : 
 
 
@@ -54,6 +55,7 @@ module cpu_stall(
 
 				((dec_wrt_en == 1'b1 && ((dec_wrt_reg == if_instr[19:16]) || (dec_wrt_reg == if_instr[15:12]))) || // If R instruction and reading from a register that is still being written to
 			       (exec_wrt_en == 1'b1 && ((exec_wrt_reg == if_instr[19:16]) || (exec_wrt_reg == if_instr[15:12]))) ||
+				   (wb_wrt_en == 1'b1 && ((wb_wrt_reg == if_instr[19:16]) || (wb_wrt_reg == if_instr[15:12]))) ||
 			       (mem_wrt_en == 1'b1 && ((mem_wrt_reg == if_instr[19:16])   ||(mem_wrt_reg == if_instr[15:12]))))) ? 1'b1 : 
 
 																	1'b0;
