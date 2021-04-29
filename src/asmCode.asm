@@ -546,37 +546,71 @@ accel_8_end:
 correct_hash_found:
 	LDB $g0, $g4, 0x0;get final nonce value
 	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	STI $g0, $zero, 0x9000 ;send it to the host
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	LDB $g0, $g4, 0x4
 	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x9100
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9004
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	LDB $g0, $g4, 0x8
 	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0xA000
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9008
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	LDB $g0, $g4, 0xC
 	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0xA100
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x900C
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	LDB $g0, $g4, 0x10
 	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0xB000
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9010
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	LDB $g0, $g4, 0x14
 	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0xB100
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9014
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	LDB $g0, $g4, 0x18
 	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0xC000
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9018
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	LDB $g0, $g4, 0x1C
 	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0xC100
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x901C
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	ADDI $g0, $zero, 1
+	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0
 	ADDI $g1, $zero, 0
 	STI $g0, $zero, 0xD000
   		; halt and send

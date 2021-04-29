@@ -21,7 +21,7 @@
 ;wait til machine is done
 .exit
 ;output end file
-.sr -s outputHash 0x9000,0xC100
+.sr -s outputHash 0x9000,0x9100
 
 .exit
 
