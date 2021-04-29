@@ -546,60 +546,60 @@ accel_8_end:
 correct_hash_found:
 	LDB $g0, $g4, 0x0;get final nonce value
 	STI $g0, $zero, 0x9000 ;send it to the host
-	ADDI $g1, $zero, 0x0100
-busy_1:
-	SUBI $g1, $g1, 1
-	BGEZ busy_1	
+;	ADDI $g1, $zero, 0x0100
+;busy_1:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_1	
 
 	LDB $g0, $g4, 0x4
 	STI $g0, $zero, 0x9040
-	ADDI $g1, $zero, 0x0100
-busy_2:
-	SUBI $g1, $g1, 1
-	BGEZ busy_2	
+;	ADDI $g1, $zero, 0x0100
+;busy_2:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_2	
 
 	LDB $g0, $g4, 0x8
 	STI $g0, $zero, 0x9080
-	ADDI $g1, $zero, 0x0100
-busy_3:
-	SUBI $g1, $g1, 1
-	BGEZ busy_3	
+;	ADDI $g1, $zero, 0x0100
+;busy_3:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_3	
 
 	LDB $g0, $g4, 0xC
 	STI $g0, $zero, 0x90C0
-	ADDI $g1, $zero, 0x0100
-busy_4:
-	SUBI $g1, $g1, 1
-	BGEZ busy_4
+;	ADDI $g1, $zero, 0x0100
+;busy_4:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_4
 	
 	LDB $g0, $g4, 0x10
 	STI $g0, $zero, 0x9100
-	ADDI $g1, $zero, 0x0100
-busy_5:
-	SUBI $g1, $g1, 1
-	BGEZ busy_5	
+;	ADDI $g1, $zero, 0x0100
+;busy_5:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_5	
 
 	LDB $g0, $g4, 0x14
 	STI $g0, $zero, 0x9140
-	ADDI $g1, $zero, 0x0100
-busy_6:
-	SUBI $g1, $g1, 1
-	BGEZ busy_6	
+;	ADDI $g1, $zero, 0x0100
+;busy_6:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_6	
 
 	LDB $g0, $g4, 0x18
 	STI $g0, $zero, 0x9180
-	ADDI $g1, $zero, 0x0100
+;	ADDI $g1, $zero, 0x0100
 
-busy_7:
-	SUBI $g1, $g1, 1
-	BGEZ busy_7	
+;busy_7:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_7	
 
 	LDB $g0, $g4, 0x1C
 	STI $g0, $zero, 0x91C0
-	ADDI $g1, $zero, 0x0100
-busy_8:
-	SUBI $g1, $g1, 1
-	BGEZ busy_8	
+;	ADDI $g1, $zero, 0x0100
+;busy_8:
+;	SUBI $g1, $g1, 1
+;	BGEZ busy_8	
 	
 	ADDI $g0, $zero, 0x0001
 	STI $g0, $zero, 0xD000

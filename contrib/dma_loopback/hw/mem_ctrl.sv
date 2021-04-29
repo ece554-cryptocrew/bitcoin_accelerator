@@ -180,8 +180,7 @@ module mem_ctrl
 
 						if(op_in == WRITE) begin
 							state <= HOSTOP;
-							//line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};
-							line_buffer <= {480'h0, common_data_bus_read_in};					
+							line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
 						end
 						else if(op_in == READ) begin
 							state <= READY;
@@ -191,8 +190,7 @@ module mem_ctrl
 						// If we are writing, fill the line buffer with
 						// data from common data bus read in
 						if(op_in == WRITE) begin
-							//line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};	
-							line_buffer <= {480'h0, common_data_bus_read_in};				
+							line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
 						end
 						fill_count <= fill_count + 1;
 					end
@@ -204,7 +202,7 @@ module mem_ctrl
 						line_buffer <= host_data_bus_read_in;
 						state <= FILL;
 					end
-					else if(op == WRITE && host_wr_ready && bubble) begin
+					else if(op == WRITE && bubble) begin
 						// Write
 						/* Here, we should just write the data and then
 						 * return to READY when done
@@ -212,7 +210,7 @@ module mem_ctrl
 						state <= READY;
 						bubble <= 1'b0;
 					end
-					else if(op == WRITE && !bubble) begin
+					else if(op == WRITE && !bubble && host_wr_ready) begin
 						// Wait a cycle to let any address changes propagate down the chain.
 						bubble <= bubble + 1;
 					end
