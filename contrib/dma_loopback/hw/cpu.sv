@@ -102,7 +102,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     logic         stl_rw_stall;
     logic         stl_jb_stall;
 
-    logic         cpu_init_stall;
+    logic         host_stall;
     
 
     localparam IFID_WIDTH = 64; // TODO: change to make pipe stages wider as needed
@@ -257,7 +257,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     always_comb begin
         next_state = CPU_IDLE; // default state
         op_in = IDLE;
-        cpu_init_stall = 1'b0;
+        host_stall = 1'b0;
         mem_ex_addr = 16'h0;
         mem_ex_wrt_data = 32'b0;
         mem_ex_wrt_en = 1'b0;
@@ -274,14 +274,14 @@ localparam logic [15:0] IM_ADDRS [0:47] =
 
         case (curr_state)
             CPU_IDLE: begin
-                cpu_init_stall = 1'b1;
+                host_stall = 1'b1;
                 if (ready)
                     next_state = WAIT_INIT_DM;
                 else
                     next_state = CPU_IDLE;
             end
             WAIT_INIT_DM: begin
-                cpu_init_stall = 1'b1;
+                host_stall = 1'b1;
                 set_curr_addr = 1'b1;
                 ex_addr = {48'h0, DM_ADDRS[dm_count]};
                 op_in = READ;
@@ -295,7 +295,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     next_state = WAIT_INIT_DM;
             end
             INIT_DM: begin
-                cpu_init_stall = 1'b1;
+                host_stall = 1'b1;
                 mem_ex_addr = dm_curr_addr;
                 mem_ex_wrt_data = ex_wrt_data;
                 mem_ex_wrt_en = 1'b1;
@@ -315,7 +315,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 end
             end
             WAIT_INIT_IM: begin
-                cpu_init_stall = 1'b1;
+                host_stall = 1'b1;
                 set_curr_addr = 1'b1;
                 ex_addr = {47'h0, 1'b1, IM_ADDRS[im_count]};
                 op_in = READ;
@@ -329,7 +329,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     next_state = WAIT_INIT_IM;
             end
             INIT_IM: begin
-                cpu_init_stall = 1'b1;
+                host_stall = 1'b1;
                 im_wrt_addr = im_curr_addr;
                 im_wrt_data = ex_wrt_data;
                 im_wrt_en = 1'b1;
@@ -354,14 +354,14 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     ex_addr = {48'h0, mem_cpu_addr};
                     ex_rd_data = mem_cpu_wrt_data;
                     op_in = WRITE;
-                    cpu_init_stall = 1'b1;
+                    host_stall = 1'b1;
                 end
                 else begin
                     next_state = RUN;
                 end
             end
             WRT_HOST: begin
-                //cpu_init_stall = 1'b1;
+                //host_stall = 1'b1;
                 ex_addr = {48'h0, mem_cpu_addr};
                 ex_rd_data = mem_cpu_wrt_data;
                 op_in = WRITE;
@@ -370,7 +370,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 end
                 else begin
                     next_state = WRT_HOST;
-                    cpu_init_stall = 1'b1;
+                    host_stall = 1'b1;
                 end
             end
         endcase
@@ -387,15 +387,15 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     //IF //TODO: PC logic
     assign IFID_in[31:0] = 32'h0; //reserved //TODO: remove?
     assign IFID_in[63:32] = im_instr_in;
-    assign im_instr_in = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
+    assign im_instr_in = (stl_jb_stall | stl_rw_stall | host_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
     //assign IFID_in[95:64] = pc_out; //pc pipe
-    assign IFID_en = !cpu_init_stall; //TODO: fix for stalls
+    assign IFID_en = !host_stall; //TODO: fix for stalls
     assign im_rd_addr = pc_new;
     assign im_addr = (im_wrt_en) ? im_wrt_addr : im_rd_addr; // read from pc if not writing from external
     //pc logic
     // if jb instr in exec stage, take new pc if taken, keep piped-old pc if not taken. else just increment pc
-    assign pc_new = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? pc_curr : (pc_curr + 16'h0004);
-    assign pc_curr = (pc_jb_taken && !cpu_init_stall) ? alu_Out : pc_out; //TODO
+    assign pc_new = (stl_jb_stall | stl_rw_stall | host_stall) ? pc_curr : (pc_curr + 16'h0004);
+    assign pc_curr = (pc_jb_taken && !host_stall) ? alu_Out : pc_out; //TODO
     assign pc_jb_taken = (alu_Op == 8'b00110001 && (ZF_flg)) || //beq  //high if jb target is taken
                          (alu_Op == 8'b00110011 && (!ZF_flg)) || //bneq
                          (alu_Op == 8'b00110101 && (!ZF_flg && NF_flg)) || //bltz
@@ -413,7 +413,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign IDEX_in[127:96] = {16'h0, rf_instr[15:0]}; // imm TODO: for sure sign extended?
     assign IDEX_in[159:128] = rf_instr[23:20]; //wb reg
     //assign IDEX_in[191:160] = IDEX_in[95:64]; //pc piped
-    assign IDEX_en = !cpu_init_stall; //TODO: fix for stalls
+    assign IDEX_en = !host_stall; //TODO: fix for stalls
     assign rf_instr = IFID_out[63:32];
     //(uses prev pipe stage to keep synchronus because of 1 cycle reads)
     assign rf_sel1 = im_instr_in[19:16]; //Rs 
@@ -425,7 +425,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign EXMEM_in[95:64] = IDEX_out[95:64]; //pass reg2 for mem data
     assign EXMEM_in[127:96] = IDEX_out[159:128]; //wb reg pass through
     //assign EXMEM_in[159:128] = IDEX_out[191:160]; // pc piped
-    assign EXMEM_en = !cpu_init_stall; //TODO: fix for stalls
+    assign EXMEM_en = !host_stall; //TODO: fix for stalls
     assign alu_A = IDEX_out[63:32]; //reg1
     assign alu_B = (IDEX_out[8]) ? IDEX_out[127:96] : IDEX_out[95:64]; //imm : reg2
     assign alu_Op = IDEX_out[16:9];
@@ -435,7 +435,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign MEMWB_in[63:32] = mem_cpu_rd_data; //cpu rd out data
     assign MEMWB_in[95:64] = EXMEM_out[63:32]; //from alu out, op result pass through
     assign MEMWB_in[127:96] = EXMEM_out[127:96]; //wb reg pass through
-    assign MEMWB_en = !cpu_init_stall; //TODO: fix for stalls
+    assign MEMWB_en = !host_stall; //TODO: fix for stalls
     //(uses prev pipe stage to keep synchronus because of 1 cycle reads)
     assign mem_cpu_addr = alu_Out;//EXMEM_out[63:32]; //from alu out, addr for mem 
     assign mem_cpu_wrt_data = IDEX_out[95:64];//EXMEM_out[95:64]; //from reg2 
@@ -469,7 +469,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
 
     always_ff @(posedge clk) begin
         $display("CPU state:%s pc:%0h im:%0h | addr:%0h wrData:%0h wr:%0h rd:%0h rdData:%0h Op:%0h | jb_taken:%0h", 
-            curr_state, pc_curr, im_instr[31:24], mem_cpu_addr, mem_cpu_wrt_data, mem_cpu_wrt_en, mem_cpu_rd_en, mem_cpu_rd_data, alu_Out, pc_jb_taken);    
+            curr_state, pc_curr, im_instr[31:24], mem_cpu_addr, mem_cpu_wrt_data, mem_cpu_wrt_en, mem_cpu_rd_en, mem_cpu_rd_data, alu_Op, pc_jb_taken);    
     end
 
 endmodule

@@ -49,6 +49,10 @@ module miner (
     logic         ac_upstream_write_done;
     logic         ac_upstream_read_valid;
 
+    always_ff @(posedge clk) begin
+        if (host_wgo | host_we) $display("                  MINER host_wgo:%h host_we:%h wData:%0h", host_wgo, host_we, host_data_bus_write_out);    
+    end
+    
     cpu   cpu0 (.clk(clk), 
                 .rst_n(rst_n),  
                 .ex_addr(hc_raw_address), 
