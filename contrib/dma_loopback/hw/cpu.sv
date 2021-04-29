@@ -82,7 +82,7 @@ module cpu (clk, rst_n, ex_addr, ex_wrt_data, accel_wrt_data, accel_addr,
     logic [3:0]   rf_sel1, rf_sel2, rf_wrt_sel;
     logic [31:0]  rf_wrt_data;
     logic         rf_wrt_en;
-    logic [31:0]  rf_reg1, reg2;
+    logic [31:0]  rf_reg1, rf_reg2;
     logic         rf_err;
     logic [31:0]  rf_instr;
 
