@@ -119,34 +119,6 @@ module afu
 
    wire [31:0] cpu_in;
    wire [31:0] cpu_out; // Todo, parameterize
-	/*
-   // miner netlist
-   logic he_host_init, he_host_rd_ready, he_host_wr_ready;
-   logic [63:0] he_raw_address, he_address_offset;
-   logic [511:0] he_host_data_bus_read_in, he_host_data_bus_write_out;
-   logic [63:0] he_corrected_address;
-   logic host_re, host_we, host_rgo, host_wgo;
-   
-   // miner instantiates cpu, mem_ctrl, and accelerators	
-   
-   miner 
-   m1
-   (
-	   .clk(clk), 
-	   .rst_n(~rst),
-	   .he_host_init(he_host_init),
-	   .he_host_rd_ready(he_host_rd_ready),
-	   .he_host_wr_ready(he_host_wr_ready),
-	   .hc_raw_address(he_raw_address),
-	   .he_address_offset(he_address_offset),
-	   .he_host_data_bus_read_in(he_host_data_bus_read_in),
-	   .he_host_data_bus_write_out(he_host_data_bus_write_out),
-	   .hc_corrected_address(hc_corrected_address),
-	   .host_re(host_re),
-	   .host_we(host_we),
-	   .host_rgo(host_rgo),
-	   .host_wgo(host_wgo)
-    );*/
 
    // Memory Controller module
    miner miner1(
@@ -154,7 +126,8 @@ module afu
        .rst_n(~rst),
        .host_init(go),
        .host_rd_ready(~dma.empty),
-       .host_wr_ready(~dma.full),
+       //.host_wr_ready(~dma.full),
+       .host_wr_ready(~dma.full && dma.wr_done),
        .address_offset(wr_addr),
        .host_data_bus_read_in(dma.rd_data),
        .host_data_bus_write_out(dma.wr_data),
