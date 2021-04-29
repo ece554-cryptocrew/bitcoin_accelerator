@@ -545,73 +545,63 @@ accel_8_end:
 
 correct_hash_found:
 	LDB $g0, $g4, 0x0;get final nonce value
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
 	STI $g0, $zero, 0x9000 ;send it to the host
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	ADDI $g1, $zero, 0x0100
+busy_1:
+	SUBI $g1, $g1, 1
+	BGEZ busy_1	
+
 	LDB $g0, $g4, 0x4
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x9004
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9040
+	ADDI $g1, $zero, 0x0100
+busy_2:
+	SUBI $g1, $g1, 1
+	BGEZ busy_2	
+
 	LDB $g0, $g4, 0x8
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x9008
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9080
+	ADDI $g1, $zero, 0x0100
+busy_3:
+	SUBI $g1, $g1, 1
+	BGEZ busy_3	
+
 	LDB $g0, $g4, 0xC
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x900C
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x90C0
+	ADDI $g1, $zero, 0x0100
+busy_4:
+	SUBI $g1, $g1, 1
+	BGEZ busy_4
+	
 	LDB $g0, $g4, 0x10
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x9010
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9100
+	ADDI $g1, $zero, 0x0100
+busy_5:
+	SUBI $g1, $g1, 1
+	BGEZ busy_5	
+
 	LDB $g0, $g4, 0x14
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x9014
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9140
+	ADDI $g1, $zero, 0x0100
+busy_6:
+	SUBI $g1, $g1, 1
+	BGEZ busy_6	
+
 	LDB $g0, $g4, 0x18
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x9018
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9180
+	ADDI $g1, $zero, 0x0100
+
+busy_7:
+	SUBI $g1, $g1, 1
+	BGEZ busy_7	
+
 	LDB $g0, $g4, 0x1C
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	STI $g0, $zero, 0x901C
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g0, $zero, 1
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
-	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x91C0
+	ADDI $g1, $zero, 0x0100
+busy_8:
+	SUBI $g1, $g1, 1
+	BGEZ busy_8	
+	
+	ADDI $g0, $zero, 0x0001
 	STI $g0, $zero, 0xD000
   		; halt and send
 		; are we going to package the header for transmission to the bitcoin network? 
