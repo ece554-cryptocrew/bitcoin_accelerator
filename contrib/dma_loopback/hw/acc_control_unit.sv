@@ -245,7 +245,7 @@ always_comb begin
             if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
                 next_state = WRITE_BUSY_BIT;
                 do_buf_hdr = 1;
-                if (HCB_START_ADDR == 16'h1000) $display("          read1: %h", mem_acc_read_data);
+                //if (HCB_START_ADDR == 16'h1000) $display("          read1: %h", mem_acc_read_data);
             end
             else
                 next_state = READ_MESSAGE_1;
