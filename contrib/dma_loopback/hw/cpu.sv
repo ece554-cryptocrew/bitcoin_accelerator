@@ -275,9 +275,10 @@ localparam logic [15:0] IM_ADDRS [0:47] =
         case (curr_state)
             CPU_IDLE: begin
                 host_stall = 1'b1;
-                if (ready)
+                if (ready) begin
                     next_state = WAIT_INIT_DM;
                     $display("CPU state: %s", next_state);
+                end
                 else
                     next_state = CPU_IDLE;
             end
