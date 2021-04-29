@@ -327,14 +327,14 @@ always_comb begin
             if (IS_MEM_USE_ARBITER && mem_acc_read_data_valid) begin
                 next_state = UPD1;
                 do_buf_hdr = 1;
-                //if (HCB_START_ADDR == 16'h1000) $display("          read2: %h", mem_acc_read_data);
+                //if (HCB_START_ADDR == 16'h1000) $display("  : %h", mem_acc_read_data);
             end
             else
                 next_state = READ_MESSAGE_2;
         end
 
         WRITE_H0: begin
-            //if (HCB_START_ADDR == 16'h1000) $display("          out hash: %h", cm_out);
+            $display("     HASH acc_addr: %h, hash: %h", HCB_START_ADDR, cm_out);
             //if (HCB_START_ADDR == 16'h1000) $display("          H0:%h, addr:%h", cm_out[MEM_ACC_WRITE_DATA_SIZE * 1 - 1: MEM_ACC_WRITE_DATA_SIZE * 0], (ACB_H0_ADDR + (MEM_ACC_WRITE_DATA_SIZE/8) * 0));
             // @hack: This signal should only be used for testing purposes.
             hash_done = 1;

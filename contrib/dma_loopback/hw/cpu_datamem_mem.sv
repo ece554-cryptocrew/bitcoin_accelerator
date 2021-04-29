@@ -15,6 +15,7 @@
 // Mem Map: 
 //
 // Host Communication (from host)
+// (80 Bytes each)
 // 0x1000 (HCB_0)
 // 0x1100 (HCB_1)
 // 0x2000 (HCB_2)
@@ -25,6 +26,7 @@
 // 0x4100 (HCB_7)
 //
 // Accelerator Communication
+// (80 Bytes each)
 // 0x5000 (ACB_0)
 // 0x5100 (ACB_1)
 // 0x6000 (ACB_2)
@@ -35,6 +37,7 @@
 // 0x8100 (ACB_7)
 //
 // Host Communication (to host)
+// (80 Bytes each)
 // 0x9000 (FCB_0)
 // 0x9100 (FCB_1)
 // 0xA000 (FCB_2)
@@ -44,8 +47,11 @@
 // 0xC000 (FCB_6)
 // 0xC100 (FCB_7)
 //
-// Stack
-// 0xD000-0xFFFF
+// Status for Host (4 Bytes)
+// 0xD000
+//
+// Stack    
+// 0xD004 - 0xFFFF
 //
 /////////////////////////////////////////////////////////////////////////////////////
 
