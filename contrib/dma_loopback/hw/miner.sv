@@ -50,7 +50,7 @@ module miner (
     logic         ac_upstream_read_valid;
 
     always_ff @(posedge clk) begin
-        if (host_wgo | host_we) $display("                  MINER host_wgo:%h host_we:%h wData:%0h", host_wgo, host_we, host_data_bus_write_out);    
+        if (host_wgo | host_we) $display("                  MINER host_wgo:%h host_we:%h addr:%h wData:%0h", host_wgo, host_we, corrected_address, host_data_bus_write_out);    
     end
     
     cpu   cpu0 (.clk(clk), 
