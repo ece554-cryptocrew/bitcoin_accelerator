@@ -361,7 +361,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 end
             end
             WRT_HOST: begin
-                cpu_init_stall = 1'b1;
+                //cpu_init_stall = 1'b1;
                 ex_addr = {48'h0, mem_cpu_addr};
                 ex_rd_data = mem_cpu_wrt_data;
                 op_in = WRITE;
@@ -370,6 +370,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 end
                 else begin
                     next_state = WRT_HOST;
+                    cpu_init_stall = 1'b1;
                 end
             end
         endcase
