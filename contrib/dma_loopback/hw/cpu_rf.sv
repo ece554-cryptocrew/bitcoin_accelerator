@@ -47,9 +47,9 @@ module cpu_rf(clk, rst_n, sel1, sel2, wrt_sel, wrt_data, wrt_en, reg1, reg2, err
         else reg2 <= regs[sel2]; 
     end
 
-    always_ff @(posedge clk) begin
-        $display("                          R0:%0h R1:%0h R2:%0h R3:%0h R4:%0h R5:%0h R6:%0h R7:%0h R8:%0h", regs[0], regs[1], regs[2], regs[3], regs[4], regs[5], regs[6], regs[7], regs[8]);
-    end
+    // always_ff @(posedge clk) begin
+    //     $display("                          R0:%0h R1:%0h R2:%0h R3:%0h R4:%0h R5:%0h R6:%0h R7:%0h R8:%0h", regs[0], regs[1], regs[2], regs[3], regs[4], regs[5], regs[6], regs[7], regs[8]);
+    // end
 
 
 endmodule
