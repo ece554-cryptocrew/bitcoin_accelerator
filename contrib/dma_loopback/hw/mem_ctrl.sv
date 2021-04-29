@@ -21,13 +21,13 @@ module mem_ctrl
 (
 	input wire clk,
 	input wire rst_n,
-	input wire host_init, // from host, not to cpu
+	input wire host_init,
 	input wire host_rd_ready,
 	input wire host_wr_ready,
 
 	input logic [1:0] op,
-	input wire [ADDR_BITCOUNT-1:0] raw_address, //from the cpu to the mem_ctrl
-	input wire [ADDR_BITCOUNT-1:0] address_offset, // from host, not to cpu
+	input wire [ADDR_BITCOUNT-1:0] raw_address,
+	input wire [ADDR_BITCOUNT-1:0] address_offset,
 
 	input logic [WORD_SIZE-1:0] common_data_bus_read_in, 
 	output logic [WORD_SIZE-1:0] common_data_bus_write_out, 
@@ -35,11 +35,11 @@ module mem_ctrl
 	input logic [CL_SIZE_WIDTH-1:0] host_data_bus_read_in,
 	output logic [CL_SIZE_WIDTH-1:0] host_data_bus_write_out,
 
-	output logic [ADDR_BITCOUNT-1:0] corrected_address, //output to host, not from cpu
+	output logic [ADDR_BITCOUNT-1:0] corrected_address,
 
-	output logic ready, //stall until ready 
-	output logic tx_done, //last word of read from host 
-	output logic rd_valid, // read is ready from host, first word of 64 byte read
+	output logic ready,
+	output logic tx_done,
+	output logic rd_valid,
 	output logic host_re, // might need since controls fifo shifting...
 	output logic host_we,
 	output logic host_rgo,
@@ -107,7 +107,7 @@ module mem_ctrl
 
 			HOSTOP: begin
 
-				if(op_in == WRITE) begin
+				if(op == WRITE) begin
 					host_wgo = 1'b1;
 
 					if(host_wr_ready && bubble) begin
@@ -119,7 +119,7 @@ module mem_ctrl
 						host_we = 1'b1;
 					end
 				end	
-				else if(op_in == READ) begin
+				else if(op == READ) begin
 				// Read
 				/* Just fill the cache line buffer with a single read
 				 */
@@ -129,7 +129,7 @@ module mem_ctrl
 				
 			FILL: begin
 
-				if(op_in == READ) begin
+				if(op == READ) begin
 					host_re = 1'b1;
 					rd_valid = 1'b1;
 
@@ -147,7 +147,6 @@ module mem_ctrl
 	end
 	
 	always_ff@ (posedge clk, negedge rst_n) begin
-		//$display("MEM state: %s Op_in: %s host_rd_ready: %0h", state, op_in, host_rd_ready);
 		if(!rst_n) begin
 			state <= STARTUP;
 			fill_count <= '0;
@@ -181,8 +180,7 @@ module mem_ctrl
 
 						if(op_in == WRITE) begin
 							state <= HOSTOP;
-							//line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};
-							line_buffer <= {480'h0, common_data_bus_read_in};					
+							line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
 						end
 						else if(op_in == READ) begin
 							state <= READY;
@@ -192,20 +190,19 @@ module mem_ctrl
 						// If we are writing, fill the line buffer with
 						// data from common data bus read in
 						if(op_in == WRITE) begin
-							//line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};
-							line_buffer <= {480'h0, common_data_bus_read_in};					
+							line_buffer <= {common_data_bus_read_in, line_buffer[CL_SIZE_WIDTH-1:WORD_SIZE]};					
 						end
 						fill_count <= fill_count + 1;
 					end
 				end
 
 				HOSTOP: begin
-					if(op_in == READ && host_rd_ready) begin
+					if(op == READ && host_rd_ready) begin
 						// Read
 						line_buffer <= host_data_bus_read_in;
 						state <= FILL;
 					end
-					else if(op_in == WRITE && host_wr_ready && bubble) begin
+					else if(op == WRITE && host_wr_ready && bubble) begin
 						// Write
 						/* Here, we should just write the data and then
 						 * return to READY when done
@@ -213,7 +210,7 @@ module mem_ctrl
 						state <= READY;
 						bubble <= 1'b0;
 					end
-					else if(op_in == WRITE && !bubble) begin
+					else if(op == WRITE && !bubble) begin
 						// Wait a cycle to let any address changes propagate down the chain.
 						bubble <= bubble + 1;
 					end

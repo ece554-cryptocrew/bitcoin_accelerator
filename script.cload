@@ -17,11 +17,10 @@
 ;Should set to the 17th bit
 
 .run
-.wait 0xD000 0x0001 0  ;configured by logan where it is
+.wait 0xD000 0x0001 0 
 ;wait til machine is done
-.exit
 ;output end file
-.sr -s outputHash 0x9000,0x9100
+.sr -s outputHash 0x9000,0x9200
 
 .exit
 
