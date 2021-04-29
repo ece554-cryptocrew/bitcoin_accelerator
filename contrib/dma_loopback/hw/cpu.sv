@@ -373,6 +373,31 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     host_stall = 1'b1;
                 end
             end
+            // RUN: begin
+            //     if ((mem_cpu_addr = 16'hD000) && mem_cpu_wrt_en) begin
+            //         next_state = WRT_HOST;
+            //         ex_addr = {48'h0, mem_cpu_addr};
+            //         ex_rd_data = mem_cpu_wrt_data;
+            //         op_in = WRITE;
+            //         host_stall = 1'b1;
+            //     end
+            //     else begin
+            //         next_state = RUN;
+            //     end
+            // end
+            // WRT_HOST: begin
+            //     //host_stall = 1'b1;
+            //     ex_addr = {48'h0, mem_cpu_addr};
+            //     ex_rd_data = mem_cpu_wrt_data;
+            //     op_in = WRITE;
+            //     if (tx_done) begin
+            //         next_state = RUN;
+            //     end
+            //     else begin
+            //         next_state = WRT_HOST;
+            //         host_stall = 1'b1;
+            //     end
+            // end
         endcase
     end
 

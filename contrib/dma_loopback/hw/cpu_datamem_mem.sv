@@ -135,8 +135,23 @@ module cpu_datamem_mem (clk, rst_n, addr, wrt_data, wrt_en, rd_data);
     // Priority goes to CPU write if both asserted, but also throws error
     always_ff @ (posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            for (integer i = 0; i < MEM_SIZE; i = i + 1) begin
-                data_mem[i] <= 8'h0;
+            for (integer i = 0; i < MEM_SIZE/16; i = i + 1) begin
+                data_mem[i*16] <= 8'h0;
+                data_mem[i*16+1] <= 8'h0;
+                data_mem[i*16+2] <= 8'h0;
+                data_mem[i*16+3] <= 8'h0;
+                data_mem[i*16+4] <= 8'h0;
+                data_mem[i*16+5] <= 8'h0;
+                data_mem[i*16+6] <= 8'h0;
+                data_mem[i*16+7] <= 8'h0;
+                data_mem[i*16+8] <= 8'h0;
+                data_mem[i*16+9] <= 8'h0;
+                data_mem[i*16+10] <= 8'h0;
+                data_mem[i*16+11] <= 8'h0;
+                data_mem[i*16+12] <= 8'h0;
+                data_mem[i*16+13] <= 8'h0;
+                data_mem[i*16+14] <= 8'h0;
+                data_mem[i*16+15] <= 8'h0;
             end
         end
         else if (wrt_en) begin
