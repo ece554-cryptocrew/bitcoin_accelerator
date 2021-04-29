@@ -388,7 +388,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign IFID_in[63:32] = im_instr_in;
     assign im_instr_in = (stl_jb_stall | stl_rw_stall | cpu_init_stall) ? 32'h0 : im_instr; //injected nop if active stall : instruction
     //assign IFID_in[95:64] = pc_out; //pc pipe
-    assign IFID_en = 1'b1; //TODO: fix for stalls
+    assign IFID_en = !cpu_init_stall; //TODO: fix for stalls
     assign im_rd_addr = pc_new;
     assign im_addr = (im_wrt_en) ? im_wrt_addr : im_rd_addr; // read from pc if not writing from external
     //pc logic
@@ -412,7 +412,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign IDEX_in[127:96] = {16'h0, rf_instr[15:0]}; // imm TODO: for sure sign extended?
     assign IDEX_in[159:128] = rf_instr[23:20]; //wb reg
     //assign IDEX_in[191:160] = IDEX_in[95:64]; //pc piped
-    assign IDEX_en = 1'b1; //TODO: fix for stalls
+    assign IDEX_en = !cpu_init_stall; //TODO: fix for stalls
     assign rf_instr = IFID_out[63:32];
     //(uses prev pipe stage to keep synchronus because of 1 cycle reads)
     assign rf_sel1 = im_instr_in[19:16]; //Rs 
@@ -424,7 +424,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign EXMEM_in[95:64] = IDEX_out[95:64]; //pass reg2 for mem data
     assign EXMEM_in[127:96] = IDEX_out[159:128]; //wb reg pass through
     //assign EXMEM_in[159:128] = IDEX_out[191:160]; // pc piped
-    assign EXMEM_en = 1'b1; //TODO: fix for stalls
+    assign EXMEM_en = !cpu_init_stall; //TODO: fix for stalls
     assign alu_A = IDEX_out[63:32]; //reg1
     assign alu_B = (IDEX_out[8]) ? IDEX_out[127:96] : IDEX_out[95:64]; //imm : reg2
     assign alu_Op = IDEX_out[16:9];
@@ -434,7 +434,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
     assign MEMWB_in[63:32] = mem_cpu_rd_data; //cpu rd out data
     assign MEMWB_in[95:64] = EXMEM_out[63:32]; //from alu out, op result pass through
     assign MEMWB_in[127:96] = EXMEM_out[127:96]; //wb reg pass through
-    assign MEMWB_en = 1'b1; //TODO: fix for stalls
+    assign MEMWB_en = !cpu_init_stall; //TODO: fix for stalls
     //(uses prev pipe stage to keep synchronus because of 1 cycle reads)
     assign mem_cpu_addr = alu_Out;//EXMEM_out[63:32]; //from alu out, addr for mem 
     assign mem_cpu_wrt_data = IDEX_out[95:64];//EXMEM_out[95:64]; //from reg2 
