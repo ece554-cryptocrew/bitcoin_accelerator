@@ -119,16 +119,18 @@ loop_begin:
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
 	;ADDI $g2, $g2, 0x1
-	SUBI $g1, $g0, 0x0003 ; g0 - 0x400000001
+	SUBI $g1, $g0, 0x0003 ; g0 - 3
 	BGEZ accel_2 ;TODO make sure comparison right
 	;ADDI $g2, $zero, 0x3FFF
 	;LSI $g2, $g2, 16
 	;ADDI $g2, $g2, 0xFFFF 
-	SUBI $g1, $g0, 0x0001 ; g0 - 0x3FFFFFFF
+	SUBI $g1, $g0, 0x0001 ; g0 - 1
 	BLEZ accel_2
 
-	LDI $g1, $zero, 0x5008 ; Get first part the output hash
-	SUB $g1, $g0, $g6 ;See if first part of hash is correct
+	LDI $g0, $zero, 0x5008 ; Get first part the output hash
+	ADDI $g5, $g6, 0
+	ADDI $g1, $zero,66
+	SUB $g1, $g6, $g0 ;See if first part of hash is correct
 	BNEQ accel_1_end
 	LDI $g0, $zero, 0x500C ;Second
 	SUB $g1, $g0, $g7
@@ -151,7 +153,7 @@ loop_begin:
 	LDI $g0, $zero, 0x5024
 	SUB $g1, $g0, $g13
 	BNEQ  accel_1_end
-	ADDI $g4, $zero, 0x1054 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x5008 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_1_end:
@@ -160,6 +162,7 @@ accel_1_end:
 	ADDI $g14, $g14, 1 ; Increament hash number	
 ;	ADDI $g2, $zero, 0x4000
 ;	LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x5000 
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -202,7 +205,7 @@ accel_2:
 	LDI $g0, $zero, 0x5124
 	SUB $g1, $g0, $g13
 	BNEQ  accel_2_end
-	ADDI $g4, $zero, 0x1154 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x5108 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_2_end:
@@ -211,6 +214,7 @@ accel_2_end:
 	ADDI $g14, $g14, 1 ; Increament hash number
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x5100 
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -253,7 +257,7 @@ accel_3:
 	LDI $g0, $zero, 0x6024
 	SUB $g1, $g0, $g13
 	BNEQ  accel_3_end
-	ADDI $g4, $zero, 0x2054 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x6008 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_3_end:
@@ -262,6 +266,7 @@ accel_3_end:
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x6000	
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -306,7 +311,7 @@ accel_4:
 	LDI $g0, $zero, 0x6124
 	SUB $g1, $g0, $g13
 	BNEQ  accel_4_end
-	ADDI $g4, $zero, 0x2154 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x6108 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_4_end:
@@ -315,6 +320,7 @@ accel_4_end:
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x6100
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -358,7 +364,7 @@ accel_5:
 	LDI $g0, $zero, 0x7024
 	SUB $g1, $g0, $g13
 	BNEQ  accel_5_end
-	ADDI $g4, $zero, 0x3054 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x7008 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_5_end:
@@ -367,6 +373,7 @@ accel_5_end:
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x7000
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -388,7 +395,7 @@ accel_6:
 
 	LDI $g0, $zero, 0x7108 ; Get first part the output hash
 	SUB $g1, $g0, $g6 ;See if first part of hash is correct
-	BNEQ accel_3_end
+	BNEQ accel_6_end
 	LDI $g0, $zero, 0x710C ;Second
 	SUB $g1, $g0, $g7
 	BNEQ accel_6_end
@@ -410,7 +417,7 @@ accel_6:
 	LDI $g0, $zero, 0x7124
 	SUB $g1, $g0, $g13
 	BNEQ  accel_6_end
-	ADDI $g4, $zero, 0x3154 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x7108 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_6_end:
@@ -419,6 +426,7 @@ accel_6_end:
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x7100
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -463,7 +471,7 @@ accel_7:
 	LDI $g0, $zero, 0x8024
 	SUB $g1, $g0, $g13
 	BNEQ  accel_7_end
-	ADDI $g4, $zero, 0x4054 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x8008 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_7_end:
@@ -472,6 +480,7 @@ accel_7_end:
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x8000
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -516,7 +525,7 @@ accel_8:
 	LDI $g0, $zero, 0x8124
 	SUB $g1, $g0, $g13
 	BNEQ  accel_8_end
-	ADDI $g4, $zero, 0x4154 ;Store address to then save final hash
+	ADDI $g4, $zero, 0x8108 ;Store address to then save final hash
 	JMP correct_hash_found ;If passes all tests then hash matches and can finish 
 
 accel_8_end:
@@ -525,6 +534,7 @@ accel_8_end:
 	ADDI $g14, $g14, 1 ; Increament hash number	
 	;ADDI $g2, $zero, 0x4000
 	;LSI $g2, $g2, 16
+	LDI $g0, $zero, 0x8100
 	SUBI $g0, $g0, 0x0002 ;Set hash_valid to false to ready g0 - 0x40000000 TODO does not check is already set may be needed
 	;ADDI $g2, $zero, 0x8000 
 	;LSI $g2, $g2, 16
@@ -535,8 +545,39 @@ accel_8_end:
 
 correct_hash_found:
 	LDB $g0, $g4, 0x0;get final nonce value
+	ADDI $g1, $zero, 0
 	STI $g0, $zero, 0x9000 ;send it to the host
+	ADDI $g1, $zero, 0
+	LDB $g0, $g4, 0x4
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0x9100
+	ADDI $g1, $zero, 0
+	LDB $g0, $g4, 0x8
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0xA000
+	ADDI $g1, $zero, 0
+	LDB $g0, $g4, 0xC
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0xA100
+	ADDI $g1, $zero, 0
+	LDB $g0, $g4, 0x10
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0xB000
+	ADDI $g1, $zero, 0
+	LDB $g0, $g4, 0x14
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0xB100
+	ADDI $g1, $zero, 0
+	LDB $g0, $g4, 0x18
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0xC000
+	ADDI $g1, $zero, 0
+	LDB $g0, $g4, 0x1C
+	ADDI $g1, $zero, 0
+	STI $g0, $zero, 0xC100
+	ADDI $g1, $zero, 0
 	ADDI $g0, $zero, 1
+	ADDI $g1, $zero, 0
 	STI $g0, $zero, 0xD000
   		; halt and send
 		; are we going to package the header for transmission to the bitcoin network? 
