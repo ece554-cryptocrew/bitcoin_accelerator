@@ -277,6 +277,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 host_stall = 1'b1;
                 if (ready)
                     next_state = WAIT_INIT_DM;
+                    $display("CPU state: %s", next_state);
                 else
                     next_state = CPU_IDLE;
             end
@@ -290,6 +291,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     mem_ex_addr = DM_ADDRS[dm_count];
                     mem_ex_wrt_data = ex_wrt_data;
                     mem_ex_wrt_en = 1'b1;  
+                    $display("CPU state: %s", next_state);
                 end
                 else
                     next_state = WAIT_INIT_DM;
@@ -304,6 +306,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 if (tx_done) begin
                     if (dm_count >= 16) begin
                         next_state = WAIT_INIT_IM;
+                        $display("CPU state: %s", next_state);
                     end
                     else begin
                         next_state = WAIT_INIT_DM;
@@ -323,7 +326,8 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     next_state = INIT_IM;
                     im_wrt_addr = IM_ADDRS[im_count];
                     im_wrt_data = ex_wrt_data;
-                    im_wrt_en = 1'b1;  
+                    im_wrt_en = 1'b1; 
+                    $display("CPU state: %s", next_state); 
                 end
                 else
                     next_state = WAIT_INIT_IM;
@@ -338,6 +342,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 if (tx_done) begin
                     if (im_count >= 47) begin
                         next_state = RUN;
+                        $display("CPU state: %s", next_state);
                     end
                     else begin
                         next_state = WAIT_INIT_IM;
@@ -355,6 +360,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                     ex_rd_data = mem_cpu_wrt_data;
                     op_in = WRITE;
                     host_stall = 1'b1;
+                    $display("CPU state: %s", next_state);
                 end
                 else begin
                     next_state = RUN;
@@ -367,6 +373,7 @@ localparam logic [15:0] IM_ADDRS [0:47] =
                 op_in = WRITE;
                 if (tx_done) begin
                     next_state = RUN;
+                    $display("CPU state: %s", next_state);
                 end
                 else begin
                     next_state = WRT_HOST;
