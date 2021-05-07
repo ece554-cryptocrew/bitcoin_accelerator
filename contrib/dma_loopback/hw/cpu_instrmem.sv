@@ -25,7 +25,7 @@ module cpu_instrmem (clk, rst_n, addr, wrt_en, wrt_data, rd_out);
 
     localparam MEM_SIZE = 65536;
 
-    logic [31:0] mem [0:MEM_SIZE-1];
+    logic [7:0] mem [0:MEM_SIZE-1];
 
     // Read logic
     // Set rd_out to 0 if invalid address
